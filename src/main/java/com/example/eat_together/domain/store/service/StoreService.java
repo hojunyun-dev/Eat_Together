@@ -1,6 +1,6 @@
-package com.example.eat_together.store.service;
+package com.example.eat_together.domain.store.service;
 
-import com.example.eat_together.store.repository.StoreRepository;
+import com.example.eat_together.domain.store.repository.StoreRepository;
 import org.springframework.stereotype.Service;
 
 @Service

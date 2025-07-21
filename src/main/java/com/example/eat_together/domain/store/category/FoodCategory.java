@@ -1,4 +1,4 @@
-package com.example.eat_together.store.category;
+package com.example.eat_together.domain.store.category;
 
 import lombok.Getter;
 

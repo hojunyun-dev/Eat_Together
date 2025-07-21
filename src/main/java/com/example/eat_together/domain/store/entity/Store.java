@@ -1,7 +1,8 @@
-package com.example.eat_together.store.entity;
+package com.example.eat_together.domain.store.entity;
 
+import com.example.eat_together.domain.store.category.FoodCategory;
+import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
-import com.example.eat_together.store.category.FoodCategory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,14 +19,9 @@ public class Store extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
 
-    // 유저 부분 병합 시 수정 예정
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User userId;
-
-    // 임시 유저    <-------------- 삭제 예정
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String name;
@@ -36,27 +32,27 @@ public class Store extends BaseTimeEntity {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
+    @Column(name = "is_open", nullable = false)
     private boolean isOpen;
 
+    @Column(name = "open_time")
     private LocalTime openTime;
 
+    @Column(name = "close_time")
     private LocalTime closeTime;
 
-    @Column(nullable = false)
+    @Column(name = "delivery_fee", nullable = false)
     private int deliveryFee;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "food_category", nullable = false)
     private FoodCategory foodCategory;
 
-    @Column(nullable = false)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
 
-    // 유저 부분 병합 시 수정 필요
-    public static Store of(//User
-                           Long userId,
+    public static Store of(User user,
                            String name,
                            String description,
                            String address,
@@ -68,7 +64,7 @@ public class Store extends BaseTimeEntity {
                            String phoneNumber
     ) {
         Store store = new Store();
-        store.userId = userId;
+        store.user = user;
         store.name = name;
         store.description = description;
         store.address = address;
