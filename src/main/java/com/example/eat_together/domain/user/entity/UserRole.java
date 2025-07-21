@@ -1,4 +1,4 @@
-package com.example.eat_together.user.entity;
+package com.example.eat_together.domain.user.entity;
 
 public enum UserRole {
     USER,

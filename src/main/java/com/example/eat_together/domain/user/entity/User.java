@@ -1,4 +1,4 @@
-package com.example.eat_together.user.entity;
+package com.example.eat_together.domain.user.entity;
 
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
