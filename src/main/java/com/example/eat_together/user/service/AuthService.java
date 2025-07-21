@@ -49,6 +49,5 @@ public class AuthService {
         }
 
         return jwtUtil.createToken(user.getUserId());
-
     }
 }

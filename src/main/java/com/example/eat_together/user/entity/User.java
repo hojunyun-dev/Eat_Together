@@ -44,4 +44,7 @@ public class User extends BaseTimeEntity {
         this.nickname = request.getNickname();
     }
 
+    public void changePassword(String password){
+        this.password = password;
+    }
 }
