@@ -22,6 +22,11 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     public UserResponseDto signup(SignupRequestDto request) {
 
+        // 중복된 아이디 검증
+        if(userRepository.existsByLoginId(request.getLoginId())){
+            throw new CustomException(ErrorCode.DUPLICATE_USER);
+        }
+
         String encodePassword = passwordEncoder.encode(request.getPassword());
 
         User user = new User(request, encodePassword);
@@ -31,22 +36,19 @@ public class AuthService {
                 saveUser.getLoginId(),
                 saveUser.getEmail(),
                 saveUser.getNickname(),
-                saveUser.getRole(),
-                saveUser.getCreatedAt(),
-                saveUser.getUpdatedAt());
+                saveUser.getRole());
     }
 
     public String login(LoginRequestDto request) {
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if(!passwordEncoder.matches(user.getPassword(), request.getPassword())){
+        if(passwordEncoder.matches(user.getPassword(), request.getPassword())){
             throw new CustomException(ErrorCode.PASSWORD_WRONG);
         }
 
         return jwtUtil.createToken(user.getUserId());
-
 
     }
 }

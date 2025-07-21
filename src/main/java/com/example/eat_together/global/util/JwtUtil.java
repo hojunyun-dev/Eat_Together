@@ -3,7 +3,6 @@ package com.example.eat_together.global.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
 
@@ -20,9 +19,9 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String subject) {
+    public String createToken(Long userId) {
         return Jwts.builder()
-                .setSubject(subject) // 보통 userId
+                .setSubject(String.valueOf(userId)) // 보통 userId
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)

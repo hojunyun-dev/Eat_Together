@@ -3,7 +3,6 @@ package com.example.eat_together.user.entity;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import com.example.eat_together.user.dto.request.SignupRequestDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +16,7 @@ public class User extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "login_id")
+    @Column(name = "login_id",unique = true)
     private String loginId;
 
     @Column(name = "email")
@@ -34,8 +33,9 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role = UserRole.USER;
 
+    @Setter
     @Column(name = "is_deleted")
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     public User(SignupRequestDto request, String password) {
         this.loginId = request.getLoginId();

@@ -16,13 +16,13 @@ public class UserResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updateAt;
 
-    public UserResponseDto(Long userId, String loginId, String email, String nickname, UserRole role, LocalDateTime createdAt, LocalDateTime updateAt) {
+    public UserResponseDto(Long userId, String loginId, String email, String nickname, UserRole role) {
         this.userId = userId;
         this.loginId = loginId;
         this.email = email;
         this.nickname = nickname;
         this.role = role;
-        this.createdAt = createdAt;
-        this.updateAt = updateAt;
+        this.createdAt = LocalDateTime.now();
+        this.updateAt = LocalDateTime.now();
     }
 }
