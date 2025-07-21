@@ -10,5 +10,5 @@ public enum OrderStatus {
     DELIVERING("배달중"),
     DELIVERED("배달완료");
 
-    private final String description;
+    private final String status;
 }
