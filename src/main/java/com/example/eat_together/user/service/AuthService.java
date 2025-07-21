@@ -48,6 +48,6 @@ public class AuthService {
             throw new CustomException(ErrorCode.PASSWORD_WRONG);
         }
 
-        return jwtUtil.createToken(user.getUserId());
+        return jwtUtil.createToken(user.getLoginId());
     }
 }
