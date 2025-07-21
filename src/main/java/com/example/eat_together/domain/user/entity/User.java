@@ -1,10 +1,16 @@
 package com.example.eat_together.domain.user.entity;
 
 import com.example.eat_together.global.entity.BaseTimeEntity;
+import com.example.eat_together.domain.chat.entity.ChatMessage;
+import com.example.eat_together.domain.chat.entity.ChatRoomUser;
+import com.example.eat_together.domain.chat.entity.ChattingGroup;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,4 +40,13 @@ public class User extends BaseTimeEntity {
 
     @Column(name = "is_deleted")
     private boolean isDeleted;
+
+    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChattingGroup> chattingGroupList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoomUser> chatRoomUserList= new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessageList= new ArrayList<>();
 }
