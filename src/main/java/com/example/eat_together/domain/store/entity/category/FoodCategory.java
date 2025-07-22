@@ -2,6 +2,8 @@ package com.example.eat_together.domain.store.entity.category;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public enum FoodCategory {
 
@@ -17,5 +19,14 @@ public enum FoodCategory {
 
     FoodCategory(String category) {
         this.category = category;
+    }
+
+    // 쿼리 파라미터로 받은 값 enum으로 변환
+    // ex) 한식 = KOREAN
+    public static FoodCategory fromKr(String category) {
+        return Arrays.stream(FoodCategory.values())
+                .filter(c -> c.category.equals(category))
+                .findFirst()
+                .orElseThrow();
     }
 }
