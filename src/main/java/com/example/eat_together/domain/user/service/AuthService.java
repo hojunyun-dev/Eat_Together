@@ -11,6 +11,7 @@ import com.example.eat_together.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -20,6 +21,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+
+    // 회원가입
     public UserResponseDto signup(SignupRequestDto request) {
 
         // 중복된 아이디 검증
@@ -32,22 +35,20 @@ public class AuthService {
         User user = new User(request, encodePassword);
         User saveUser = userRepository.save(user);
 
-        return new UserResponseDto(saveUser.getUserId(),
-                saveUser.getLoginId(),
-                saveUser.getEmail(),
-                saveUser.getNickname(),
-                saveUser.getRole());
+        return new UserResponseDto(saveUser);
     }
 
+    // 로그인
+    @Transactional
     public String login(LoginRequestDto request) {
 
         User user = userRepository.findByLoginId(request.getLoginId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.INFO_MISMATCH));
 
-        if(passwordEncoder.matches(user.getPassword(), request.getPassword())){
-            throw new CustomException(ErrorCode.PASSWORD_WRONG);
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new CustomException(ErrorCode.INFO_MISMATCH);
         }
 
-        return jwtUtil.createToken(user.getLoginId());
+        return jwtUtil.createToken(user.getUserId(), user.getLoginId());
     }
 }
