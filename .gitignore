@@ -25,6 +25,7 @@ bin/
 *.ipr
 out/
 !**/src/main/**/out/
+!**/src/resources/application.yml
 !**/src/test/**/out/
 
 

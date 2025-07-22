@@ -1,6 +1,5 @@
 package com.example.eat_together.global.util;
 
-import com.example.eat_together.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,10 +33,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = bearerToken.substring(7);
-        final String email = jwtUtil.getSubject(token);
+        final Long userId = jwtUtil.getUserId(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = User.withUsername(email)
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = User.withUsername(String.valueOf(userId))
                     .password("") // 비밀번호는 검증하지 않음
                     .authorities(Collections.emptyList())
                     .build();

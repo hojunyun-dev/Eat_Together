@@ -35,6 +35,9 @@ public class Store extends BaseTimeEntity {
     @Column(name = "is_open", nullable = false)
     private boolean isOpen;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @Column(name = "open_time")
     private LocalTime openTime;
 
@@ -76,4 +79,15 @@ public class Store extends BaseTimeEntity {
         store.phoneNumber = phoneNumber;
         return store;
     }
+
+    // 매장 삭제 시 사용
+    public void deleted() {
+        this.isDeleted = true;
+    }
+
+    // 매장 삭제를 되돌릴 때 사용
+    public void returnDeleted() {
+        this.isDeleted = false;
+    }
+
 }
