@@ -78,4 +78,14 @@ public class MenuService {
         return MenuResponseDto.from(menu);
 
     }
+
+    @Transactional
+    public void deleteMenu(Long storeId, Long menuId) {
+
+        Store store = storeRepository.findById(storeId).orElseThrow();
+
+        Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
+
+        menu.deleted();
+    }
 }
