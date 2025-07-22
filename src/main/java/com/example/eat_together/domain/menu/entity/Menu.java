@@ -18,6 +18,9 @@ public class Menu extends BaseTimeEntity {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
     @Column(nullable = false)
     private String name;
 
@@ -28,21 +31,31 @@ public class Menu extends BaseTimeEntity {
     private String description;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     public static Menu of(Store store,
+                          String imageUrl,
                           String name,
                           double price,
-                          String description,
-                          boolean isDeleted
+                          String description
     ) {
         Menu menu = new Menu();
         menu.store = store;
+        menu.imageUrl = imageUrl;
         menu.name = name;
         menu.price = price;
         menu.description = description;
-        menu.isDeleted = isDeleted;
         return menu;
+    }
+
+    // 메뉴 삭제 시 사용
+    public void deleted() {
+        this.isDeleted = true;
+    }
+
+    // 메뉴 삭제를 되돌릴 때 사용
+    public void returnDeleted() {
+        this.isDeleted = false;
     }
 
 }
