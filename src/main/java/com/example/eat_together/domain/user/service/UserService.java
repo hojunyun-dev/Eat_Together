@@ -29,8 +29,9 @@ public class UserService {
             throw new CustomException(ErrorCode.PASSWORD_WRONG);
         }
 
-        // 비밀번호 다시 인코딩 후 변경
+        // 비밀번호 다시 인코딩 후 비밀번호 변경
         String encodePassword = passwordEncoder.encode(request.getNewPassword());
-        user.changePassword(encodePassword);
+
+        user.updatePassword(encodePassword);
     }
 }

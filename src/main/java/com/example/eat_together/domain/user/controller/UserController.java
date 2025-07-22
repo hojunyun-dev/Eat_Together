@@ -14,12 +14,14 @@ public class UserController {
 
     private final UserService userService;
 
+    // 비밀번호 변경
     @PatchMapping("/{userId}/password")
     public ApiResponse<Void> changePassword(@PathVariable Long userId,
-            @Valid @RequestBody ChangePasswordRequestDto request){
+                                            @Valid @RequestBody ChangePasswordRequestDto request){
 
         userService.changePassword(userId,request);
 
-        return null;
+        return ApiResponse.sccuess("비밀번호 변경 성공");
     }
+
 }

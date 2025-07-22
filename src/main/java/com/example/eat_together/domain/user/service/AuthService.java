@@ -11,6 +11,7 @@ import com.example.eat_together.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -35,16 +36,16 @@ public class AuthService {
         return new UserResponseDto(saveUser.getUserId(),
                 saveUser.getLoginId(),
                 saveUser.getEmail(),
-                saveUser.getNickname(),
-                saveUser.getRole());
+                saveUser.getNickname());
     }
 
+    @Transactional
     public String login(LoginRequestDto request) {
 
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if(passwordEncoder.matches(user.getPassword(), request.getPassword())){
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new CustomException(ErrorCode.PASSWORD_WRONG);
         }
 

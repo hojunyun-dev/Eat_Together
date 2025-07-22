@@ -15,17 +15,17 @@ public class UserResponseDto {
     private final String nickname;
 
     @Setter
-    private UserRole role = UserRole.USER;
+    private UserRole role;
 
     private final LocalDateTime createdAt;
     private final LocalDateTime updateAt;
 
-    public UserResponseDto(Long userId, String loginId, String email, String nickname, UserRole role) {
+    public UserResponseDto(Long userId, String loginId, String email, String nickname) {
         this.userId = userId;
         this.loginId = loginId;
         this.email = email;
         this.nickname = nickname;
-        this.role = role;
+        this.role = UserRole.USER;
         this.createdAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
     }
