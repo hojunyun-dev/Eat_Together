@@ -1,6 +1,6 @@
 package com.example.eat_together.domain.menu.service;
 
-import com.example.eat_together.domain.menu.dto.request.CreateMenuRequestDto;
+import com.example.eat_together.domain.menu.dto.request.MenuRequestDto;
 import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.menu.entity.Menu;
@@ -25,7 +25,7 @@ public class MenuService {
     }
 
     @Transactional
-    public void createMenu(Long storeId, CreateMenuRequestDto requestDto) {
+    public void createMenu(Long storeId, MenuRequestDto requestDto) {
 
         Store store = storeRepository.findById(storeId).orElseThrow();
 
@@ -51,23 +51,31 @@ public class MenuService {
         return PagingMenuResponseDto.formPage(getMenusByStore);
     }
 
+    @Transactional(readOnly = true)
     public MenuResponseDto getMenuByStore(Long storeId, Long menuId) {
 
         Store store = storeRepository.findById(storeId).orElseThrow();
 
         Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
 
-        MenuResponseDto responseDto =
-                new MenuResponseDto(
-                        menu.getMenuId(),
-                        menu.getImageUrl(),
-                        menu.getName(),
-                        menu.getDescription(),
-                        menu.getPrice(),
-                        menu.getCreatedAt(),
-                        menu.getUpdatedAt()
-                );
+        return MenuResponseDto.from(menu);
+    }
 
-        return responseDto;
+    @Transactional
+    public MenuResponseDto updateMenu(Long storeId, Long menuId, MenuRequestDto request) {
+
+        Store store = storeRepository.findById(storeId).orElseThrow();
+
+        Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
+
+        menu.update(
+                request.getImageUrl(),
+                request.getName(),
+                request.getDescription(),
+                request.getPrice()
+        );
+
+        return MenuResponseDto.from(menu);
+
     }
 }

@@ -48,6 +48,15 @@ public class Menu extends BaseTimeEntity {
         return menu;
     }
 
+
+    public void update(String imageUrl, String name, String description, double price) {
+        this.imageUrl = imageUrl;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+    }
+
+
     // 메뉴 삭제 시 사용
     public void deleted() {
         this.isDeleted = true;

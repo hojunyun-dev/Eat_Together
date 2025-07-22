@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.menu.dto.respones;
 
+import com.example.eat_together.domain.menu.entity.Menu;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -34,4 +35,15 @@ public class MenuResponseDto {
         this.updatedAt = updatedAt;
     }
 
+    public static MenuResponseDto from(Menu menu) {
+        return new MenuResponseDto(
+                menu.getMenuId(),
+                menu.getImageUrl(),
+                menu.getName(),
+                menu.getDescription(),
+                menu.getPrice(),
+                menu.getCreatedAt(),
+                menu.getUpdatedAt()
+        );
+    }
 }
