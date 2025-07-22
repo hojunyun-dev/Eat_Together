@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +55,22 @@ public class UserService {
         saveUser.setUpdatedAt(LocalDateTime.now());
 
         return new UserResponseDto(saveUser);
+    }
+
+    // 유저 단건 조회
+    public UserResponseDto findUser(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new UserResponseDto(user);
+    }
+
+    // 유저 전체 조회
+    public List<UserResponseDto> findAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponseDto::toDto)
+                .toList();
     }
 }
