@@ -29,6 +29,8 @@ public class PagingStoreResponseDto {
                                 .closeTime(Store.getCloseTime())
                                 .category(Store.getFoodCategory())
                                 .phoneNumber(Store.getPhoneNumber())
+                                .createdAt(Store.getCreatedAt())
+                                .updatedAt(Store.getUpdatedAt())
                                 .build())
                         .toList();
 
