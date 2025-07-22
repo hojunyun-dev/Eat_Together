@@ -12,7 +12,7 @@ public class MenuResponseDto {
     private final String imageUrl;
     private final String name;
     private final String description;
-    private final int price;
+    private final double price;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -21,7 +21,7 @@ public class MenuResponseDto {
                            String imageUrl,
                            String name,
                            String description,
-                           int price,
+                           double price,
                            LocalDateTime createdAt,
                            LocalDateTime updatedAt
     ) {
