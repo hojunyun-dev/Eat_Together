@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.entity;
 
+import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import jakarta.persistence.*;
@@ -28,6 +29,9 @@ public class User extends BaseTimeEntity {
     @Column(name = "nickname")
     private String nickname;
 
+    @Column(name = "name")
+    private String name;
+
     @Setter
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
@@ -41,6 +45,22 @@ public class User extends BaseTimeEntity {
         this.password = password;
         this.email = request.getEmail();
         this.nickname = request.getNickname();
+        this.name = request.getName();
+    }
+
+    public void updateProfile(UpdateUserInfoRequestDto request) {
+        // 닉네임이 요청에 포함되어 있다면(null이 아니라면) 업데이트
+        if (request.getNickname() != null) {
+            this.nickname = request.getNickname();
+        }
+        // 이메일이 요청에 포함되어 있다면(null이 아니라면) 업데이트
+        if (request.getEmail() != null) {
+            this.email = request.getEmail();
+        }
+        // 이름이 요청에 포함되어 있다면(null이 아니라면) 업데이트
+        if (request.getName() != null) {
+            this.name = request.getName();
+        }
     }
 
     public void updatePassword(String password){

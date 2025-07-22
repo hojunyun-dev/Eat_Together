@@ -35,10 +35,7 @@ public class AuthService {
         User user = new User(request, encodePassword);
         User saveUser = userRepository.save(user);
 
-        return new UserResponseDto(saveUser.getUserId(),
-                saveUser.getLoginId(),
-                saveUser.getEmail(),
-                saveUser.getNickname());
+        return new UserResponseDto(saveUser);
     }
 
     // 로그인
@@ -52,6 +49,6 @@ public class AuthService {
             throw new CustomException(ErrorCode.INFO_MISMATCH);
         }
 
-        return jwtUtil.createToken(user.getLoginId());
+        return jwtUtil.createToken(user.getUserId(), user.getLoginId());
     }
 }

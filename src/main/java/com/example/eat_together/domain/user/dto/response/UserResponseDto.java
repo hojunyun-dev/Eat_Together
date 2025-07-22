@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.dto.response;
 
+import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.entity.UserRole;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,20 +14,24 @@ public class UserResponseDto {
     private final String loginId;
     private final String email;
     private final String nickname;
+    private final String name;
 
     @Setter
     private UserRole role;
 
     private final LocalDateTime createdAt;
-    private final LocalDateTime updateAt;
 
-    public UserResponseDto(Long userId, String loginId, String email, String nickname) {
-        this.userId = userId;
-        this.loginId = loginId;
-        this.email = email;
-        this.nickname = nickname;
+    @Setter
+    private LocalDateTime updateAt;
+
+    public UserResponseDto(User user) {
+        this.userId = user.getUserId();
+        this.loginId = user.getLoginId();
+        this.email = user.getEmail();
+        this.nickname = user.getNickname();
+        this.name = user.getName();
         this.role = UserRole.USER;
-        this.createdAt = LocalDateTime.now();
-        this.updateAt = LocalDateTime.now();
+        this.createdAt = user.getCreatedAt();
+        this.updateAt = user.getUpdatedAt();
     }
 }

@@ -33,7 +33,7 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> sccuess(String message) {
+    public static <T> ApiResponse<T> success(String message) {
         return ApiResponse.<T>builder()
                 .message(message)
                 .build();
