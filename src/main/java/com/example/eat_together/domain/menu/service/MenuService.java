@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.menu.service;
 
 import com.example.eat_together.domain.menu.dto.request.CreateMenuRequestDto;
+import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.repository.MenuRepository;
@@ -50,4 +51,23 @@ public class MenuService {
         return PagingMenuResponseDto.formPage(getMenusByStore);
     }
 
+    public MenuResponseDto getMenuByStore(Long storeId, Long menuId) {
+
+        Store store = storeRepository.findById(storeId).orElseThrow();
+
+        Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
+
+        MenuResponseDto responseDto =
+                new MenuResponseDto(
+                        menu.getMenuId(),
+                        menu.getImageUrl(),
+                        menu.getName(),
+                        menu.getDescription(),
+                        menu.getPrice(),
+                        menu.getCreatedAt(),
+                        menu.getUpdatedAt()
+                );
+
+        return responseDto;
+    }
 }
