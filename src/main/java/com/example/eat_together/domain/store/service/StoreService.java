@@ -7,6 +7,8 @@ import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +30,14 @@ public class StoreService {
     @Transactional
     public void createStore(UserDetails userDetails, CreateStoreRequestDto requestDto) {
 
-        String userId = userDetails.getUsername();
+        Long userId = Long.valueOf(userDetails.getUsername());
 
         String foodCategory = requestDto.getCategory();
         FoodCategory category = FoodCategory.fromKr(foodCategory);
 
-        User user = userRepository.findByLoginId(userId).orElseThrow();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
 
         Store store = Store.of(user,
                 requestDto.getName(),
@@ -57,5 +61,19 @@ public class StoreService {
         Page<Store> getStoresByCategory = storeRepository.findByFoodCategoryAndIsDeletedFalse(category, storesByCategory);
 
         return PagingStoreResponseDto.formPage(getStoresByCategory);
+    }
+
+    public PagingStoreResponseDto getStoresByUserId(UserDetails userDetails, Pageable pageable) {
+
+        Long userId = Long.valueOf(userDetails.getUsername());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Pageable storesByUserId = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Store> response = storeRepository.findStoresByUserAndIsDeletedFalse(user, storesByUserId);
+
+        return PagingStoreResponseDto.formPage(response);
     }
 }

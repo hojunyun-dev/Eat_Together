@@ -55,4 +55,19 @@ public class StoreController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<PagingStoreResponseDto>> getStoresByUserId(@AuthenticationPrincipal UserDetails user,
+                                                                                 @PageableDefault Pageable pageable) {
+
+        PagingStoreResponseDto storesByUserId = storeService.getStoresByUserId(user, pageable);
+
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_MY_LIST_FETCH_SUCCESS.getMessage(),
+                        storesByUserId
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
