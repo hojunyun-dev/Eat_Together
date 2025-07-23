@@ -25,14 +25,14 @@ public class OrderItem {
 
     private int quantity;
 
-    private int price;
+    private double price;
 
-    public static OrderItem of(Order order, Menu menu, int quantity, int price) {
+    public static OrderItem of(Order order, Menu menu, int quantity) {
         OrderItem orderItem = new OrderItem();
         orderItem.order = order;
         orderItem.menu = menu;
         orderItem.quantity = quantity;
-        orderItem.price = price;
+        orderItem.price = menu.getPrice();
         return orderItem;
     }
 

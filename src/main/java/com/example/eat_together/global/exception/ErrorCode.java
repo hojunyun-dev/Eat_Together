@@ -26,6 +26,7 @@ public enum ErrorCode {
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 장바구니를 찾을 수 없습니다."),
     NOT_FOUND_CHAT_ROOM(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "아이템을 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
 
     // 409 CONFLICT
     DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다");
