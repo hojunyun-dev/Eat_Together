@@ -1,7 +1,8 @@
 package com.example.eat_together.domain.order.service;
 
-import com.example.eat_together.domain.cart.entity.Cart;
-import com.example.eat_together.domain.cart.repository.CartRepository;
+//import com.example.eat_together.domain.cart.entity.Cart;
+//import com.example.eat_together.domain.cart.repository.CartRepository;
+
 import com.example.eat_together.domain.order.dto.OrderResponseDto;
 import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.user.repository.UserRepository;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private final CartRepository cartRepository;
+    //    private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
@@ -25,8 +26,8 @@ public class OrderService {
     @Transactional
     public void createOrder(Long userId) {
 
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
+//        Cart cart = cartRepository.findByUserId(userId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
 
         // 장바구니 api 확인 후 수정 예정
 //        User user = cart.getUser();
