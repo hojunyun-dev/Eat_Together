@@ -2,6 +2,7 @@ package com.example.eat_together.domain.store.service;
 
 import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
+import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.repository.StoreRepository;
@@ -54,6 +55,7 @@ public class StoreService {
         storeRepository.save(store);
     }
 
+    @Transactional(readOnly = true)
     public PagingStoreResponseDto getStoresByCategory(FoodCategory category, Pageable pageable) {
 
         Pageable storesByCategory = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
@@ -63,6 +65,7 @@ public class StoreService {
         return PagingStoreResponseDto.formPage(getStoresByCategory);
     }
 
+    @Transactional(readOnly = true)
     public PagingStoreResponseDto getStoresByUserId(UserDetails userDetails, Pageable pageable) {
 
         Long userId = Long.valueOf(userDetails.getUsername());
@@ -75,5 +78,14 @@ public class StoreService {
         Page<Store> response = storeRepository.findStoresByUserAndIsDeletedFalse(user, storesByUserId);
 
         return PagingStoreResponseDto.formPage(response);
+    }
+
+    @Transactional(readOnly = true)
+    public StoreResponseDto getStore(Long storeId) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        return StoreResponseDto.from(store);
     }
 }

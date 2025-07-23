@@ -2,6 +2,7 @@ package com.example.eat_together.domain.store.controller;
 
 import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
+import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
@@ -69,5 +70,20 @@ public class StoreController {
                 );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{storeId}")
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable Long storeId) {
+
+        StoreResponseDto store = storeService.getStore(storeId);
+
+        ApiResponse<StoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_FETCH_SUCCESS.getMessage(),
+                        store
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }
