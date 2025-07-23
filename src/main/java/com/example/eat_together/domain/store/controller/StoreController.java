@@ -1,8 +1,12 @@
 package com.example.eat_together.domain.store.controller;
 
-import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreUpdateRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
+import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
+import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
+import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
 import com.example.eat_together.global.dto.ApiResponse;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +28,16 @@ public class StoreController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user, @RequestBody CreateStoreRequestDto requestDto) {
+    public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user,
+                                                   @RequestBody StoreRequestDto requestDto) {
 
         storeService.createStore(user, requestDto);
 
-        ApiResponse response = new ApiResponse<>("매장 등록이 완료되었습니다.", null);
+        ApiResponse response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_CREATED_SUCCESS.getMessage(),
+                        null
+                );
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -41,8 +50,86 @@ public class StoreController {
 
         PagingStoreResponseDto storesByCategory = storeService.getStoresByCategory(foodCategory, pageable);
 
-        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>("매장 목록 조회가 완료되었습니다.", storesByCategory);
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_LIST_FETCH_SUCCESS.getMessage(),
+                        storesByCategory
+                );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<PagingStoreResponseDto>> getStoresByUserId(@AuthenticationPrincipal UserDetails user,
+                                                                                 @PageableDefault Pageable pageable) {
+
+        PagingStoreResponseDto storesByUserId = storeService.getStoresByUserId(user, pageable);
+
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_MY_LIST_FETCH_SUCCESS.getMessage(),
+                        storesByUserId
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{storeId}")
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable Long storeId) {
+
+        StoreResponseDto store = storeService.getStore(storeId);
+
+        ApiResponse<StoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_FETCH_SUCCESS.getMessage(),
+                        store
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PagingStoreResponseDto>> getStoreBySearch(@RequestParam String keyword,
+                                                                                @PageableDefault Pageable pageable) {
+
+        PagingStoreResponseDto storeBySearch = storeService.getStoreBySearch(keyword, pageable);
+
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_SEARCH_SUCCESS.getMessage(),
+                        storeBySearch
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{storeId}")
+    public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(@PathVariable Long storeId,
+                                                                     @RequestBody StoreUpdateRequestDto request) {
+
+        StoreResponseDto storeResponseDto = storeService.updateStore(storeId, request);
+
+        ApiResponse<StoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_UPDATED_SUCCESS.getMessage(),
+                        storeResponseDto
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{storeId}")
+    public ResponseEntity<ApiResponse> deleteStore(@PathVariable Long storeId) {
+
+        storeService.deleteStore(storeId);
+
+        ApiResponse<Store> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_DELETED_SUCCESS.getMessage(),
+                        null
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

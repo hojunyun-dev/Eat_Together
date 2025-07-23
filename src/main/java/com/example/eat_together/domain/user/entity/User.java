@@ -8,6 +8,8 @@ import com.example.eat_together.domain.chat.entity.ChatRoomUser;
 import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.global.entity.BaseTimeEntity;
+import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -103,5 +105,10 @@ public class User extends BaseTimeEntity {
         this.role = UserRole.ADMIN;
     }
 
-    public void deleteUser() {this.isDeleted = true;}
+    public void deleteUser() {
+        if (this.role == UserRole.ADMIN) {
+            throw new CustomException(ErrorCode.ADMIN_ACCOUNT_CANNOT_BE_DELETED);
+        }
+        this.isDeleted = true;
+    }
 }
