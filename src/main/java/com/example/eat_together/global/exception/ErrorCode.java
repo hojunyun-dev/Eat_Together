@@ -27,7 +27,9 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
 
     // 409 CONFLICT
-    DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다");
+    DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다"),
+    STORE_ALREADY_OPEN(HttpStatus.CONFLICT, "이미 영업 중인 매장입니다."),
+    STORE_ALREADY_CLOSED(HttpStatus.CONFLICT, "이미 영업 종료된 매장입니다.");
 
 
     private final HttpStatus status;
