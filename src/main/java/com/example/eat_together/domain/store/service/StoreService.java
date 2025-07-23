@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.store.service;
 
-import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreUpdateRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.Store;
@@ -29,7 +30,7 @@ public class StoreService {
     }
 
     @Transactional
-    public void createStore(UserDetails userDetails, CreateStoreRequestDto requestDto) {
+    public void createStore(UserDetails userDetails, StoreRequestDto requestDto) {
 
         Long userId = Long.valueOf(userDetails.getUsername());
 
@@ -97,5 +98,64 @@ public class StoreService {
         Page<Store> response = storeRepository.findBySearch(keyword, bySearch);
 
         return PagingStoreResponseDto.formPage(response);
+    }
+
+    @Transactional
+    public StoreResponseDto updateStore(Long storeId, StoreUpdateRequestDto request) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        boolean isUpdated = false;
+
+        if (request.getName() != null && !request.getName().equals(store.getName())) {
+            store.updateName(request.getName());
+            isUpdated = true;
+        }
+
+        if (request.getDescription() != null && !request.getDescription().equals(store.getDescription())) {
+            store.updateDescription(request.getDescription());
+            isUpdated = true;
+        }
+
+        if (request.getAddress() != null && !request.getAddress().equals(store.getAddress())) {
+            store.updateAddress(request.getAddress());
+            isUpdated = true;
+        }
+
+        if (request.getOpenTime() != null && !request.getOpenTime().equals(store.getOpenTime())) {
+            store.updateOpenTime(request.getOpenTime());
+            isUpdated = true;
+        }
+
+        if (request.getCloseTime() != null && !request.getCloseTime().equals(store.getCloseTime())) {
+            store.updateCloseTime(request.getCloseTime());
+            isUpdated = true;
+        }
+
+        if (request.getDeliveryFee() != null &&
+                Double.compare(request.getDeliveryFee(), store.getDeliveryFee()) != 0) {
+            store.updateDeliveryFee(request.getDeliveryFee());
+            isUpdated = true;
+        }
+
+        if (request.getCategory() != null) {
+            FoodCategory category = FoodCategory.fromKr(request.getCategory());
+            if (!category.equals(store.getFoodCategory())) {
+                store.updateFoodCategory(category);
+                isUpdated = true;
+            }
+        }
+
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().equals(store.getPhoneNumber())) {
+            store.updatePhoneNumber(request.getPhoneNumber());
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
+            throw new CustomException(ErrorCode.UPDATE_CONTENT_REQUIRED);
+        }
+
+        return StoreResponseDto.from(store);
     }
 }

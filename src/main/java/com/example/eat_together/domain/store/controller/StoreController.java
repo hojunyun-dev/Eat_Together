@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.store.controller;
 
-import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreRequestDto;
+import com.example.eat_together.domain.store.dto.request.StoreUpdateRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
@@ -27,7 +28,7 @@ public class StoreController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user,
-                                                   @RequestBody CreateStoreRequestDto requestDto) {
+                                                   @RequestBody StoreRequestDto requestDto) {
 
         storeService.createStore(user, requestDto);
 
@@ -100,4 +101,20 @@ public class StoreController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PatchMapping("/{storeId}")
+    public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(@PathVariable Long storeId,
+                                                                     @RequestBody StoreUpdateRequestDto request) {
+
+        StoreResponseDto storeResponseDto = storeService.updateStore(storeId, request);
+
+        ApiResponse<StoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_UPDATED_SUCCESS.getMessage(),
+                        storeResponseDto
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }
