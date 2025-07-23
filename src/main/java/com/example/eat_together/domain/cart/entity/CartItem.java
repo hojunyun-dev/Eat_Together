@@ -1,3 +1,11 @@
+package com.example.eat_together.domain.cart.entity;
+
+import com.example.eat_together.domain.menu.entity.Menu;
+import com.example.eat_together.global.entity.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -34,6 +42,6 @@ public class CartItem extends BaseTimeEntity {
     }
 
     public int getTotalPrice() {
-        return (int)(menu.getPrice() * quantity);
+        return (int) (menu.getPrice() * quantity);
     }
 }

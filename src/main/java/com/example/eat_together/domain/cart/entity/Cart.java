@@ -1,3 +1,14 @@
+package com.example.eat_together.domain.cart.entity;
+
+import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.global.entity.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -26,7 +37,7 @@ public class Cart extends BaseTimeEntity {
         cartItem.setCart(this);
     }
 
-    public void clear() {
+    public void clearItems() {
         cartItems.clear();
     }
 }
