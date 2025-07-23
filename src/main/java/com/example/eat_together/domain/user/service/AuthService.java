@@ -49,6 +49,6 @@ public class AuthService {
             throw new CustomException(ErrorCode.INFO_MISMATCH);
         }
 
-        return jwtUtil.createToken(user.getUserId(), user.getLoginId());
+        return jwtUtil.createToken(user.getUserId(), user.getLoginId(), user.getRole());
     }
 }
