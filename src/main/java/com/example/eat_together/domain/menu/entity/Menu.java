@@ -49,13 +49,6 @@ public class Menu extends BaseTimeEntity {
     }
 
 
-    public void update(String imageUrl, String name, String description, double price) {
-        this.imageUrl = imageUrl;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-    }
-
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
