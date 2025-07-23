@@ -14,7 +14,10 @@ public enum ErrorCode {
     PASSWORD_WRONG(HttpStatus.BAD_REQUEST, "비밀번호가 다릅니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     UPDATE_CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "변경 내용을 입력해야 합니다."),
-    DELETED_USER(HttpStatus.BAD_REQUEST, "삭제된 유저입니다"),
+    DELETED_USER(HttpStatus.BAD_REQUEST,"삭제된 유저입니다"),
+
+    // 403 FORBIDEN
+    ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
