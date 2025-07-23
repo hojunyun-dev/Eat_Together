@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ChatResponse {
-    CHATTING_GROUP_CREATED("채팅 그룹을 생성했습니다.");
+    CHATTING_GROUP_CREATED("채팅 그룹을 생성했습니다."),
+    CHATTING_GROUP_PARTICIPATED("채팅 그룹에 참여했습니다.");
 
     private final String message;
 
