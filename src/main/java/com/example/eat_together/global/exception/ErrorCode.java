@@ -10,6 +10,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
 
     // 400 BAD_REQUEST
+    INFO_MISMATCH(HttpStatus.BAD_REQUEST,"아이디 또는 비밀번호가 다릅니다."),
     PASSWORD_WRONG(HttpStatus.BAD_REQUEST, "비밀번호가 다릅니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     UPDATE_CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "변경 내용을 입력해야 합니다."),
