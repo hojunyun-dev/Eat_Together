@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.controller;
 
+import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.global.dto.ApiResponse;
@@ -61,6 +62,22 @@ public class UserController {
         return ApiResponse.of(allUsers,"전체 유저 조회 완료");
     }
 
+    // 마이 페이지 조회
+    @GetMapping("/find/me")
+    public ApiResponse<UserResponseDto> findMyProfile(@AuthenticationPrincipal UserDetails userDetails){
 
-    // TODO : 마이페이지 조회,유저 삭제
+        UserResponseDto myProfile = userService.findMyProfile(Long.valueOf(userDetails.getUsername()));
+
+        return ApiResponse.of(myProfile,"유저 조회 완료");
+    }
+
+    // 유저 삭제
+    @PostMapping("/delete")
+    public ApiResponse<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @Valid @RequestBody PasswordRequestDto request){
+
+        userService.deleteUser(request, Long.valueOf(userDetails.getUsername()));
+
+        return ApiResponse.success("삭제 완료");
+    }
 }

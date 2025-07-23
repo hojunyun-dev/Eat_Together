@@ -100,4 +100,6 @@ public class User extends BaseTimeEntity {
     public void changeRoleByAdmin() {
         this.role = UserRole.ADMIN;
     }
+
+    public void deleteUser() {this.isDeleted = true;}
 }

@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.service;
 
+import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.entity.User;
@@ -72,5 +73,28 @@ public class UserService {
                 .stream()
                 .map(UserResponseDto::toDto)
                 .toList();
+    }
+
+    // 마이페이지 조회
+    public UserResponseDto findMyProfile(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new UserResponseDto(user);
+    }
+
+    // 유저 삭제
+    @Transactional
+    public void deleteUser(PasswordRequestDto request, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new CustomException(ErrorCode.PASSWORD_WRONG);
+        }
+
+        user.deleteUser();
     }
 }

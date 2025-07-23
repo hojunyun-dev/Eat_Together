@@ -42,8 +42,14 @@ public class AuthService {
     @Transactional
     public String login(LoginRequestDto request) {
 
+        // 유저 검증
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INFO_MISMATCH));
+
+        // 소프트 삭제 검증
+        if(user.isDeleted()){
+            throw new CustomException(ErrorCode.DELETED_USER);
+        }
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new CustomException(ErrorCode.INFO_MISMATCH);
