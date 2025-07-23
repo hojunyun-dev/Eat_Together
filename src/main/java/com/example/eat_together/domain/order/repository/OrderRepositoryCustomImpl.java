@@ -23,16 +23,18 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     @Override
-    public Page<OrderResponseDto> findOrders(Pageable pageable) {
+    public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable) {
         List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
                 .from(order)
+                .where(order.user.userId.eq(userId))
                 .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory.select(order.count())
-                .from(order);
+                .from(order)
+                .where(order.user.userId.eq(userId));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
