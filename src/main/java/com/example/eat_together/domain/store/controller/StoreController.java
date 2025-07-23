@@ -3,6 +3,7 @@ package com.example.eat_together.domain.store.controller;
 import com.example.eat_together.domain.store.dto.request.CreateStoreRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
+import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
 import com.example.eat_together.global.dto.ApiResponse;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +25,16 @@ public class StoreController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user, @RequestBody CreateStoreRequestDto requestDto) {
+    public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user,
+                                                   @RequestBody CreateStoreRequestDto requestDto) {
 
         storeService.createStore(user, requestDto);
 
-        ApiResponse response = new ApiResponse<>("매장 등록이 완료되었습니다.", null);
+        ApiResponse response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_CREATED_SUCCESS.getMessage(),
+                        null
+                );
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -41,7 +47,11 @@ public class StoreController {
 
         PagingStoreResponseDto storesByCategory = storeService.getStoresByCategory(foodCategory, pageable);
 
-        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>("매장 목록 조회가 완료되었습니다.", storesByCategory);
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_LIST_FETCH_SUCCESS.getMessage(),
+                        storesByCategory
+                );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
