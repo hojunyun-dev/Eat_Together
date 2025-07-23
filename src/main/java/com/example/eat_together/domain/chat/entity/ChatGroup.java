@@ -43,9 +43,10 @@ public class ChatGroup extends BaseTimeEntity {
     //status: 임시채팅방이니 마감/종료/진행
     @Enumerated(EnumType.STRING)
     private Status status;
-    public static ChatGroup of(ChatGroupDto chatGroupDto){
+    public static ChatGroup of(User user, ChatGroupDto chatGroupDto){
         ChatGroup chatGroup = new ChatGroup();
         chatGroup.title = chatGroupDto.getTitle();
+        chatGroup.host = user;
         chatGroup.description = chatGroupDto.getDescription();
         chatGroup.foodType = chatGroupDto.getFoodType();
         chatGroup.isDeleted = false;
