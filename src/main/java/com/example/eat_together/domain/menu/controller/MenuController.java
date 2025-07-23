@@ -7,6 +7,7 @@ import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.message.ResponseMessage;
 import com.example.eat_together.domain.menu.service.MenuService;
 import com.example.eat_together.global.dto.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class MenuController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createMenu(@PathVariable Long storeId,
-                                                  @RequestBody MenuRequestDto requestDto) {
+                                                  @Valid @RequestBody MenuRequestDto requestDto) {
 
         menuService.createMenu(storeId, requestDto);
 
