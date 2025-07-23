@@ -16,6 +16,9 @@ public enum ErrorCode {
     UPDATE_CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "변경 내용을 입력해야 합니다."),
     DELETED_USER(HttpStatus.BAD_REQUEST,"삭제된 유저입니다"),
 
+    // 403 FORBIDEN
+    ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
+
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장을 찾을 수 없습니다."),
@@ -23,6 +26,7 @@ public enum ErrorCode {
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 장바구니를 찾을 수 없습니다."),
     NOT_FOUND_CHAT_ROOM(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "아이템을 찾을 수 없습니다."),
+
     // 409 CONFLICT
     DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다");
 
