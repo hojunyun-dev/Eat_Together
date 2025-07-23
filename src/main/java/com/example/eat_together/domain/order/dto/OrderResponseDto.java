@@ -14,7 +14,11 @@ public class OrderResponseDto {
 
     private final Long userId;
 
+    private final Long storeId;
+
     private final OrderStatus status;
+
+    private final double deliveryFee;
 
     private final double totalPrice;
 
@@ -26,10 +30,11 @@ public class OrderResponseDto {
     public OrderResponseDto(Order order) {
         this.id = order.getId();
         this.userId = order.getUser().getUserId();
+        this.storeId = order.getStore().getStoreId();
         this.status = order.getStatus();
+        this.deliveryFee = order.getStore().getDeliveryFee();
         this.totalPrice = order.getTotalPrice();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();
     }
-
 }
