@@ -32,18 +32,19 @@ public class CartService {
     // 1. 장바구니에 메뉴 추가
     @Transactional
     public void addItem(Long userId, CartItemRequestDto requestDto) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
-        Cart cart = cartRepository.findByUserId(userId)
+        Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseGet(() -> cartRepository.save(Cart.of(user)));
 
         // 기존 장바구니에 동일 메뉴가 있다면 수량 증가
         cart.getCartItems().stream()
-                .filter(item -> item.getMenu().getId().equals(menu.getId()))
+                .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId())) // TODO : 이거 고침
                 .findFirst()
                 .ifPresentOrElse(
                         item -> item.updateQuantity(item.getQuantity() + requestDto.getQuantity()),
@@ -57,7 +58,7 @@ public class CartService {
     // 2. 장바구니 전체 조회
     @Transactional
     public CartResponseDto getCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+        Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
 
         List<CartItemResponseDto> itemDtos = cart.getCartItems().stream()

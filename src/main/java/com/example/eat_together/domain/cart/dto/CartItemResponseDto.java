@@ -16,7 +16,7 @@ public class CartItemResponseDto {
         this.itemId = cartItem.getId();
         this.menuName = cartItem.getMenu().getName();
         this.quantity = cartItem.getQuantity();
-        this.price = cartItem.getMenu().getPrice();
+        this.price = (int) cartItem.getMenu().getPrice(); // TODO : 이거 고침
         this.totalPrice = cartItem.getTotalPrice();
     }
 }

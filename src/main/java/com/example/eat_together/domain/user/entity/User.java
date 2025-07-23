@@ -65,15 +65,30 @@ public class User extends BaseTimeEntity {
         this.name = request.getName();
     }
 
+    public User(String loginId, String name, String password, String email,String nickname) {
+        this.loginId = loginId;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.name = name;
+    }
+
+    public static User createAuth(String loginId, String name, String password, String email, String nickname) {
+        return new User(loginId,name,password,email,nickname);
+    }
+
     public void updateProfile(UpdateUserInfoRequestDto request) {
+
         // 닉네임이 요청에 포함되어 있다면(null이 아니라면) 업데이트
         if (request.getNickname() != null) {
             this.nickname = request.getNickname();
         }
+
         // 이메일이 요청에 포함되어 있다면(null이 아니라면) 업데이트
         if (request.getEmail() != null) {
             this.email = request.getEmail();
         }
+
         // 이름이 요청에 포함되어 있다면(null이 아니라면) 업데이트
         if (request.getName() != null) {
             this.name = request.getName();
@@ -83,4 +98,10 @@ public class User extends BaseTimeEntity {
     public void updatePassword(String password) {
         this.password = password;
     }
+
+    public void changeRoleByAdmin() {
+        this.role = UserRole.ADMIN;
+    }
+
+    public void deleteUser() {this.isDeleted = true;}
 }

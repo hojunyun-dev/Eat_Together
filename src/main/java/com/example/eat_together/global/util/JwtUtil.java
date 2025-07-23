@@ -1,12 +1,21 @@
 package com.example.eat_together.global.util;
 
+import com.example.eat_together.domain.user.entity.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 @Component
@@ -22,14 +31,29 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(Long userId, String loginId) {
+    public String createToken(Long userId, String loginId, UserRole role) {
         return BEARER_PREFIX + Jwts.builder()
                 .setSubject(String.valueOf(userId)) // 보통 userId
                 .claim("loginId",loginId)
+                .claim("userRole",role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public Authentication getAuthentication(String token) {
+        Claims claims = extractClaims(token); // 기존 extractClaims 재활용
+
+        // "userRole" 클레임에서 역할을 가져와 "ROLE_" 접두사를 붙여 GrantedAuthority로 변환
+        String roleString = claims.get("userRole", String.class); // String.class로 명시적 캐스팅
+        Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_" + roleString));
+
+        // UserDetails 객체 생성 (비밀번호는 필요 없으므로 빈 문자열)
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+
+        // UsernamePasswordAuthenticationToken 반환
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     // 토큰에서 subject 추출
