@@ -8,10 +8,10 @@ import java.util.List;
 public class CartResponseDto {
 
     private final List<CartItemResponseDto> items;
-    private final int totalPrice;
+    private final double totalPrice;
 
     public CartResponseDto(List<CartItemResponseDto> items) {
         this.items = items;
-        this.totalPrice = items.stream().mapToInt(CartItemResponseDto::getTotalPrice).sum();
+        this.totalPrice = items.stream().mapToDouble(CartItemResponseDto::getTotalPrice).sum();
     }
 }

@@ -29,6 +29,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
         String adminPassword = passwordEncoder.encode("1234");
         String adminEmail = "admin@eatTorther.com";
         String adminnickname = "ADMIN";
+
         //이미 admin 계정이 있을 시 리턴
         if (userRepository.existsByLoginId(adminLoginId)) {
             return;

@@ -41,7 +41,7 @@ public class CartItem extends BaseTimeEntity {
         this.quantity = quantity;
     }
 
-    public int getTotalPrice() {
-        return (int) (menu.getPrice() * quantity);
+    public double getTotalPrice() {
+        return menu.getPrice() * quantity;
     }
 }

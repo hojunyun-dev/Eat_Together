@@ -44,7 +44,7 @@ public class CartService {
 
         // 기존 장바구니에 동일 메뉴가 있다면 수량 증가
         cart.getCartItems().stream()
-                .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId())) // TODO : 이거 고침
+                .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId()))
                 .findFirst()
                 .ifPresentOrElse(
                         item -> item.updateQuantity(item.getQuantity() + requestDto.getQuantity()),

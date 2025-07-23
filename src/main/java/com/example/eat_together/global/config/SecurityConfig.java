@@ -33,8 +33,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup", "/auth/login")
-                        .permitAll()
+                        .requestMatchers("/auth/signup", "/auth/login").permitAll()
+                        // ADMIN은 모든 경로를 사용 가능함
+                        .requestMatchers("/**").hasRole("ADMIN")
+                        // 그 외의 요청은 @PreAuthorize를 사용하여 확인
                         .anyRequest().authenticated()
                 )
                 // 권한 or 유효한 토근 검증 핸들링
