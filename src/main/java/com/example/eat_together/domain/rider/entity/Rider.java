@@ -41,7 +41,7 @@ public class Rider {
     }
 
     //라이더 삭제
-    public void softDelete() {
+    public void delete() {
         this.isDeleted = true;
     }
 
