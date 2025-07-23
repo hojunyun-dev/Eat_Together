@@ -158,4 +158,13 @@ public class StoreService {
 
         return StoreResponseDto.from(store);
     }
+
+    @Transactional
+    public void deleteStore(Long storeId) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        store.deleted();
+    }
 }

@@ -4,6 +4,7 @@ import com.example.eat_together.domain.store.dto.request.StoreRequestDto;
 import com.example.eat_together.domain.store.dto.request.StoreUpdateRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
+import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
@@ -112,6 +113,20 @@ public class StoreController {
                 (
                         ResponseMessage.STORE_UPDATED_SUCCESS.getMessage(),
                         storeResponseDto
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{storeId}")
+    public ResponseEntity<ApiResponse> deleteStore(@PathVariable Long storeId) {
+
+        storeService.deleteStore(storeId);
+
+        ApiResponse<Store> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_DELETED_SUCCESS.getMessage(),
+                        null
                 );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
