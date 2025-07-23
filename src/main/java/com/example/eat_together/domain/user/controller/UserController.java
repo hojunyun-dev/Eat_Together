@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.controller;
 
+import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.global.dto.ApiResponse;
@@ -8,9 +9,12 @@ import com.example.eat_together.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -38,5 +42,42 @@ public class UserController {
         return ApiResponse.of(userResponseDto,"정보 수정 완료");
     }
 
+    // 유저 단건 조회 ( ADMIN 전용 )
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<UserResponseDto> findUser(@PathVariable Long userId){
 
+        UserResponseDto user = userService.findUser(userId);
+
+        return ApiResponse.of(user,"유저 조회 완료");
+    }
+
+    // 유저 전체 조회 ( ADMIN 전용 )
+    @GetMapping("/find/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<UserResponseDto>> findAllUsers(){
+
+        List<UserResponseDto> allUsers = userService.findAllUsers();
+
+        return ApiResponse.of(allUsers,"전체 유저 조회 완료");
+    }
+
+    // 마이 페이지 조회
+    @GetMapping("/find/me")
+    public ApiResponse<UserResponseDto> findMyProfile(@AuthenticationPrincipal UserDetails userDetails){
+
+        UserResponseDto myProfile = userService.findMyProfile(Long.valueOf(userDetails.getUsername()));
+
+        return ApiResponse.of(myProfile,"유저 조회 완료");
+    }
+
+    // 유저 삭제
+    @PostMapping("/delete")
+    public ApiResponse<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @Valid @RequestBody PasswordRequestDto request){
+
+        userService.deleteUser(request, Long.valueOf(userDetails.getUsername()));
+
+        return ApiResponse.success("삭제 완료");
+    }
 }
