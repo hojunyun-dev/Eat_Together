@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepositoryCustom {
-    Page<OrderResponseDto> findOrders(Pageable pageable);
+    Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable);
 }
