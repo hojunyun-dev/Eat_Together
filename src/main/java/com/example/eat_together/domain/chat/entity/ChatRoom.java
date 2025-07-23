@@ -4,12 +4,15 @@ import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 //수정예정_대략적인 틀입니다.
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "chat_rooms")
 public class ChatRoom extends BaseTimeEntity {

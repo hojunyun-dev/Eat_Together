@@ -1,6 +1,8 @@
 package com.example.eat_together.domain.user.entity;
 
 import com.example.eat_together.domain.chat.entity.ChatGroup;
+import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
+import com.example.eat_together.global.entity.BaseTimeEntity;
 import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoomUser;
 import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
@@ -47,7 +49,7 @@ public class User extends BaseTimeEntity {
     private boolean isDeleted;
 
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatGroup> chattingGroupList = new ArrayList<>();
+    private List<ChatGroup> chatGroupList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRoomUserList = new ArrayList<>();
