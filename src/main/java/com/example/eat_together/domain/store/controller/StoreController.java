@@ -84,6 +84,20 @@ public class StoreController {
                 );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PagingStoreResponseDto>> getStoreBySearch(@RequestParam String keyword,
+                                                                                @PageableDefault Pageable pageable) {
+
+        PagingStoreResponseDto storeBySearch = storeService.getStoreBySearch(keyword, pageable);
+
+        ApiResponse<PagingStoreResponseDto> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_SEARCH_SUCCESS.getMessage(),
+                        storeBySearch
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

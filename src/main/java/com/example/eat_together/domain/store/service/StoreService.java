@@ -88,4 +88,14 @@ public class StoreService {
 
         return StoreResponseDto.from(store);
     }
+
+    @Transactional(readOnly = true)
+    public PagingStoreResponseDto getStoreBySearch(String keyword, Pageable pageable) {
+
+        Pageable bySearch = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Store> response = storeRepository.findBySearch(keyword, bySearch);
+
+        return PagingStoreResponseDto.formPage(response);
+    }
 }
