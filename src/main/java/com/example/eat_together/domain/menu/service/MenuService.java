@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.menu.service;
 
 import com.example.eat_together.domain.menu.dto.request.MenuRequestDto;
+import com.example.eat_together.domain.menu.dto.request.MenuUpdateRequestDto;
 import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.menu.entity.Menu;
@@ -71,7 +72,7 @@ public class MenuService {
     }
 
     @Transactional
-    public MenuResponseDto updateMenu(Long storeId, Long menuId, MenuRequestDto request) {
+    public MenuResponseDto updateMenu(Long storeId, Long menuId, MenuUpdateRequestDto request) {
 
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
@@ -82,23 +83,33 @@ public class MenuService {
             throw new CustomException(ErrorCode.MENU_NOT_FOUND);
         }
 
-        if (menu.getImageUrl().equals(request.getImageUrl())
-                && menu.getName().equals(request.getName())
-                && menu.getDescription().equals(request.getDescription())
-                && Double.compare(menu.getPrice(), request.getPrice()) == 0) {
+        boolean isUpdated = false;
 
+        if (request.getImageUrl() != null && !request.getImageUrl().equals(menu.getImageUrl())) {
+            menu.updateImageUrl(request.getImageUrl());
+            isUpdated = true;
+        }
+
+        if (request.getName() != null && !request.getName().equals(menu.getName())) {
+            menu.updateName(request.getName());
+            isUpdated = true;
+        }
+
+        if (request.getDescription() != null && !request.getDescription().equals(menu.getDescription())) {
+            menu.updateDescription(request.getDescription());
+            isUpdated = true;
+        }
+
+        if (request.getPrice() != null && !request.getPrice().equals(menu.getPrice())) {
+            menu.updatePrice(request.getPrice());
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
             throw new CustomException(ErrorCode.UPDATE_CONTENT_REQUIRED);
         }
 
-        menu.update(
-                request.getImageUrl(),
-                request.getName(),
-                request.getDescription(),
-                request.getPrice()
-        );
-
         return MenuResponseDto.from(menu);
-
     }
 
     @Transactional

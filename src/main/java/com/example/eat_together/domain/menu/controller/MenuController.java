@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.menu.controller;
 
 import com.example.eat_together.domain.menu.dto.request.MenuRequestDto;
+import com.example.eat_together.domain.menu.dto.request.MenuUpdateRequestDto;
 import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.menu.entity.Menu;
@@ -72,7 +73,7 @@ public class MenuController {
     @PatchMapping("/{menuId}")
     public ResponseEntity<ApiResponse<MenuResponseDto>> updateMenu(@PathVariable Long storeId,
                                                                    @PathVariable Long menuId,
-                                                                   @RequestBody MenuRequestDto request) {
+                                                                   @RequestBody MenuUpdateRequestDto request) {
 
         MenuResponseDto responseDto = menuService.updateMenu(storeId, menuId, request);
 
