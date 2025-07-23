@@ -1,12 +1,18 @@
 package com.example.eat_together.domain.user.entity;
 
+import com.example.eat_together.domain.chat.entity.ChatGroup;
+import com.example.eat_together.domain.chat.entity.ChatMessage;
+import com.example.eat_together.domain.chat.entity.ChatRoomUser;
+import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.global.entity.BaseTimeEntity;
-import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,6 +45,15 @@ public class User extends BaseTimeEntity {
 
     @Column(name = "is_deleted")
     private boolean isDeleted;
+
+    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatGroup> chattingGroupList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoomUser> chatRoomUserList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessageList = new ArrayList<>();
 
     public User(SignupRequestDto request, String password) {
         this.loginId = request.getLoginId();
@@ -78,7 +93,7 @@ public class User extends BaseTimeEntity {
         }
     }
 
-    public void updatePassword(String password){
+    public void updatePassword(String password) {
         this.password = password;
     }
 

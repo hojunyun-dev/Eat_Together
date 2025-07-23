@@ -3,17 +3,17 @@ package com.example.eat_together.domain.menu.dto.request;
 import lombok.Getter;
 
 @Getter
-public class CreateMenuRequestDto {
+public class MenuUpdateRequestDto {
 
     private final String imageUrl;
 
     private final String name;
 
-    private final double price;
+    private final Double price;
 
     private final String description;
 
-    public CreateMenuRequestDto(String imageUrl, String name, double price, String description) {
+    public MenuUpdateRequestDto(String imageUrl, String name, double price, String description) {
         this.imageUrl = imageUrl;
         this.name = name;
         this.price = price;
