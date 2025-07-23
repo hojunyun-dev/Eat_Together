@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "reviews")
 public class Review extends BaseTimeEntity {
 
     @Id
