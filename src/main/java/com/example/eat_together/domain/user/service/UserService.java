@@ -9,6 +9,8 @@ import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.domain.user.dto.request.ChangePasswordRequestDto;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,11 +70,9 @@ public class UserService {
     }
 
     // 유저 전체 조회
-    public List<UserResponseDto> findAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserResponseDto::toDto)
-                .toList();
+    public Page<UserResponseDto> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(UserResponseDto::toDto);
     }
 
     // 마이페이지 조회
