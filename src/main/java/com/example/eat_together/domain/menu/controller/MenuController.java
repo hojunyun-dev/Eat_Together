@@ -93,7 +93,8 @@ public class MenuController {
         menuService.deleteMenu(storeId, menuId);
 
         ApiResponse<Menu> response = new ApiResponse<>
-                (ResponseMessage.MENU_DELETED_SUCCESS.getMessage(),
+                (
+                        ResponseMessage.MENU_DELETED_SUCCESS.getMessage(),
                         null
                 );
 
