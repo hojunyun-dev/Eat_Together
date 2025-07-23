@@ -4,7 +4,6 @@ import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,9 @@ public class ChatRoom extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    String name;
-
-    @Column(name = "is_group")
-    Boolean isGroup;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private ChattingGroup chattingGroup;
+    private ChatGroup chatGroup;
 
     @Column(name = "is_deleted")
     Boolean isDeleted;
@@ -33,7 +27,11 @@ public class ChatRoom extends BaseTimeEntity {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRoomUserList= new ArrayList<>();
 
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatMessage> chatMessageList= new ArrayList<>();
+    public static ChatRoom of(ChatGroup chatGroup){
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.chatGroup = chatGroup;
+        chatRoom.isDeleted = false;
 
+        return chatRoom;
+    }
 }

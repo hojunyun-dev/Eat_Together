@@ -34,4 +34,11 @@ public class ChatRoomUser extends BaseTimeEntity {
     @Column(name = "left_at")
     private LocalDateTime leftAt;
 
+    public static ChatRoomUser of(ChatRoom chatRoom, User user){
+        ChatRoomUser chatRoomUser = new ChatRoomUser();
+        chatRoomUser.chatRoom = chatRoom;
+        chatRoomUser.user = user;
+
+        return chatRoomUser;
+    }
 }
