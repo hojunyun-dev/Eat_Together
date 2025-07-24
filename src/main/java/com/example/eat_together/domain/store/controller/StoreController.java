@@ -9,6 +9,7 @@ import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
 import com.example.eat_together.global.dto.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class StoreController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user,
-                                                   @RequestBody StoreRequestDto requestDto) {
+                                                   @Valid @RequestBody StoreRequestDto requestDto) {
 
         storeService.createStore(user, requestDto);
 
@@ -105,9 +106,10 @@ public class StoreController {
 
     @PatchMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(@PathVariable Long storeId,
-                                                                     @RequestBody StoreUpdateRequestDto request) {
+                                                                     @RequestBody StoreUpdateRequestDto request,
+                                                                     @AuthenticationPrincipal UserDetails userDetails) {
 
-        StoreResponseDto storeResponseDto = storeService.updateStore(storeId, request);
+        StoreResponseDto storeResponseDto = storeService.updateStore(storeId, request, userDetails);
 
         ApiResponse<StoreResponseDto> response = new ApiResponse<>
                 (
@@ -119,9 +121,10 @@ public class StoreController {
     }
 
     @DeleteMapping("/{storeId}")
-    public ResponseEntity<ApiResponse> deleteStore(@PathVariable Long storeId) {
+    public ResponseEntity<ApiResponse> deleteStore(@PathVariable Long storeId,
+                                                   @AuthenticationPrincipal UserDetails userDetails) {
 
-        storeService.deleteStore(storeId);
+        storeService.deleteStore(storeId, userDetails);
 
         ApiResponse<Store> response = new ApiResponse<>
                 (
