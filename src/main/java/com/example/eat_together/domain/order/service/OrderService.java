@@ -10,6 +10,7 @@ import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.entity.OrderItem;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderRepository;
+import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.entity.UserRole;
 import com.example.eat_together.domain.user.repository.UserRepository;
@@ -40,7 +41,13 @@ public class OrderService {
 
         User user = cart.getUser();
 
-        Order order = Order.of(user);
+        if (cart.getCartItems().isEmpty()) {
+            throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        Store store = cart.getCartItems().get(0).getMenu().getStore();
+
+        Order order = Order.of(user, store);
 
         for (CartItem cartItem : cart.getCartItems()) {
             OrderItem orderItem = OrderItem.of(order, cartItem.getMenu(), cartItem.getQuantity());
