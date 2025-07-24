@@ -10,6 +10,9 @@ import com.example.eat_together.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +28,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 비밀번호 변경
     @PatchMapping("/password")
@@ -58,11 +62,15 @@ public class UserController {
     // 유저 전체 조회 ( ADMIN 전용 )
     @GetMapping("/find/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(){
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(Pageable pageable){
 
-        List<UserResponseDto> allUsers = userService.findAllUsers();
+        // Pageable 적용 ( page, size 값 입력해야함 )
+        // ex) page = 0, size = 3 첫번째 페이지에 3명 출력
+        Page<UserResponseDto> usersPage = userService.findAllUsers(pageable);
 
-        return ResponseEntity.ok(ApiResponse.of(allUsers,MessageEnum.SEARCH_INFO.getMessage()));
+        List<UserResponseDto> allUsers = usersPage.getContent();
+
+        return ResponseEntity.ok(ApiResponse.of(allUsers, MessageEnum.SEARCH_INFO.getMessage()));
     }
 
     // 마이 페이지 조회
@@ -82,5 +90,28 @@ public class UserController {
         userService.deleteUser(request, Long.valueOf(userDetails.getUsername()));
 
         return ResponseEntity.ok(ApiResponse.success(MessageEnum.DELETE_USER.getMessage()));
+    }
+
+
+    /*
+    *
+    * 이 API는 단순 redis 연동 확인용 API 입니다.
+    *
+    * */
+    @GetMapping("/redis")
+    public ResponseEntity<String> checkRedisConnection() {
+        try {
+            // Redis에 PING 명령을 보내고 PONG 응답을 확인
+            // RedisTemplate은 ConnectionFactory를 통해 연결을 얻고 명령을 실행합니다.
+            String response = redisTemplate.getConnectionFactory().getConnection().ping();
+            if ("PONG".equals(response)) {
+                return ResponseEntity.ok("Redis connection is UP.");
+            } else {
+                return ResponseEntity.status(500).body("Redis connection failed: " + response);
+            }
+        } catch (Exception e) {
+            // 연결 실패 시 예외가 발생합니다.
+            return ResponseEntity.status(500).body("Redis connection failed: " + e.getMessage());
+        }
     }
 }

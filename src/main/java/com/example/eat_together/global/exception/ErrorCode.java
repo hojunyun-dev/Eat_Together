@@ -20,6 +20,7 @@ public enum ErrorCode {
 
     // 403 FORBIDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
+    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
