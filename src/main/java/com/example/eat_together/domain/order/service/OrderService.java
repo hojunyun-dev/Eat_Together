@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -51,21 +53,21 @@ public class OrderService {
 
     }
 
-    // 주문 목록 조회 (추후 조회기간, 주문상태로 조회 추가 예정)
-    public Page<OrderResponseDto> getOrders(Long userId, int page, int size) {
+    // 주문 목록 조회
+    public Page<OrderResponseDto> getOrders(Long userId, int page, int size, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return orderRepository.findOrdersByUserId(userId, pageable);
+        return orderRepository.findOrdersByUserId(userId, pageable, startDate, endDate, status);
     }
 
     // 주문 목록 단일 조회
     public OrderDetailResponseDto getOrder(Long userId, Long orderId) {
-        Order order = orderRepository.findByIdAndUserUserId(orderId, userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
+        userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Order order = orderRepository.findByIdAndUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
         return new OrderDetailResponseDto(order);
     }
 
     // 주문 상태 변경(가게 권한)
+    @Transactional
     public OrderStatusUpdateResponseDto updateOrderStatus(Long userId, Long orderId, OrderStatus status) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException((ErrorCode.USER_NOT_FOUND)));
 
@@ -83,8 +85,12 @@ public class OrderService {
     }
 
     // 주문 단건 삭제 (소프트 딜리트)
+    @Transactional
     public void deleteOrder(Long userId, Long orderId) {
-        Order order = orderRepository.findByIdAndUserUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Order order = orderRepository.findByIdAndUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
         order.deletedOrder();
     }
 }
