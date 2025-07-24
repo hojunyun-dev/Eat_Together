@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.user.service;
 
+import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.entity.User;
@@ -8,10 +9,11 @@ import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.domain.user.dto.request.ChangePasswordRequestDto;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 
 @Service
@@ -54,5 +56,43 @@ public class UserService {
         saveUser.setUpdatedAt(LocalDateTime.now());
 
         return new UserResponseDto(saveUser);
+    }
+
+    // 유저 단건 조회
+    public UserResponseDto findUser(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new UserResponseDto(user);
+    }
+
+    // 유저 전체 조회
+    public Page<UserResponseDto> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(UserResponseDto::toDto);
+    }
+
+    // 마이페이지 조회
+    public UserResponseDto findMyProfile(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new UserResponseDto(user);
+    }
+
+    // 유저 삭제
+    @Transactional
+    public void deleteUser(PasswordRequestDto request, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new CustomException(ErrorCode.PASSWORD_WRONG);
+        }
+
+        user.deleteUser();
     }
 }

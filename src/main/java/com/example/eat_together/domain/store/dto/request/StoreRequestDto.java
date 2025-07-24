@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.time.LocalTime;
 
 @Getter
-public class CreateStoreRequestDto {
+public class StoreRequestDto {
 
     private final String name;
     private final String description;
@@ -17,14 +17,14 @@ public class CreateStoreRequestDto {
     private final String phoneNumber;
 
 
-    public CreateStoreRequestDto(String name,
-                                 String description,
-                                 String address,
-                                 LocalTime openTime,
-                                 LocalTime closeTime,
-                                 int deliveryFee,
-                                 String category,
-                                 String phoneNumber
+    public StoreRequestDto(String name,
+                           String description,
+                           String address,
+                           LocalTime openTime,
+                           LocalTime closeTime,
+                           int deliveryFee,
+                           String category,
+                           String phoneNumber
     ) {
         this.name = name;
         this.description = description;

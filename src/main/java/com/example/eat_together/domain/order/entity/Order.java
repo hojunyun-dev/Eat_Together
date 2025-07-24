@@ -1,6 +1,8 @@
 package com.example.eat_together.domain.order.entity;
 
+import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.rider.entity.Rider;
+import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -23,6 +25,9 @@ public class Order extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
 
     @ManyToOne
     @JoinColumn(name = "rider_id")
@@ -55,11 +60,20 @@ public class Order extends BaseTimeEntity {
     }
 
     public void calculateTotalPrice() {
-        int total = 0;
+        double total = 0;
         for (OrderItem orderItem : orderItems) {
-            total += orderItem.getPrice();
+            total += orderItem.getPrice() * orderItem.getQuantity();
         }
+        total += store.getDeliveryFee();
         this.totalPrice = total;
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void deletedOrder() {
+        this.isDeleted = true;
     }
 
 }

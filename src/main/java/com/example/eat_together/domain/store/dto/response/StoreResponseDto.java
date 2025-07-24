@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.store.dto.response;
 
+import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,6 +47,22 @@ public class StoreResponseDto {
         this.phoneNumber = phoneNumber;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public static StoreResponseDto from(Store store) {
+        return new StoreResponseDto(
+                store.getStoreId(),
+                store.getName(),
+                store.getDescription(),
+                store.getAddress(),
+                store.isOpen(),
+                store.getOpenTime(),
+                store.getCloseTime(),
+                store.getFoodCategory(),
+                store.getPhoneNumber(),
+                store.getCreatedAt(),
+                store.getUpdatedAt()
+        );
     }
 
 }

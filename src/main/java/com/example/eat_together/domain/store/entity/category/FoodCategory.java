@@ -1,5 +1,7 @@
 package com.example.eat_together.domain.store.entity.category;
 
+import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -27,6 +29,6 @@ public enum FoodCategory {
         return Arrays.stream(FoodCategory.values())
                 .filter(c -> c.category.equals(category))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 }

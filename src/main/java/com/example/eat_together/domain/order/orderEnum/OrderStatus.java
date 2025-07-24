@@ -1,4 +1,4 @@
-package com.example.eat_together.domain.order.entity;
+package com.example.eat_together.domain.order.orderEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,5 +10,5 @@ public enum OrderStatus {
     DELIVERING("배달중"),
     DELIVERED("배달완료");
 
-    private final String status;
+    private final String message;
 }

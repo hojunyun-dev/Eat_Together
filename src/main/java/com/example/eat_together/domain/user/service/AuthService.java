@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.user.service;
 
 import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.global.util.JwtUtil;
@@ -40,15 +41,21 @@ public class AuthService {
 
     // 로그인
     @Transactional
-    public String login(LoginRequestDto request) {
+    public TokenResponse login(LoginRequestDto request) {
 
+        // 유저 검증
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INFO_MISMATCH));
+
+        // 소프트 삭제 검증
+        if(user.isDeleted()){
+            throw new CustomException(ErrorCode.DELETED_USER);
+        }
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new CustomException(ErrorCode.INFO_MISMATCH);
         }
 
-        return jwtUtil.createToken(user.getUserId(), user.getLoginId());
+        return jwtUtil.createToken(user.getUserId(), user.getLoginId(), user.getRole());
     }
 }

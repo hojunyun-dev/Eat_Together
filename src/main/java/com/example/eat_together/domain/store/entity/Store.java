@@ -45,7 +45,7 @@ public class Store extends BaseTimeEntity {
     private LocalTime closeTime;
 
     @Column(name = "delivery_fee", nullable = false)
-    private int deliveryFee;
+    private double deliveryFee;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "food_category", nullable = false)
@@ -62,7 +62,7 @@ public class Store extends BaseTimeEntity {
                            boolean isOpen,
                            LocalTime openTime,
                            LocalTime closeTime,
-                           int deliveryFee,
+                           double deliveryFee,
                            FoodCategory foodCategory,
                            String phoneNumber
     ) {
@@ -78,6 +78,46 @@ public class Store extends BaseTimeEntity {
         store.foodCategory = foodCategory;
         store.phoneNumber = phoneNumber;
         return store;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateAddress(String address) {
+        this.address = address;
+    }
+
+    public void updateOpenTime(LocalTime openTime) {
+        this.openTime = openTime;
+    }
+
+    public void updateCloseTime(LocalTime closeTime) {
+        this.closeTime = closeTime;
+    }
+
+    public void updateDeliveryFee(double deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public void updateFoodCategory(FoodCategory foodCategory) {
+        this.foodCategory = foodCategory;
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void openStore() {
+        this.isOpen = true;
+    }
+
+    public void closeStore() {
+        this.isOpen = false;
     }
 
     // 매장 삭제 시 사용
