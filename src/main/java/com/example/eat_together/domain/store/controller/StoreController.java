@@ -132,4 +132,33 @@ public class StoreController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PatchMapping("/{storeId}/open")
+    public ResponseEntity<ApiResponse> openStore(@PathVariable Long storeId) {
+
+        storeService.openStore(storeId);
+
+        ApiResponse<Store> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_OPEN_SUCCESS.getMessage(),
+                        null
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{storeId}/close")
+    public ResponseEntity<ApiResponse> closeStore(@PathVariable Long storeId) {
+
+        storeService.closeStore(storeId);
+
+        ApiResponse<Store> response = new ApiResponse<>
+                (
+                        ResponseMessage.STORE_CLOSE_SUCCESS.getMessage(),
+                        null
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }

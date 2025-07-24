@@ -167,4 +167,30 @@ public class StoreService {
 
         store.deleted();
     }
+
+    @Transactional
+    public void openStore(Long storeId) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (store.isOpen()) {
+            throw new CustomException(ErrorCode.STORE_ALREADY_OPEN);
+        }
+
+        store.openStore();
+    }
+
+    @Transactional
+    public void closeStore(Long storeId) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!store.isOpen()) {
+            throw new CustomException(ErrorCode.STORE_ALREADY_CLOSED);
+        }
+
+        store.closeStore();
+    }
 }
