@@ -15,6 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -31,13 +33,16 @@ public class OrderController {
                 .body(ApiResponse.of(null, OrderResponse.ORDER_CREATED.getMessage()));
     }
 
-    // 주문 목록 페이징 조회 (추후 조회기간, 주문상태로 조회 추가 예정)
+    // 주문 목록 페이징 조회
     @GetMapping
     public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(@AuthenticationPrincipal UserDetails userDetails,
                                                                          @RequestParam(value = "page", defaultValue = "1") int page,
-                                                                         @RequestParam(value = "size", defaultValue = "10") int size) {
+                                                                         @RequestParam(value = "size", defaultValue = "10") int size,
+                                                                         @RequestParam(required = false) LocalDate startDate,
+                                                                         @RequestParam(required = false) LocalDate endDate,
+                                                                         @RequestParam(required = false) OrderStatus status) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.of(orderService.getOrders(Long.valueOf(userDetails.getUsername()), page, size), OrderResponse.ORDER_LIST_FOUND.getMessage()));
+                .body(ApiResponse.of(orderService.getOrders(Long.valueOf(userDetails.getUsername()), page, size, startDate, endDate, status), OrderResponse.ORDER_LIST_FOUND.getMessage()));
     }
 
     // 주문 목록 단일 조회
@@ -61,5 +66,4 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.of(null, OrderResponse.ORDER_DELETED.getMessage()));
     }
-
 }
