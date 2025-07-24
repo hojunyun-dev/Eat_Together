@@ -6,6 +6,7 @@ import com.example.eat_together.domain.user.dto.request.LoginRequestDto;
 import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.service.AuthService;
+import com.example.eat_together.global.dto.TokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequestDto request){
-        String login = authService.login(request);
+    public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequestDto request){
+        TokenResponse login = authService.login(request);
 
         return ResponseEntity.ok(ApiResponse.of(login,MessageEnum.LOGIN.getMessage()));
     }

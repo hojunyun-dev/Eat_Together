@@ -1,6 +1,7 @@
 package com.example.eat_together.global.util;
 
 import com.example.eat_together.domain.user.entity.UserRole;
+import com.example.eat_together.global.dto.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.http.HttpStatus;
@@ -31,8 +32,8 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(Long userId, String loginId, UserRole role) {
-        return BEARER_PREFIX + Jwts.builder()
+    public TokenResponse createToken(Long userId, String loginId, UserRole role) {
+        String accessToken = BEARER_PREFIX + Jwts.builder()
                 .setSubject(String.valueOf(userId)) // 보통 userId
                 .claim("loginId",loginId)
                 .claim("userRole",role.name())
@@ -40,6 +41,17 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        String refreshToken = BEARER_PREFIX + Jwts.builder()
+                .setSubject(String.valueOf(userId)) // 보통 userId
+                .claim("loginId",loginId)
+                .claim("userRole",role.name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return TokenResponse.of(accessToken, refreshToken);
     }
 
     public Authentication getAuthentication(String token) {

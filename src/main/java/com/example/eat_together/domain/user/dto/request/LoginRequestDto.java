@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 public class LoginRequestDto {
 
-    @NotBlank(message = "아이디는 필수값입니다.")
     private final Long userId;
 
     @NotBlank(message = "아이디는 필수입력값입니다.")

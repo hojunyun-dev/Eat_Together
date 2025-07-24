@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.user.service;
 
 import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.global.util.JwtUtil;
@@ -40,7 +41,7 @@ public class AuthService {
 
     // 로그인
     @Transactional
-    public String login(LoginRequestDto request) {
+    public TokenResponse login(LoginRequestDto request) {
 
         // 유저 검증
         User user = userRepository.findByLoginId(request.getLoginId())
