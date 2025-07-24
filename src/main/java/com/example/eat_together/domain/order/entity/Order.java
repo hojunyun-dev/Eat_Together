@@ -46,9 +46,10 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isDeleted;
 
-    public static Order of(User user) {
+    public static Order of(User user, Store store) {
         Order order = new Order();
         order.user = user;
+        order.store = store;
         order.status = OrderStatus.ORDERED;
         order.isDeleted = false;
         return order;
