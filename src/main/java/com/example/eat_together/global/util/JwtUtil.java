@@ -23,7 +23,8 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET_KEY = "your-256-bit-secret-your-256-bit-secret"; // 256비트 이상 문자열
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간
+    private static final long ACCESS_TOKEN_TIME = 1000 * 60 * 30; // 30분
+    private static final long REFRESH_TOKEN_TIME = 1000 * 60 * 60 * 24; // 1일
     private static final String BEARER_PREFIX = "Bearer ";
     private final Key key;
 
@@ -33,12 +34,20 @@ public class JwtUtil {
 
     // 토큰 생성
     public TokenResponse createToken(Long userId, String loginId, UserRole role) {
+
+        // Payload : 클라이언트가 서버에 요청을 보낼 시 필요한 정보들 저장
+        // Jwt에 필요 정보 저장
+        Claims claims = Jwts.claims();
+        claims.put("userId",userId);
+        claims.put("loginId",loginId);
+        claims.put("role",role);
+
         String accessToken = BEARER_PREFIX + Jwts.builder()
                 .setSubject(String.valueOf(userId)) // 보통 userId
                 .claim("loginId",loginId)
                 .claim("userRole",role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -47,7 +56,7 @@ public class JwtUtil {
                 .claim("loginId",loginId)
                 .claim("userRole",role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -108,6 +117,11 @@ public class JwtUtil {
         }
     }
 
+    // Refresh Token 만료 시간
+    public long getRefreshTokenTime() {
+        return REFRESH_TOKEN_TIME;
+    }
+
     public Long getUserId(String token) {
         try {
             String userId = extractClaims(token).getSubject();
@@ -116,4 +130,6 @@ public class JwtUtil {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "잘못된 사용자 ID 형식입니다.");
         }
     }
+
+
 }

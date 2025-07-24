@@ -7,11 +7,18 @@ import java.util.List;
 @Getter
 public class CartResponseDto {
 
-    private final List<CartItemResponseDto> items;
-    private final double totalPrice;
+    private final Long storeId;
+    private final List<CartItemResponseDto> content;
+    private final double subPrice;
+    private final double deliveryTip;
+    private final double storeTotalPrice;
 
-    public CartResponseDto(List<CartItemResponseDto> items) {
-        this.items = items;
-        this.totalPrice = items.stream().mapToDouble(CartItemResponseDto::getTotalPrice).sum();
+    public CartResponseDto(Long storeId, List<CartItemResponseDto> content, double deliveryTip) {
+        this.storeId = storeId;
+        this.content = content;
+        this.subPrice = content.stream().mapToDouble(CartItemResponseDto::getTotalPrice).sum();
+        this.deliveryTip = deliveryTip;
+        this.storeTotalPrice = subPrice + deliveryTip;
     }
 }
+
