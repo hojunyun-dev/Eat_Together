@@ -67,6 +67,7 @@ public class OrderService {
     }
 
     // 주문 상태 변경(가게 권한)
+    @Transactional
     public OrderStatusUpdateResponseDto updateOrderStatus(Long userId, Long orderId, OrderStatus status) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException((ErrorCode.USER_NOT_FOUND)));
 
@@ -84,9 +85,12 @@ public class OrderService {
     }
 
     // 주문 단건 삭제 (소프트 딜리트)
+    @Transactional
     public void deleteOrder(Long userId, Long orderId) {
         userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         Order order = orderRepository.findByIdAndUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
         order.deletedOrder();
     }
 }
