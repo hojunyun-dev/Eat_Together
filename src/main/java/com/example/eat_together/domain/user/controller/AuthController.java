@@ -10,6 +10,8 @@ import com.example.eat_together.global.dto.TokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserResponseDto>> signup(@Valid @RequestBody SignupRequestDto request){
 
@@ -30,10 +33,19 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.of(signup, MessageEnum.SIGNUP.getMessage()));
     }
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequestDto request){
         TokenResponse login = authService.login(request);
 
         return ResponseEntity.ok(ApiResponse.of(login,MessageEnum.LOGIN.getMessage()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(@AuthenticationPrincipal UserDetails userDetails) {
+
+        authService.logout(Long.valueOf(userDetails.getUsername()));
+
+        return ResponseEntity.ok(ApiResponse.success(MessageEnum.LOGOUT.getMessage()));
     }
 }

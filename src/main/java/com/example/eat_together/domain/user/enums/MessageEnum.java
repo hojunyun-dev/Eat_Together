@@ -9,7 +9,8 @@ public enum MessageEnum {
     CHANGE_PASSWORD("비밀번호 변경 완료!"),
     UPDATE_INFO("개인 정보 수정 완료!"),
     SEARCH_INFO("정보 조회 성공!"),
-    DELETE_USER("유저 삭제 완료");
+    DELETE_USER("유저 삭제 완료"),
+    LOGOUT("로그아웃 했습니다.");
 
     private final String message;
 
