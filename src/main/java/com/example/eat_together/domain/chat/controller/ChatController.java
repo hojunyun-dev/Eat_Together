@@ -27,7 +27,7 @@ public class ChatController {
     }
 
     //채팅방 참여 및 입장
-    @PostMapping("/{roomId}/join")
+    @PostMapping("/{roomId}/enter")
     public ResponseEntity<ApiResponse<Void>> enterChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId){
         chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
 
@@ -35,4 +35,9 @@ public class ChatController {
     }
 
     //채팅방 조회
+
+    //기존 채팅 내역 조회
+
+    //채팅방 퇴장
+
 }

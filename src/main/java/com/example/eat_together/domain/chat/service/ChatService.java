@@ -1,10 +1,13 @@
 package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.dto.ChatGroupDto;
+import com.example.eat_together.domain.chat.dto.ChatMessageDto;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
+import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
 import com.example.eat_together.domain.chat.entity.ChatRoomUser;
 import com.example.eat_together.domain.chat.repository.ChatGroupRepository;
+import com.example.eat_together.domain.chat.repository.ChatMessageRepository;
 import com.example.eat_together.domain.chat.repository.ChatRoomRepository;
 import com.example.eat_together.domain.chat.repository.ChatRoomUserRepository;
 import com.example.eat_together.domain.user.entity.User;
@@ -27,6 +30,7 @@ public class ChatService {
     private final ChatGroupRepository chatGroupRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public void createChatGroup(Long loginId,  ChatGroupDto chatGroupDto) {
         Optional<User> optionalHost = userRepository.findById(loginId);
@@ -52,8 +56,15 @@ public class ChatService {
         }
     }
 
-    //메세지 저장
+    //메세지 저장    public void saveMessage(ChatMessageDto chatMessageDto, Long loginId, Long roomId)
+    public void saveMessage(ChatMessageDto chatMessageDto, Long roomId){
+        //User user = getUser(loginId);
+        ChatRoom chatRoom = getChatRoom(roomId);
 
+        //ChatMessage chatMessage = ChatMessage.of(chatMessageDto, user, chatRoom);
+        ChatMessage chatMessage = ChatMessage.of(chatMessageDto, chatRoom);
+        chatMessageRepository.save(chatMessage);
+    }
 
     //사용자
     private User getUser(Long userId){

@@ -28,9 +28,19 @@ public class ChatMessage extends BaseTimeEntity {
 
     private String message;
 
-    public static ChatMessage of(ChatMessageDto chatMessageDto){
+    public static ChatMessage of(ChatMessageDto chatMessageDto,User user, ChatRoom chatRoom){
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.message = chatMessageDto.getMessage();
+        chatMessage.user = user;
+        chatMessage.chatRoom = chatRoom;
+
+        return chatMessage;
+    }
+    //test
+    public static ChatMessage of(ChatMessageDto chatMessageDto, ChatRoom chatRoom){
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.message = chatMessageDto.getMessage();
+        chatMessage.chatRoom = chatRoom;
 
         return chatMessage;
     }
