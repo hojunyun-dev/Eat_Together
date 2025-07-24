@@ -17,6 +17,8 @@ public enum ErrorCode {
     DELETED_USER(HttpStatus.BAD_REQUEST, "삭제된 유저입니다"),
     STORE_ACCESS_DENIED(HttpStatus.BAD_REQUEST, "자신의 매장이 아닙니다."),
     STORE_INVALID_TIME(HttpStatus.BAD_REQUEST, "오픈 시간이 종료 시간보다 빨라야 합니다."),
+    ORDER_INVALID_PERIOD(HttpStatus.BAD_REQUEST, "조회 시작일은 종료일보다 이전이어야 합니다."),
+    ORDER_PERIOD_MISMATCH(HttpStatus.BAD_REQUEST, "조회 시작일과 종료일은 함께 입력되어야 합니다."),
 
     // 403 FORBIDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
