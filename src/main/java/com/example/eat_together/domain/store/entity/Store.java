@@ -112,6 +112,14 @@ public class Store extends BaseTimeEntity {
         this.phoneNumber = phoneNumber;
     }
 
+    public void openStore() {
+        this.isOpen = true;
+    }
+
+    public void closeStore() {
+        this.isOpen = false;
+    }
+
     // 매장 삭제 시 사용
     public void deleted() {
         this.isDeleted = true;

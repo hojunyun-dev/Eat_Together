@@ -10,6 +10,8 @@ import com.example.eat_together.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,11 +60,15 @@ public class UserController {
     // 유저 전체 조회 ( ADMIN 전용 )
     @GetMapping("/find/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(){
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(Pageable pageable){
 
-        List<UserResponseDto> allUsers = userService.findAllUsers();
+        // Pageable 적용 ( page, size 값 입력해야함 )
+        // ex) page = 0, size = 3 첫번째 페이지에 3명 출력
+        Page<UserResponseDto> usersPage = userService.findAllUsers(pageable);
 
-        return ResponseEntity.ok(ApiResponse.of(allUsers,MessageEnum.SEARCH_INFO.getMessage()));
+        List<UserResponseDto> allUsers = usersPage.getContent();
+
+        return ResponseEntity.ok(ApiResponse.of(allUsers, MessageEnum.SEARCH_INFO.getMessage()));
     }
 
     // 마이 페이지 조회
