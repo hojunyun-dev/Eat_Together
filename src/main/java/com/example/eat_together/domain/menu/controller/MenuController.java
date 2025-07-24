@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,9 +29,10 @@ public class MenuController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createMenu(@PathVariable Long storeId,
-                                                  @Valid @RequestBody MenuRequestDto requestDto) {
+                                                  @Valid @RequestBody MenuRequestDto requestDto,
+                                                  @AuthenticationPrincipal UserDetails userDetails) {
 
-        menuService.createMenu(storeId, requestDto);
+        menuService.createMenu(storeId, requestDto, userDetails);
 
         ApiResponse<Menu> response = new ApiResponse<>
                 (
@@ -73,9 +76,10 @@ public class MenuController {
     @PatchMapping("/{menuId}")
     public ResponseEntity<ApiResponse<MenuResponseDto>> updateMenu(@PathVariable Long storeId,
                                                                    @PathVariable Long menuId,
-                                                                   @RequestBody MenuUpdateRequestDto request) {
+                                                                   @RequestBody MenuUpdateRequestDto request,
+                                                                   @AuthenticationPrincipal UserDetails userDetails) {
 
-        MenuResponseDto responseDto = menuService.updateMenu(storeId, menuId, request);
+        MenuResponseDto responseDto = menuService.updateMenu(storeId, menuId, request, userDetails);
 
         ApiResponse<MenuResponseDto> response = new ApiResponse<>
                 (
@@ -88,9 +92,10 @@ public class MenuController {
 
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResponse> deletedMenu(@PathVariable Long storeId,
-                                                   @PathVariable Long menuId) {
+                                                   @PathVariable Long menuId,
+                                                   @AuthenticationPrincipal UserDetails userDetails) {
 
-        menuService.deleteMenu(storeId, menuId);
+        menuService.deleteMenu(storeId, menuId, userDetails);
 
         ApiResponse<Menu> response = new ApiResponse<>
                 (
