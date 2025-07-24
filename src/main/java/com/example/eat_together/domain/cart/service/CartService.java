@@ -9,6 +9,8 @@ import com.example.eat_together.domain.cart.repository.CartItemRepository;
 import com.example.eat_together.domain.cart.repository.CartRepository;
 import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.repository.MenuRepository;
+import com.example.eat_together.domain.store.entity.Store;
+import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
@@ -28,23 +30,26 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
+    private final StoreRepository storeRepository;
 
     // 1. 장바구니에 메뉴 추가
     @Transactional
-    public void addItem(Long userId, CartItemRequestDto requestDto) {
-
+    public void addItem(Long userId, Long storeId, CartItemRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
+        // TODO: StoreId 검증 로직 추가
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
         Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseGet(() -> cartRepository.save(Cart.of(user)));
 
-        // 기존 장바구니에 동일 메뉴가 있다면 수량 증가
         cart.getCartItems().stream()
-                .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId())) // TODO : 이거 고침
+                .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId()))
                 .findFirst()
                 .ifPresentOrElse(
                         item -> item.updateQuantity(item.getQuantity() + requestDto.getQuantity()),
@@ -54,6 +59,7 @@ public class CartService {
                         }
                 );
     }
+
 
     // 2. 장바구니 전체 조회
     @Transactional
@@ -65,8 +71,18 @@ public class CartService {
                 .map(CartItemResponseDto::new)
                 .collect(Collectors.toList());
 
-        return new CartResponseDto(itemDtos);
+        if (itemDtos.isEmpty()) {
+            throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        Store store = cart.getCartItems().get(0).getMenu().getStore();  // 메뉴에서 store 꺼내기
+        Long storeId = store.getStoreId();
+        double deliveryFee = store.getDeliveryFee();
+
+        return new CartResponseDto(storeId, itemDtos, deliveryFee);
     }
+
+
 
     // 3. 장바구니 수량 수정
     @Transactional

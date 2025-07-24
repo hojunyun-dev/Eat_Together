@@ -14,24 +14,25 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/carts")
+@RequestMapping
 public class CartController {
 
     private final CartService cartService;
 
-    // 1. 메뉴 장바구니에 추가
-    @PostMapping("/items")
+    // 1. 메뉴 장바구니에 추가 (storeId를 경로로 받음)
+    @PostMapping("/stores/{storeId}/carts/items")
     public ResponseEntity<ApiResponse<Void>> addItem(
             @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long storeId,
             @Valid @RequestBody CartItemRequestDto requestDto) {
 
-        cartService.addItem(Long.valueOf(userDetails.getUsername()), requestDto);
+        cartService.addItem(Long.valueOf(userDetails.getUsername()), storeId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(null, "장바구니에 메뉴가 추가되었습니다."));
     }
 
     // 2. 장바구니 조회
-    @GetMapping("/me")
+    @GetMapping("/carts/me")
     public ResponseEntity<ApiResponse<CartResponseDto>> getCart(
             @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -40,7 +41,7 @@ public class CartController {
     }
 
     // 3. 장바구니 항목 수량 수정
-    @PatchMapping("/items/{itemId}")
+    @PatchMapping("/carts/items/{itemId}")
     public ResponseEntity<ApiResponse<Void>> updateQuantity(
             @PathVariable Long itemId,
             @Valid @RequestBody CartItemRequestDto requestDto) {
@@ -50,7 +51,7 @@ public class CartController {
     }
 
     // 4. 장바구니 항목 삭제
-    @DeleteMapping("/items/{itemId}")
+    @DeleteMapping("/carts/items/{itemId}")
     public ResponseEntity<ApiResponse<Void>> deleteItem(@PathVariable Long itemId) {
         cartService.deleteItem(itemId);
         return ResponseEntity.ok(ApiResponse.of(null, "장바구니에서 항목이 삭제되었습니다."));
