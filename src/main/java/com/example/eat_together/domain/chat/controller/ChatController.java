@@ -40,4 +40,8 @@ public class ChatController {
 
     //채팅방 퇴장
 
+    //기존 코드: 예외처리
+
+    //인터셉터 구현
+
 }

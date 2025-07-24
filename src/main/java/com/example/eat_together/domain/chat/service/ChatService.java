@@ -15,11 +15,9 @@ import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -56,13 +54,12 @@ public class ChatService {
         }
     }
 
-    //메세지 저장    public void saveMessage(ChatMessageDto chatMessageDto, Long loginId, Long roomId)
-    public void saveMessage(ChatMessageDto chatMessageDto, Long roomId){
-        //User user = getUser(loginId);
+    //메세지 저장
+    public void saveMessage(ChatMessageDto chatMessageDto, Long loginId, Long roomId){
+        User user = getUser(loginId);
         ChatRoom chatRoom = getChatRoom(roomId);
 
-        //ChatMessage chatMessage = ChatMessage.of(chatMessageDto, user, chatRoom);
-        ChatMessage chatMessage = ChatMessage.of(chatMessageDto, chatRoom);
+        ChatMessage chatMessage = ChatMessage.of(chatMessageDto, user, chatRoom);
         chatMessageRepository.save(chatMessage);
     }
 
