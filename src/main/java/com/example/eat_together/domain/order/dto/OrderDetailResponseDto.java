@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.order.dto;
 
 import com.example.eat_together.domain.order.entity.Order;
-import com.example.eat_together.domain.order.entity.OrderStatus;
+import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
