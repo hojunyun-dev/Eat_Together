@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+import java.util.Optional;
+
 @Service
 public class StoreService {
 
@@ -32,13 +35,25 @@ public class StoreService {
     @Transactional
     public void createStore(UserDetails userDetails, StoreRequestDto requestDto) {
 
+        LocalTime openTime = requestDto.getOpenTime();
+        LocalTime closeTime = requestDto.getCloseTime();
+
+        if (!openTime.isBefore(closeTime)) {
+            throw new CustomException(ErrorCode.STORE_INVALID_TIME);
+        }
+
         Long userId = Long.valueOf(userDetails.getUsername());
 
         String foodCategory = requestDto.getCategory();
-        FoodCategory category = FoodCategory.fromKr(foodCategory);
+        FoodCategory category = Optional.ofNullable(FoodCategory.fromKr(foodCategory))
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (storeRepository.existsByUserAndNameAndIsDeletedFalse(user, requestDto.getName())) {
+            throw new CustomException(ErrorCode.STORE_NAME_DUPLICATED);
+        }
 
 
         Store store = Store.of(user,
@@ -84,7 +99,7 @@ public class StoreService {
     @Transactional(readOnly = true)
     public StoreResponseDto getStore(Long storeId) {
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         return StoreResponseDto.from(store);
@@ -97,14 +112,27 @@ public class StoreService {
 
         Page<Store> response = storeRepository.findBySearch(keyword, bySearch);
 
+        if (response.isEmpty()) {
+            throw new CustomException(ErrorCode.STORE_SEARCH_NO_RESULT);
+        }
+
         return PagingStoreResponseDto.formPage(response);
     }
 
     @Transactional
-    public StoreResponseDto updateStore(Long storeId, StoreUpdateRequestDto request) {
+    public StoreResponseDto updateStore(Long storeId, StoreUpdateRequestDto request, UserDetails userDetails) {
 
-        Store store = storeRepository.findById(storeId)
+        Long userId = Long.valueOf(userDetails.getUsername());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new CustomException(ErrorCode.STORE_ACCESS_DENIED);
+        }
 
         boolean isUpdated = false;
 
@@ -160,10 +188,19 @@ public class StoreService {
     }
 
     @Transactional
-    public void deleteStore(Long storeId) {
+    public void deleteStore(Long storeId, UserDetails userDetails) {
 
-        Store store = storeRepository.findById(storeId)
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new CustomException(ErrorCode.STORE_ACCESS_DENIED);
+        }
 
         store.deleted();
     }
@@ -171,7 +208,7 @@ public class StoreService {
     @Transactional
     public void openStore(Long storeId) {
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         if (store.isOpen()) {
@@ -184,7 +221,7 @@ public class StoreService {
     @Transactional
     public void closeStore(Long storeId) {
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         if (!store.isOpen()) {

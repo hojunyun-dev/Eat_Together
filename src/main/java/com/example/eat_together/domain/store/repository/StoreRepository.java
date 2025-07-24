@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
@@ -17,6 +19,10 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Page<Store> findStoresByUserAndIsDeletedFalse(User user, Pageable pageable);
 
+    boolean existsByUserAndNameAndIsDeletedFalse(User user, String name);
+
     @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword,  '%')) ORDER BY s.createdAt DESC ")
     Page<Store> findBySearch(String keyword, Pageable pageable);
+
+    Optional<Store> findByStoreIdAndIsDeletedFalse(Long storeId);
 }
