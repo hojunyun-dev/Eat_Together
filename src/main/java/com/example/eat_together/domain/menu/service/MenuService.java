@@ -8,11 +8,14 @@ import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.repository.MenuRepository;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.repository.StoreRepository;
+import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,17 +24,31 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
-    public MenuService(MenuRepository menuRepository, StoreRepository storeRepository) {
+    public MenuService(MenuRepository menuRepository, StoreRepository storeRepository, UserRepository userRepository) {
         this.menuRepository = menuRepository;
         this.storeRepository = storeRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public void createMenu(Long storeId, MenuRequestDto requestDto) {
+    public void createMenu(Long storeId, MenuRequestDto requestDto, UserDetails userDetails) {
 
-        Store store = storeRepository.findById(storeId)
+        Long userId = Long.parseLong(userDetails.getUsername());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new CustomException(ErrorCode.STORE_ACCESS_DENIED);
+        }
+
+        if (menuRepository.existsByStoreAndNameAndIsDeletedFalse(store, requestDto.getName())) {
+            throw new CustomException(ErrorCode.MENU_NAME_DUPLICATED);
+        }
 
         Menu menu = Menu.of(store,
                 requestDto.getImageUrl(),
@@ -46,12 +63,12 @@ public class MenuService {
     @Transactional(readOnly = true)
     public PagingMenuResponseDto getMenusByStoreId(Long storeId, Pageable pageable) {
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Pageable menusByStore = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Menu> getMenusByStore = menuRepository.findAllByStore(store, menusByStore);
+        Page<Menu> getMenusByStore = menuRepository.findAllByStoreAndIsDeletedFalse(store, menusByStore);
 
         return PagingMenuResponseDto.formPage(getMenusByStore);
     }
@@ -59,7 +76,7 @@ public class MenuService {
     @Transactional(readOnly = true)
     public MenuResponseDto getMenuByStore(Long storeId, Long menuId) {
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
@@ -72,10 +89,18 @@ public class MenuService {
     }
 
     @Transactional
-    public MenuResponseDto updateMenu(Long storeId, Long menuId, MenuUpdateRequestDto request) {
+    public MenuResponseDto updateMenu(Long storeId, Long menuId, MenuUpdateRequestDto request, UserDetails userDetails) {
 
-        Store store = storeRepository.findById(storeId)
+        Long userId = Long.parseLong(userDetails.getUsername());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new CustomException(ErrorCode.STORE_ACCESS_DENIED);
+        }
 
         Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
 
@@ -113,10 +138,18 @@ public class MenuService {
     }
 
     @Transactional
-    public void deleteMenu(Long storeId, Long menuId) {
+    public void deleteMenu(Long storeId, Long menuId, UserDetails userDetails) {
 
-        Store store = storeRepository.findById(storeId)
+        Long userId = Long.parseLong(userDetails.getUsername());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new CustomException(ErrorCode.STORE_ACCESS_DENIED);
+        }
 
         Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
 

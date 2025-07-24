@@ -38,7 +38,7 @@ public enum ErrorCode {
     STORE_ALREADY_OPEN(HttpStatus.CONFLICT, "이미 영업 중인 매장입니다."),
     STORE_ALREADY_CLOSED(HttpStatus.CONFLICT, "이미 영업 종료된 매장입니다."),
     STORE_NAME_DUPLICATED(HttpStatus.CONFLICT, "동일한 이름의 매장을 등록할 수 없습니다."),
-    ;
+    MENU_NAME_DUPLICATED(HttpStatus.CONFLICT, "매장에 동일한 이름의 메뉴를 등록할 수 없습니다.");
 
 
     private final HttpStatus status;
