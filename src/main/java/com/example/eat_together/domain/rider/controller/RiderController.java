@@ -9,6 +9,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.eat_together.domain.user.entity.User;//추가
+import org.springframework.security.core.annotation.AuthenticationPrincipal;//추가
+
+
 
 import java.util.List;
 
@@ -19,13 +23,15 @@ public class RiderController {
 
     private final RiderService riderService;
 
-    // 라이더 등록
+    // 라이더 등록(로그인된 사용자 정보를 기반으로 Rider를 생성하도록 변경)
     @PostMapping
-    public ResponseEntity<ApiResponse<Rider>> createRider(@RequestBody RiderRequestDto requestDto) {
-        Rider rider = riderService.createRider(requestDto.getName(), requestDto.getPhone());
+    public ResponseEntity<ApiResponse<Rider>> createRider(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody RiderRequestDto requestDto
+    ) {
+        Rider rider = riderService.createRider(user, requestDto.getPhone());
         return ResponseEntity.ok(ApiResponse.of(rider, RiderResponse.RIDER_CREATED_SUCCESS.getMessage()));
     }
-
 
 
     // 전체 라이더 목록 조회
@@ -56,7 +62,7 @@ public class RiderController {
             @PathVariable Long id,
             @Valid @RequestBody RiderRequestDto requestDto
     ) {
-        Rider updated = riderService.updateRider(id, requestDto.getName(), requestDto.getPhone());
+        Rider updated = riderService.updateRider(id, requestDto.getPhone()); //getName() 삭제
         return ResponseEntity.ok(ApiResponse.of(updated, RiderResponse.RIDER_UPDATED_SUCCESS.getMessage()));
     }
 }

@@ -6,6 +6,8 @@ import com.example.eat_together.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.eat_together.domain.user.entity.User;//추가
+
 
 import java.util.List;
 
@@ -16,8 +18,8 @@ public class RiderService {
     private final RiderRepository riderRepository;
 
     //라이더 등록
-    public Rider createRider(String name, String phone) {
-        Rider rider = Rider.of(name, phone);
+    public Rider createRider(User user, String phone) { //유저 연관관계 추가
+        Rider rider = Rider.of(user, phone);
         return riderRepository.save(rider);
     }
 
@@ -33,10 +35,10 @@ public class RiderService {
     }
 
     //라이더 정보 수정
-    public Rider updateRider(Long id, String name, String phone) {
+    public Rider updateRider(Long id, String phone) {
         Rider rider = riderRepository.findActiveRiderById(id)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 라이더 정보가 존재하지 않습니다."));
-        rider.update(name, phone);
+        rider.update(phone);
         return rider;
     }
     //라이더 삭제
@@ -44,7 +46,13 @@ public class RiderService {
     public void deleteRider(Long id) {
         Rider rider = riderRepository.findActiveRiderById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 라이더를 찾을 수 없습니다."));
-
         rider.delete();
+    }
+
+    // Rider 배차 가능 여부
+    @Transactional
+    public void changeAvailability(Long id, boolean isAvailable) {
+        Rider rider = getRiderById(id);
+        rider.changeAvailability(isAvailable);
     }
 }
