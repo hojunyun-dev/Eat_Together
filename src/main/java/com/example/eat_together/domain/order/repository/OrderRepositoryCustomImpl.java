@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.order.repository;
 
-import com.example.eat_together.domain.order.dto.OrderResponseDto;
-import com.example.eat_together.domain.order.dto.QOrderResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderResponseDto;
+import com.example.eat_together.domain.order.dto.response.QOrderResponseDto;
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
