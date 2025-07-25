@@ -1,6 +1,5 @@
 package com.example.eat_together.domain.user.service;
 
-import com.example.eat_together.domain.user.dto.request.ReissueRequestDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
@@ -10,7 +9,6 @@ import com.example.eat_together.domain.user.dto.request.LoginRequestDto;
 import com.example.eat_together.domain.user.dto.request.SignupRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -128,63 +126,6 @@ public class AuthService {
         }
     }
 
-    // 토큰 재발급
-    @Transactional
-    public String reissue(ReissueRequestDto request) {
-
-        String refreshToken = request.getRefreshToken();
-
-        // 1. Refresh Token 자체의 유효성 검사 및 클레임 추출
-        Claims claims = jwtUtil.extractClaims(refreshToken);
-
-        Long userId = Long.parseLong(claims.getSubject());
-        String loginId = claims.get("loginId", String.class);
-        log.info("재발급 요청 Refresh Token Claims: userId={}, loginId={}", userId, loginId);
-
-        String hashKey = "refreshToken:" + userId;
-        String refreshTokenField = "refreshToken";
-
-        // 2. Redis에 저장된 Refresh Token과 일치하는지 확인
-        String storedRefreshToken = (String) stringRedisTemplate.opsForHash().get(hashKey, refreshTokenField);
-
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-            // Redis에 없거나 일치하지 않으면 유효하지 않은 토큰으로 간주
-            log.warn("유효하지 않거나 일치하지 않는 Refresh Token: userId={}, hashKey={}, stored={}, incoming={}",
-                    userId, hashKey, storedRefreshToken, refreshToken);
-            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        // 3. Refresh Token 자체의 유효성 (만료 여부) 다시 확인
-        // Redis에 저장된 토큰이 만료되었을 때 Redis에서 삭제하는 로직은 유효
-        if (!jwtUtil.isValidToken(refreshToken)) {
-            stringRedisTemplate.delete(hashKey);
-            log.warn("만료된 Refresh Token 발견: userId={}. Redis에서 삭제.", userId);
-            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
-        }
-
-        // 4. 사용자 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.INFO_MISMATCH));
-
-        // 5. 새로운 Access Token 및 Refresh Token 생성
-        TokenResponse newTokenResponse = jwtUtil.createToken(user.getUserId(), user.getLoginId(), user.getRole());
-
-        String accessToken = newTokenResponse.getAccessToken();
-
-        // 6. 새로운 Refresh Token으로 Redis 해시 테이블 업데이트
-        Map<String, String> newHashData = new HashMap<>();
-        newHashData.put(refreshTokenField, newTokenResponse.getRefreshToken());
-        newHashData.put("loginId", user.getLoginId());
-
-        stringRedisTemplate.opsForHash().putAll(hashKey, newHashData);
-
-        // 7. 해시 테이블 전체 만료 시간 재설정 (재발급 시마다 만료 시간 연장)
-        stringRedisTemplate.expire(hashKey, jwtUtil.getRefreshTokenTime(), TimeUnit.MILLISECONDS);
-
-        log.info("새로운 Access Token 및 Refresh Token 발급 완료 (userId: {}), Redis 업데이트: {}", user.getUserId(), hashKey);
-
-        return accessToken;
-    }
 }
 
 

@@ -11,7 +11,8 @@ public enum MessageEnum {
     SEARCH_INFO("정보 조회 성공!"),
     DELETE_USER("유저 삭제 완료"),
     LOGOUT("로그아웃 했습니다."),
-    TOKEN_REISSU("Access Token 재발급 완료");
+    TOKEN_REISSU("Access Token 재발급 완료"),
+    USER_RESTORATION("삭제된 유저 복구 완료");
 
     private final String message;
 

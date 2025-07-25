@@ -19,6 +19,7 @@ public enum ErrorCode {
     STORE_INVALID_TIME(HttpStatus.BAD_REQUEST, "오픈 시간이 종료 시간보다 빨라야 합니다."),
     ORDER_INVALID_PERIOD(HttpStatus.BAD_REQUEST, "조회 시작일은 종료일보다 이전이어야 합니다."),
     ORDER_PERIOD_MISMATCH(HttpStatus.BAD_REQUEST, "조회 시작일과 종료일은 함께 입력되어야 합니다."),
+    USER_NOT_DELETE(HttpStatus.BAD_REQUEST,"삭제되지 않은 유저입니다."),
 
     // 403 FORBIDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),

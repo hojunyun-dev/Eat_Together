@@ -1,6 +1,5 @@
 package com.example.eat_together.domain.user.controller;
 
-import com.example.eat_together.domain.user.dto.request.ReissueRequestDto;
 import com.example.eat_together.domain.user.enums.MessageEnum;
 import com.example.eat_together.global.dto.ApiResponse;
 import com.example.eat_together.domain.user.dto.request.LoginRequestDto;
@@ -14,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,16 +47,5 @@ public class AuthController {
         authService.logout(Long.valueOf(userDetails.getUsername()));
 
         return ResponseEntity.ok(ApiResponse.success(MessageEnum.LOGOUT.getMessage()));
-    }
-
-    // 토큰 재발급
-    @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<String>> reissue(
-            @Valid @RequestBody ReissueRequestDto request
-    ) {
-
-        String reissue = authService.reissue(request);
-
-        return ResponseEntity.ok(ApiResponse.of(reissue,MessageEnum.TOKEN_REISSU.getMessage()));
     }
 }
