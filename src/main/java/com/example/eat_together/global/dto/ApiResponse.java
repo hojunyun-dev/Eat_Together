@@ -39,11 +39,4 @@ public class ApiResponse<T> {
                 .message(message)
                 .build();
     }
-
-    public static <T> ApiResponse<T> success(RiderResponse response) {
-        return ApiResponse.<T>builder()
-                .message(response.getMessage())
-                .build();
-    }
-
 }
