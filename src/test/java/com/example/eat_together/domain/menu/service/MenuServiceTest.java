@@ -153,9 +153,6 @@ public class MenuServiceTest {
     void 메뉴_수정() {
 
         // given
-        // 기존 메뉴
-        Menu beforeMenu = menu;
-
         // 유저, 매장, 메뉴 설정
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
