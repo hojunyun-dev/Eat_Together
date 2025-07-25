@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -73,4 +74,13 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .fetchOne());
     }
 
+    @Override
+    public List<Order> findByUserIdAndStoreIdAndStatus(Long userId, Long storeId, OrderStatus status) {
+        return queryFactory.selectFrom(order)
+                .where(order.user.userId.eq(userId),
+                        order.store.storeId.eq(storeId),
+                        order.status.eq(status))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)  // JPA 비관적 락 설정
+                .fetch();
+    }
 }
