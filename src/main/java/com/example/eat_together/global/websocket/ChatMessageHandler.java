@@ -6,10 +6,7 @@ import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,6 +15,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.security.Principal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,8 +54,6 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         session.sendMessage(new TextMessage("누군가 연결을 접속했습니다."));
     }
 
-    //WebSocket 연결 종료 시 동작
-    // WebSocket 연결 종료 직전 동작
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         System.out.println("여기는 연결 종료됐다는 뜻이야");
@@ -76,6 +72,9 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         //payload를 mapper를 이용해 dto로 변환합니다
         ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
 
+        Long loginId = extractLoginId(session);
+        System.out.println("유저아이디: " + loginId);
+
         // 채팅방 현재 접속 중 멤버 확인
         Long roomId = extractRoomId(session);
         Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
@@ -85,7 +84,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         System.out.println("사용자 id: " + loginId);
 */
         //메세지 저장
-        chatService.saveMessage(chatMessageDto, roomId);
+        chatService.saveMessage(chatMessageDto, loginId, roomId);
 
         for(WebSocketSession webSocketSession : nowChattingRoomUsers) {
             if(webSocketSession.isOpen()) {
@@ -139,15 +138,18 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     //특정 그룹의 멤버 set 추출
     private Set<WebSocketSession> extractRoomMember(Long roomId){
       Set<WebSocketSession> nowChattingRoomUsers = nowChattingRooms.get(roomId);
+
         return nowChattingRoomUsers;
     }
 
-    // http 헤더의 토큰 추출
-    private String extractToken(WebSocketSession session){
-        List<String> httpHeader = session.getHandshakeHeaders().get("Authorization");
-        String token = httpHeader.get(0).substring(7);
+    private Long extractLoginId(WebSocketSession session){
+        Principal principal = session.getPrincipal();
+        if(principal == null)
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        Long loginId = Long.valueOf(principal.getName());
 
-        return token;
+        return loginId;
     }
+
 
 }

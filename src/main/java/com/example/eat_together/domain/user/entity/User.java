@@ -109,4 +109,11 @@ public class User extends BaseTimeEntity {
         }
         this.isDeleted = true;
     }
+
+    public void restoration() {
+        if (this.role == UserRole.ADMIN) {
+            throw new CustomException(ErrorCode.ADMIN_ACCOUNT_CANNOT_BE_DELETED);
+        }
+        this.isDeleted = false;
+    }
 }

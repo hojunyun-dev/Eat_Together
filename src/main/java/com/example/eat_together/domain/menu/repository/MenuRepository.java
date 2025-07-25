@@ -10,8 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-    Page<Menu> findAllByStore(Store store, Pageable pageable);
+    Page<Menu> findAllByStoreAndIsDeletedFalse(Store store, Pageable pageable);
 
     Menu findByMenuIdAndStore(Long menuId, Store store);
+
+    boolean existsByStoreAndNameAndIsDeletedFalse(Store store, String name);
 
 }

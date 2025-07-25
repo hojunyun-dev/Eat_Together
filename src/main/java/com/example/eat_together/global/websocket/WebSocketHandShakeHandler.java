@@ -1,33 +1,34 @@
-package com.example.eat_together.global.util;
+package com.example.eat_together.global.websocket;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
+import com.example.eat_together.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import static com.example.eat_together.global.util.JwtAuthenticationFilter.AUTHORIZATION_HEADER;
+import static com.example.eat_together.global.util.JwtAuthenticationFilter.BEARER_PREFIX;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class WebSocketHandShakeHandler extends DefaultHandshakeHandler {
 
     private final JwtUtil jwtUtil;
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String BEARER_PREFIX = "Bearer ";
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
+    protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         // 1. Request Header에서 JWT 토큰 추출
         String jwt = resolveToken(request);
 
@@ -60,18 +61,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 다음 필터로 요청과 응답 전달
-        filterChain.doFilter(request, response);
+        Principal principal = jwtUtil.getAuthentication(jwt);
+
+        return principal;
     }
 
-    /**
-     * HTTP 요청 헤더에서 JWT 토큰을 추출하는 메서드
-     * Authorization: Bearer <token> 형식에서 <token> 부분만 반환
-     * @param request HttpServletRequest 객체
-     * @return 추출된 JWT 토큰 문자열 (없거나 형식이 맞지 않으면 null 반환)
-     */
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+    private String resolveToken(ServerHttpRequest request) {
+        List<String> httpHeader = request.getHeaders().get(AUTHORIZATION_HEADER);
+        if(httpHeader == null)
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        String bearerToken = httpHeader.get(0);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(BEARER_PREFIX.length());
         }

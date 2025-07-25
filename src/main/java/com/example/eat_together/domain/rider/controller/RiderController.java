@@ -1,15 +1,22 @@
 package com.example.eat_together.domain.rider.controller;
 
 import com.example.eat_together.domain.rider.dto.request.RiderRequestDto;
+import com.example.eat_together.domain.rider.dto.request.RiderStatusRequestDto;
+import com.example.eat_together.domain.rider.dto.response.RiderResponseDto;
 import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.rider.service.RiderService;
 import com.example.eat_together.domain.rider.riderEnum.RiderResponse;
 import com.example.eat_together.global.dto.ApiResponse;
+import com.example.eat_together.global.exception.CustomException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.eat_together.domain.user.entity.User;//추가
+import org.springframework.security.core.annotation.AuthenticationPrincipal;//추가
 
+
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -21,42 +28,62 @@ public class RiderController {
 
     // 라이더 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<Rider>> createRider(@RequestBody RiderRequestDto requestDto) {
-        Rider rider = riderService.createRider(requestDto.getName(), requestDto.getPhone());
-        return ResponseEntity.ok(ApiResponse.of(rider, RiderResponse.RIDER_CREATED_SUCCESS.getMessage()));
+    public ResponseEntity<ApiResponse<RiderResponseDto>> createRider(
+            Principal principal,
+            @Valid @RequestBody RiderRequestDto requestDto
+    ) {
+        Rider rider = riderService.createRider(principal.getName(), requestDto.getPhone());
+        return ResponseEntity.ok(
+                ApiResponse.of(RiderResponseDto.of(rider), "라이더 등록 성공")
+        );
     }
-
 
 
     // 전체 라이더 목록 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Rider>>> getAllRiders() {
+    public ResponseEntity<ApiResponse<List<RiderResponseDto>>> getAllRiders() {
         List<Rider> riders = riderService.getAllRiders();
-        return ResponseEntity.ok(ApiResponse.of(riders, RiderResponse.RIDER_LIST_FOUND_SUCCESS.getMessage()));
+        List<RiderResponseDto> response = riders.stream()
+                .map(RiderResponseDto::of)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.of(response, RiderResponse.RIDER_LIST_FOUND_SUCCESS.getMessage()));
     }
+
 
     // 라이더 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Rider>> getRider(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<RiderResponseDto>> getRider(@PathVariable Long id) {
         Rider rider = riderService.getRiderById(id);
-        return ResponseEntity.ok(ApiResponse.of(rider, RiderResponse.RIDER_FOUND_SUCCESS.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(RiderResponseDto.of(rider), RiderResponse.RIDER_FOUND_SUCCESS.getMessage()));
     }
 
     //라이더 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRider(@PathVariable Long id) {
         riderService.deleteRider(id);
-        return ResponseEntity.ok(ApiResponse.of(null, "라이더가 성공적으로 삭제되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_DELETED_SUCCESS));
     }
 
-
-    // 라이더 정보 수정
+    //라이더 정보 수정
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Rider>> updateRider(
+    public ResponseEntity<ApiResponse<RiderResponseDto>> updateRider(
             @PathVariable Long id,
             @Valid @RequestBody RiderRequestDto requestDto
     ) {
-        Rider updated = riderService.updateRider(id, requestDto.getName(), requestDto.getPhone());
-        return ResponseEntity.ok(ApiResponse.of(updated, RiderResponse.RIDER_UPDATED_SUCCESS.getMessage()));
+        Rider updated = riderService.updateRider(id, requestDto.getPhone());
+        return ResponseEntity.ok(ApiResponse.of(RiderResponseDto.of(updated), RiderResponse.RIDER_UPDATED_SUCCESS.getMessage()));
     }
+
+
+    //라이더 상태 변경( 예: 배달 가능/ 배달 불가)
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<Void>> changeStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody RiderStatusRequestDto requestDto
+    ) {
+        riderService.changeStatus(id, requestDto.getStatus());
+        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_STATUS_UPDATED.getMessage()));
+
+    }
+
 }

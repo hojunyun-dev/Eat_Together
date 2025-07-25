@@ -3,9 +3,9 @@ package com.example.eat_together.domain.order.service;
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
 import com.example.eat_together.domain.cart.repository.CartRepository;
-import com.example.eat_together.domain.order.dto.OrderDetailResponseDto;
-import com.example.eat_together.domain.order.dto.OrderResponseDto;
-import com.example.eat_together.domain.order.dto.OrderStatusUpdateResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderDetailResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderStatusUpdateResponseDto;
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.entity.OrderItem;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
@@ -63,6 +63,16 @@ public class OrderService {
     // 주문 목록 조회
     public Page<OrderResponseDto> getOrders(Long userId, int page, int size, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
+
+        // 조회 시작일과 종료일 중에 하나만 입력했을 경우 예외 발생
+        if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+            throw new CustomException(ErrorCode.ORDER_PERIOD_MISMATCH);
+        }
+
+        // 조회 시작일이 종료일보다 늦은 경우 예외 발생
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_PERIOD);
+        }
         return orderRepository.findOrdersByUserId(userId, pageable, startDate, endDate, status);
     }
 
@@ -83,6 +93,11 @@ public class OrderService {
         }
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 가게 오너 Id와 요청한 사용자 Id가 다를 경우 예외 발생
+        if (!order.getStore().getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
 
         order.updateStatus(status);
 
