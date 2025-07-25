@@ -1,12 +1,14 @@
 package com.example.eat_together.domain.order.controller;
 
-import com.example.eat_together.domain.order.dto.OrderDetailResponseDto;
-import com.example.eat_together.domain.order.dto.OrderResponseDto;
-import com.example.eat_together.domain.order.dto.OrderStatusUpdateResponseDto;
+import com.example.eat_together.domain.order.dto.request.OrderStatusUpdateRequestDto;
+import com.example.eat_together.domain.order.dto.response.OrderDetailResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderStatusUpdateResponseDto;
 import com.example.eat_together.domain.order.orderEnum.OrderResponse;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.service.OrderService;
 import com.example.eat_together.global.dto.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -54,9 +56,9 @@ public class OrderController {
 
     // 주문 상태 변경(가게 권한)
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<ApiResponse<OrderStatusUpdateResponseDto>> updateOrderStatus(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId, @RequestBody OrderStatus status) {
+    public ResponseEntity<ApiResponse<OrderStatusUpdateResponseDto>> updateOrderStatus(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId, @Valid @RequestBody OrderStatusUpdateRequestDto requestDto) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.of(orderService.updateOrderStatus(Long.valueOf(userDetails.getUsername()), orderId, status), OrderResponse.ORDER_UPDATED.getMessage()));
+                .body(ApiResponse.of(orderService.updateOrderStatus(Long.valueOf(userDetails.getUsername()), orderId, requestDto.getStatus()), OrderResponse.ORDER_UPDATED.getMessage()));
     }
 
     // 주문 단건 삭제 (소프트 딜리트)

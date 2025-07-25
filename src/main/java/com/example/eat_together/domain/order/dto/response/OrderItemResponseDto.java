@@ -1,4 +1,4 @@
-package com.example.eat_together.domain.order.dto;
+package com.example.eat_together.domain.order.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
