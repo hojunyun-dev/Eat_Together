@@ -23,6 +23,7 @@ public enum ErrorCode {
     // 403 FORBIDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.FORBIDDEN,"Refresh Token이 만료되었습니다."),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
@@ -34,6 +35,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
     STORE_SEARCH_NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.NOT_FOUND,"Refresh Token을 찾을 수 없습니다."),
 
     // 409 CONFLICT
     DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다"),
