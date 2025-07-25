@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.menu.service;
 
 import com.example.eat_together.domain.menu.dto.request.MenuRequestDto;
+import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.fixture.MenuTestDtoFixture;
@@ -121,4 +122,29 @@ public class MenuServiceTest {
         assertThat(responseDto.getMenuList().get(0).getName()).isEqualTo("촉촉한 초코칩");
     }
 
+    @Test()
+    @DisplayName("매장_메뉴_단건_조회")
+    void 매장_메뉴_단건_조회() {
+
+        // given
+        // 매장 정보 설정
+        when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
+
+        // 메뉴 정보 설정
+        when(menuRepository.findByMenuIdAndStore(1L, store)).thenReturn(menu);
+
+        // when
+        // getMenuByStore메서드 호출
+        MenuResponseDto menuByStore = menuService.getMenuByStore(1L, 1L);
+
+        // then
+        // 조회한 메뉴의 값이 들어있는지 검증
+        assertThat(menuByStore).isNotNull();
+
+        // 조회한 메뉴의 이름이 저장된 이름이 맞는지 검증        현재 Fixture 클래스에 테스트용 이름으로 저장
+        assertThat(menuByStore.getName()).isEqualTo("테스트용 이름");
+
+        // 조회한 메뉴의 가격이 저장된 메뉴의 가격과 일치하는지 검증
+        assertThat(menuByStore.getPrice()).isEqualTo(menu.getPrice());
+    }
 }
