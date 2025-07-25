@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.rider.entity;
 
+import com.example.eat_together.domain.rider.riderEnum.RiderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,23 +28,29 @@ public class Rider {
     @Column(nullable = false, length = 20, unique = true)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean isAvailable = true; //라이더 배차 가능 여부
+    private RiderStatus status = RiderStatus.AVAILABLE; //라이더 배차 가능 여부
 
     @Column(nullable = false)
     private boolean isDeleted = false; //소프트딜리트
 
-    //라이더 생성
-    public static Rider of(User user, String phone) { //User user필드 추가
+    @Column(name = "is_available", nullable = false)
+    private boolean isAvailable = true; // 추가
+
+    public static Rider of(User user, String phone) {
         Rider rider = new Rider();
-        rider.user = user; //수정
+        rider.user = user;
+        rider.name = user.getName();
         rider.phone = phone;
+        rider.isAvailable = true; //
+        rider.status = RiderStatus.AVAILABLE;//추가
         return rider;
     }
 
     //라이더 정보 수정
-    public void update(String phone) { //update 메서드 간소화
-        this.phone = phone; //name 필드 제거
+    public void update(String phone) {
+        this.phone = phone;
     }
 
     //라이더 삭제
@@ -52,7 +59,7 @@ public class Rider {
     }
 
     //배차 가능 여부(상태 변경)
-    public void changeAvailability(boolean isAvailable) {
-        this.isAvailable = isAvailable;
+    public void changeStatus(RiderStatus status) {
+        this.status = status;
     }
 }

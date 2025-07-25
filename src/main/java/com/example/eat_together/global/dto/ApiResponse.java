@@ -1,5 +1,6 @@
 package com.example.eat_together.global.dto;
 
+import com.example.eat_together.domain.rider.riderEnum.RiderResponse;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.example.eat_together.global.util; // ⭐ 실제 패키지 경로에 맞게 수정해주세요.
+package com.example.eat_together.global.util;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
