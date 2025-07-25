@@ -32,6 +32,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Service:Menu")
 public class MenuServiceTest {
 
     @InjectMocks
@@ -176,5 +177,22 @@ public class MenuServiceTest {
 
     }
 
+    @Test()
+    @DisplayName("메뉴_삭제")
+    void 메뉴_삭제() {
+
+        // given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
+        when(menuRepository.findByMenuIdAndStore(1L, store)).thenReturn(menu);
+
+        // when
+        menuService.deleteMenu(1L, 1L, userDetails);
+
+        // then
+        assertThat(menu.isDeleted()).isTrue();
+
+
+    }
 
 }
