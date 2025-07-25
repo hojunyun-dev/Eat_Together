@@ -3,13 +3,14 @@ package com.example.eat_together.domain.store.fixture;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.user.entity.User;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalTime;
 
 public class StoreTestFixture {
 
     public static Store 매장_생성(User user) {
-        return Store.of(
+        Store store = Store.of(
                 user,
                 "테스트매장",
                 "테스트용 소개입니다.",
@@ -21,5 +22,9 @@ public class StoreTestFixture {
                 FoodCategory.KOREAN,
                 "010-1234-5678"
         );
+
+        ReflectionTestUtils.setField(store, "storeId", 1L);
+
+        return store;
     }
 }
