@@ -50,12 +50,16 @@ public class MenuServiceTest {
     User user;
     Store store;
     Menu menu;
+    UserDetails userDetails;
 
     @BeforeEach
     void set() {
         user = UserTestFixture.유저_생성(1L);
         store = StoreTestFixture.매장_생성(user);
         menu = MenuTestFixture.메뉴_생성(store);
+
+        userDetails = mock(UserDetails.class);
+        lenient().when(userDetails.getUsername()).thenReturn("1");
     }
 
     @Test()
@@ -63,14 +67,10 @@ public class MenuServiceTest {
     void 메뉴_등록_성공() {
 
         // given
-        // userDetails Mock 객체 생성
-        UserDetails userDetails = mock(UserDetails.class);
-
         // 요청 값 생성
         MenuRequestDto requestDto = MenuTestDtoFixture.requestDtoMock();
 
         // 유저 정보 세팅
-        when(userDetails.getUsername()).thenReturn("1");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // 매장 정보 세팅
@@ -147,4 +147,37 @@ public class MenuServiceTest {
         // 조회한 메뉴의 가격이 저장된 메뉴의 가격과 일치하는지 검증
         assertThat(menuByStore.getPrice()).isEqualTo(menu.getPrice());
     }
+
+    @Test()
+    @DisplayName("메뉴_수정")
+    void 메뉴_수정() {
+
+        // given
+        // 기존 메뉴
+        Menu beforeMenu = menu;
+
+        // 유저, 매장, 메뉴 설정
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
+        when(menuRepository.findByMenuIdAndStore(1L, store)).thenReturn(menu);
+
+        // when
+        MenuResponseDto responseDto =
+                menuService.updateMenu
+                        (
+                                1L,
+                                1L,
+                                MenuTestDtoFixture.updateRequestDtoMock(), // 수정 정보 Dto
+                                userDetails
+                        );
+
+        // then
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getName()).isEqualTo("수정된 테스트용 이름");
+        assertThat(responseDto.getPrice()).isEqualTo(4500.0);
+        assertThat(responseDto.getDescription()).isEqualTo("수정된 테스트용 메뉴 소개");
+
+    }
+
+
 }

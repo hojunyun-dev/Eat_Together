@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.menu.fixture;
 
 import com.example.eat_together.domain.menu.dto.request.MenuRequestDto;
+import com.example.eat_together.domain.menu.dto.request.MenuUpdateRequestDto;
 
 public class MenuTestDtoFixture {
 
@@ -11,6 +12,10 @@ public class MenuTestDtoFixture {
 
     public static MenuRequestDto requestDtoMock() {
         return new MenuRequestDto(MENU_IMAGE_URL, MENU_NAME, MENU_PRICE, MENU_DESCRIPTION);
+    }
+
+    public static MenuUpdateRequestDto updateRequestDtoMock() {
+        return new MenuUpdateRequestDto("수정된 " + MENU_IMAGE_URL, "수정된 " + MENU_NAME, 1000.0 + MENU_PRICE, "수정된 " + MENU_DESCRIPTION);
     }
 
 }
