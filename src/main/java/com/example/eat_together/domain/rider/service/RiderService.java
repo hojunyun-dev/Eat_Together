@@ -2,7 +2,10 @@ package com.example.eat_together.domain.rider.service;
 
 import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.rider.repository.RiderRepository;
+import com.example.eat_together.domain.rider.riderEnum.RiderStatus;
+import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +19,20 @@ import java.util.List;
 public class RiderService {
 
     private final RiderRepository riderRepository;
+    private final UserRepository userRepository;
 
     //라이더 등록
-    public Rider createRider(User user, String phone) { //유저 연관관계 추가
+    public Rider createRider(String userIdStr, String phone) {
+        Long userId = Long.parseLong(userIdStr);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         Rider rider = Rider.of(user, phone);
         return riderRepository.save(rider);
     }
+
+
 
     //전체 라이더 목록 조회
     public List<Rider> getAllRiders() {
@@ -46,13 +57,15 @@ public class RiderService {
     public void deleteRider(Long id) {
         Rider rider = riderRepository.findActiveRiderById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 라이더를 찾을 수 없습니다."));
+
         rider.delete();
     }
 
-    // Rider 배차 가능 여부
+    // 라이더 배차 가능 여부  --> ENUM기반으로 수정
     @Transactional
-    public void changeAvailability(Long id, boolean isAvailable) {
+    public void changeStatus(Long id, RiderStatus status) {
         Rider rider = getRiderById(id);
-        rider.changeAvailability(isAvailable);
+        rider.changeStatus(status);
     }
+
 }
