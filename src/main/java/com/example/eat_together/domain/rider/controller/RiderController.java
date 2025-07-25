@@ -61,10 +61,10 @@ public class RiderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRider(@PathVariable Long id) {
         riderService.deleteRider(id);
-        return ResponseEntity.ok(ApiResponse.of(null, "라이더가 삭제되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_DELETED_SUCCESS));
     }
 
-
+    //라이더 정보 수정
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RiderResponseDto>> updateRider(
             @PathVariable Long id,
@@ -82,7 +82,8 @@ public class RiderController {
             @Valid @RequestBody RiderStatusRequestDto requestDto
     ) {
         riderService.changeStatus(id, requestDto.getStatus());
-        return ResponseEntity.ok(ApiResponse.of(null, "라이더 상태가 변경되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_STATUS_UPDATED.getMessage()));
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.eat_together.global.dto;
 
+import com.example.eat_together.domain.rider.riderEnum.RiderResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -38,4 +39,11 @@ public class ApiResponse<T> {
                 .message(message)
                 .build();
     }
+
+    public static <T> ApiResponse<T> success(RiderResponse response) {
+        return ApiResponse.<T>builder()
+                .message(response.getMessage())
+                .build();
+    }
+
 }
