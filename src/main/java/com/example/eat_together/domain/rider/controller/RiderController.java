@@ -34,7 +34,7 @@ public class RiderController {
     ) {
         Rider rider = riderService.createRider(principal.getName(), requestDto.getPhone());
         return ResponseEntity.ok(
-                ApiResponse.of(RiderResponseDto.of(rider), "라이더 등록 성공")
+                ApiResponse.of(RiderResponseDto.of(rider), RiderResponse.RIDER_CREATED_SUCCESS.getMessage())
         );
     }
 
@@ -61,7 +61,7 @@ public class RiderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRider(@PathVariable Long id) {
         riderService.deleteRider(id);
-        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_DELETED_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_DELETED_SUCCESS.getMessage()));
     }
 
     //라이더 정보 수정
