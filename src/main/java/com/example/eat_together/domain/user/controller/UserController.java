@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.user.controller;
 
 import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
+import com.example.eat_together.domain.user.dto.request.ReissueRequestDto;
 import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.enums.MessageEnum;
@@ -92,6 +93,26 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(MessageEnum.DELETE_USER.getMessage()));
     }
 
+    // 토큰 재발급
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<String>> reissue(
+            @Valid @RequestBody ReissueRequestDto request
+    ) {
+
+        String reissue = userService.reissue(request);
+
+        return ResponseEntity.ok(ApiResponse.of(reissue,MessageEnum.TOKEN_REISSU.getMessage()));
+    }
+
+    // 어드민 전용 삭제된 유저 복구
+    @PostMapping("/{userId}/restoration")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<UserResponseDto>> restoration(@PathVariable Long userId){
+
+        UserResponseDto restoration = userService.restoration(userId);
+
+        return ResponseEntity.ok(ApiResponse.of(restoration,MessageEnum.USER_RESTORATION.getMessage()));
+    }
 
     /*
     *
