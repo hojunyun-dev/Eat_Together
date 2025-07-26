@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@Secured("USER")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/chats")
@@ -63,6 +62,4 @@ public class ChatController {
 
         return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.QUIT_CHAT_ROOM.getMessage()));
     }
-
-
 }

@@ -9,10 +9,10 @@ import java.util.List;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query("""
-        SELECT DISTINCT cr
-        FROM ChatRoom cr
-        JOIN FETCH cr.chatGroup cg
-        LEFT JOIN FETCH cr.chatRoomUserList cl
-    """)
+                SELECT DISTINCT cr
+                FROM ChatRoom cr
+                JOIN FETCH cr.chatGroup cg
+                LEFT JOIN FETCH cr.chatRoomUserList cl
+            """)
     List<ChatRoom> findAll();
 }

@@ -2,12 +2,8 @@ package com.example.eat_together.domain.chat.dto;
 
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.chatEnum.Status;
-import com.example.eat_together.domain.chat.entity.ChatRoom;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -20,7 +16,7 @@ public class ChatRoomDto {
     private Status status;
     private Long currentMemberCount;
 
-    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, Status status, Long currentMemberCount){
+    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, Status status, Long currentMemberCount) {
         ChatRoomDto chatRoomDto = new ChatRoomDto();
         chatRoomDto.roomId = roomId;
         chatRoomDto.title = title;

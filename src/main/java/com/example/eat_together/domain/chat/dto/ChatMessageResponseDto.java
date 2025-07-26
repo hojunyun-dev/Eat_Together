@@ -1,6 +1,5 @@
 package com.example.eat_together.domain.chat.dto;
 
-import com.example.eat_together.domain.chat.entity.ChatMessage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,11 +13,11 @@ public class ChatMessageResponseDto {
     private String message;
     private LocalDateTime updateAt;
 
-    public static ChatMessageResponseDto of(Long roomId, Long userId, String meessage, LocalDateTime updateAt){
+    public static ChatMessageResponseDto of(Long roomId, Long userId, String message, LocalDateTime updateAt) {
         ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto();
         chatMessageResponseDto.roomId = roomId;
         chatMessageResponseDto.userId = userId;
-        chatMessageResponseDto.message = meessage;
+        chatMessageResponseDto.message = message;
         chatMessageResponseDto.updateAt = updateAt;
 
         return chatMessageResponseDto;

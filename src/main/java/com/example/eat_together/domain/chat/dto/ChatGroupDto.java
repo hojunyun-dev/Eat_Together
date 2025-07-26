@@ -21,7 +21,7 @@ public class ChatGroupDto {
 
     private Status status;
 
-    public static ChatGroupDto of(ChatGroup chatGroup){
+    public static ChatGroupDto of(ChatGroup chatGroup) {
         ChatGroupDto chatGroupDto = new ChatGroupDto();
         chatGroupDto.title = chatGroup.getTitle();
         chatGroupDto.description = chatGroup.getDescription();

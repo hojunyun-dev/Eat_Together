@@ -4,7 +4,6 @@ import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.service.ChatService;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
-import com.example.eat_together.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -24,127 +23,110 @@ import java.util.regex.Pattern;
 @Component
 public class ChatMessageHandler extends TextWebSocketHandler {
 
+    static Map<Long, Set<WebSocketSession>> nowChattingRooms = new HashMap<>();
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
-
-    //Map<그룹: 멤버 set>
-    static Map<Long, Set<WebSocketSession>> nowChattingRooms = new HashMap<>();
 
     //WebSocket 연결 시 동작
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("여기는 연결됐다는 뜻이고");
 
         Long roomId = extractRoomId(session);
         Long userId = extractLoginId(session);
-        chatService.enterChatRoom(userId, roomId);
-        nowChattingRooms.putIfAbsent(roomId, new HashSet<>());
+        chatService.enterChatRoom(userId, roomId);  //멤버로 저장
+        nowChattingRooms.putIfAbsent(roomId, new HashSet<>());  //접속중인 클라이언트에 대한 웹소켓 삽입
 
-        Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
+        //특정 채팅방의 접속중 세션을 저장하는 set
+        Set<WebSocketSession> nowChattingRoomSession = extractCurrentSession(roomId);
 
-        if(session.isOpen()) {
-            nowChattingRoomUsers.add(session);
-            System.out.println("=======================");
-            for(WebSocketSession webSocketSession : nowChattingRoomUsers){System.out.println(webSocketSession);}
-            System.out.println("=======================");
-        }else{
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        //세션이 유효할 경우: 연결되어 있는 경우
+        if (session.isOpen()) {
+            //세션 삽입
+            nowChattingRoomSession.add(session);
+        } else {
+            //연결이 끊긴 세션은 삽입x
+            throw new CustomException(ErrorCode.INVALID_SESSION);
         }
-        session.sendMessage(new TextMessage("누군가 연결을 접속했습니다."));
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        System.out.println("여기는 연결 종료됐다는 뜻이야");
         Long roomId = extractRoomId(session);
-        System.out.println("채팅방 번호: " + roomId);
-        Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
-        nowChattingRoomUsers.remove(session);
+        Set<WebSocketSession> nowChattingRoomSession = extractCurrentSession(roomId);
+        //연결이 종료되면 접속 중인 세션을 저장하는 set에서 해당 세션 제거
+        nowChattingRoomSession.remove(session);
     }
 
-    //메세지 처리
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("메세지 핸들러~");
-        //메세지에서 payload를 가져옵니다
+        //메세지에서 payload get
         String payload = message.getPayload();
-        //payload를 mapper를 이용해 dto로 변환합니다
+        //mapper를 이용해 dto로 변환
         ChatMessageRequestDto chatMessageRequestDto = objectMapper.readValue(payload, ChatMessageRequestDto.class);
 
+        //사용자 정보
         Long loginId = extractLoginId(session);
-        System.out.println("유저아이디: " + loginId);
 
-        // 채팅방 현재 접속 중 멤버 확인
+        // 채팅방 현재 접속 중 멤버 확인: 메세지 보낼 대상
         Long roomId = extractRoomId(session);
-        Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
+        Set<WebSocketSession> nowChattingRoomSession = extractCurrentSession(roomId);
 
-        //메세지 저장
+        //db에 메세지 저장
         chatService.saveMessage(chatMessageRequestDto, loginId, roomId);
 
-        for(WebSocketSession webSocketSession : nowChattingRoomUsers) {
-            if(webSocketSession.isOpen()) {
+        for (WebSocketSession webSocketSession : nowChattingRoomSession) {
+            if (webSocketSession.isOpen()) {
                 try {
-                    System.out.println("유저: " + webSocketSession);
                     webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageRequestDto)));
-                }catch(IOException e){
-                    System.out.println("유효하지 않은 세션이라 메세지 못 보냈대용");
+                } catch (IOException e) {
+                    throw new CustomException(ErrorCode.INVALID_REQUEST);
                 }
             }
         }
     }
 
     //uri 추출
-    private URI extractUri(WebSocketSession session){
+    private URI extractUri(WebSocketSession session) {
         Optional<URI> optionalURI = Optional.ofNullable(session.getUri());
-        // 예외처리는 보다 구체적으로 이후 수정하겠습니다. 현재는 임의로 처리해뒀습니다.
-        if(optionalURI.isEmpty())
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        if (optionalURI.isEmpty())
+            throw new CustomException(ErrorCode.INVALID_URI);
         URI uri = optionalURI.get();
 
         return uri;
     }
 
-    // uri 스트링타입으로 추출
-    private String extractStringUri(WebSocketSession session){
+    //roomId 추출
+    private Long extractRoomId(WebSocketSession session) {
         URI uri = extractUri(session);
         String stringUri = uri.toString();
 
-        return stringUri;
-    }
-
-    //roomId 추출
-    private Long extractRoomId(WebSocketSession session){
-        String stringUri = extractStringUri(session);
-        System.out.println("1. StringUri = " + stringUri);
         Pattern pattern = Pattern.compile("(?<=/chats/send/)\\d+");
-        System.out.println("2. Pattern = " + pattern);
         Matcher matcher = pattern.matcher(stringUri);
-        System.out.println("3. Matcher = " + matcher);
+
         Long roomId = null;
-        if(matcher.find()) {
+        if (matcher.find()) {
             roomId = Long.valueOf(matcher.group());
             System.out.println(roomId);
             return roomId;
-        }else{
+        } else {
             throw new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM);
         }
     }
 
-    //특정 그룹의 멤버 set 추출
-    private Set<WebSocketSession> extractRoomMember(Long roomId){
-      Set<WebSocketSession> nowChattingRoomUsers = nowChattingRooms.get(roomId);
+    //특정 채팅방에 접속중인 웹소켓 세션 set 출력
+    private Set<WebSocketSession> extractCurrentSession(Long roomId) {
+        Set<WebSocketSession> nowChattingRoomSession = nowChattingRooms.get(roomId);
 
-        return nowChattingRoomUsers;
+        return nowChattingRoomSession;
     }
 
-    private Long extractLoginId(WebSocketSession session){
+    // 사용자 정보
+    private Long extractLoginId(WebSocketSession session) {
         Principal principal = session.getPrincipal();
-        if(principal == null)
+        if (principal == null)
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         Long loginId = Long.valueOf(principal.getName());
 
         return loginId;
     }
-
-
 }
