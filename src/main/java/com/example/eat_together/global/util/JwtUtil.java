@@ -25,7 +25,7 @@ public class JwtUtil {
     private static final String SECRET_KEY = "your-256-bit-secret-your-256-bit-secret"; // 256비트 이상 문자열
     private static final long ACCESS_TOKEN_TIME = 1000 * 60 * 30; // 30분
     private static final long REFRESH_TOKEN_TIME = 1000 * 60 * 60 * 24; // 1일
-    private static final String BEARER_PREFIX = "Bearer ";
+    public static final String BEARER_PREFIX = "Bearer ";
     private final Key key;
 
     public JwtUtil() {

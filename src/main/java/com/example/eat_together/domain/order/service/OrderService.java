@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,13 @@ public class OrderService {
         }
 
         Store store = cart.getCartItems().get(0).getMenu().getStore();
+
+        // 주문완료상태인 주문이 같은 가게에 있으면 중복 주문으로 간주 (JPA 비관적락 적용)
+        List<Order> orderWithOrdered =
+                orderRepository.findByUserIdAndStoreIdAndStatus(userId, store.getStoreId(), OrderStatus.ORDERED);
+        if (!orderWithOrdered.isEmpty()) {
+            throw new CustomException(ErrorCode.DUPLICATE_ORDER);
+        }
 
         Order order = Order.of(user, store);
 

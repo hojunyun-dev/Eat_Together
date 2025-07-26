@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup",
                                 "/auth/login",
+                                "/auth/reissue",
                                 "/users/redis",
                                 "/chats/**")
                         .permitAll()
