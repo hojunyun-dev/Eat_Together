@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         System.out.println("이건 등록된거란 뜻이지");
-        registry.addHandler(chatMessageHandler, "/chats/**")
+        registry.addHandler(chatMessageHandler, "/chats/send/**")
                 .setAllowedOrigins("*")
                 .setHandshakeHandler(new WebSocketHandShakeHandler(jwtUtil));
     }

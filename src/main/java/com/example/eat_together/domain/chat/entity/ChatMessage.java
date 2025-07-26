@@ -1,6 +1,6 @@
 package com.example.eat_together.domain.chat.entity;
 
-import com.example.eat_together.domain.chat.dto.ChatMessageDto;
+import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -28,18 +28,18 @@ public class ChatMessage extends BaseTimeEntity {
 
     private String message;
 
-    public static ChatMessage of(ChatMessageDto chatMessageDto,User user, ChatRoom chatRoom){
+    public static ChatMessage of(ChatMessageRequestDto chatMessageRequestDto, User user, ChatRoom chatRoom){
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.message = chatMessageDto.getMessage();
+        chatMessage.message = chatMessageRequestDto.getMessage();
         chatMessage.user = user;
         chatMessage.chatRoom = chatRoom;
 
         return chatMessage;
     }
     //test
-    public static ChatMessage of(ChatMessageDto chatMessageDto, ChatRoom chatRoom){
+    public static ChatMessage of(ChatMessageRequestDto chatMessageRequestDto, ChatRoom chatRoom){
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.message = chatMessageDto.getMessage();
+        chatMessage.message = chatMessageRequestDto.getMessage();
         chatMessage.chatRoom = chatRoom;
 
         return chatMessage;

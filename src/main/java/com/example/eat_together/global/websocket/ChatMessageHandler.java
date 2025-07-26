@@ -1,6 +1,6 @@
 package com.example.eat_together.global.websocket;
 
-import com.example.eat_together.domain.chat.dto.ChatMessageDto;
+import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.service.ChatService;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
@@ -26,7 +26,6 @@ public class ChatMessageHandler extends TextWebSocketHandler {
 
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
-    private final JwtUtil jwtUtil;
 
     //Map<그룹: 멤버 set>
     static Map<Long, Set<WebSocketSession>> nowChattingRooms = new HashMap<>();
@@ -34,11 +33,11 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     //WebSocket 연결 시 동작
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("session: " + session);
         System.out.println("여기는 연결됐다는 뜻이고");
 
         Long roomId = extractRoomId(session);
-        System.out.println("채팅방 번호: " + roomId);
+        Long userId = extractLoginId(session);
+        chatService.enterChatRoom(userId, roomId);
         nowChattingRooms.putIfAbsent(roomId, new HashSet<>());
 
         Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
@@ -70,7 +69,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         //메세지에서 payload를 가져옵니다
         String payload = message.getPayload();
         //payload를 mapper를 이용해 dto로 변환합니다
-        ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
+        ChatMessageRequestDto chatMessageRequestDto = objectMapper.readValue(payload, ChatMessageRequestDto.class);
 
         Long loginId = extractLoginId(session);
         System.out.println("유저아이디: " + loginId);
@@ -78,19 +77,15 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         // 채팅방 현재 접속 중 멤버 확인
         Long roomId = extractRoomId(session);
         Set<WebSocketSession> nowChattingRoomUsers = extractRoomMember(roomId);
-/*
-        //사용자 id
-        Long loginId = jwtUtil.getUserId(extractToken(session));
-        System.out.println("사용자 id: " + loginId);
-*/
+
         //메세지 저장
-        chatService.saveMessage(chatMessageDto, loginId, roomId);
+        chatService.saveMessage(chatMessageRequestDto, loginId, roomId);
 
         for(WebSocketSession webSocketSession : nowChattingRoomUsers) {
             if(webSocketSession.isOpen()) {
                 try {
                     System.out.println("유저: " + webSocketSession);
-                    webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageDto)));
+                    webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageRequestDto)));
                 }catch(IOException e){
                     System.out.println("유효하지 않은 세션이라 메세지 못 보냈대용");
                 }
@@ -121,7 +116,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     private Long extractRoomId(WebSocketSession session){
         String stringUri = extractStringUri(session);
         System.out.println("1. StringUri = " + stringUri);
-        Pattern pattern = Pattern.compile("(?<=/chats/)\\d+");
+        Pattern pattern = Pattern.compile("(?<=/chats/send/)\\d+");
         System.out.println("2. Pattern = " + pattern);
         Matcher matcher = pattern.matcher(stringUri);
         System.out.println("3. Matcher = " + matcher);
