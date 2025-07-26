@@ -12,6 +12,8 @@ import com.example.eat_together.domain.store.fixture.StoreTestFixture;
 import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.global.exception.CustomException;
+import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.global.fixture.UserTestFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -191,8 +194,102 @@ public class MenuServiceTest {
 
         // then
         assertThat(menu.isDeleted()).isTrue();
-
-
     }
 
+    @Test
+    @DisplayName("User 예외 발생")
+    void 유저를_찾을_수_없어_예외_발생() {
+
+        // given
+        MenuRequestDto requestDto = MenuTestDtoFixture.requestDtoMock();
+
+        // 유저 조회 시 null 반환
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // when
+        // Menu 생성 시 예외
+        CustomException menuCreateException = assertThrows(CustomException.class, () ->
+        {
+            menuService.createMenu(1L, requestDto, userDetails);
+        });
+
+        // Menu 수정 시 예외
+        CustomException menuUpdateException = assertThrows(CustomException.class, () ->
+        {
+            menuService.updateMenu(1L, 1L, MenuTestDtoFixture.updateRequestDtoMock(), userDetails);
+        });
+
+        // Menu 삭제 시 예외
+        CustomException menuDeleteException = assertThrows(CustomException.class, () ->
+        {
+            menuService.deleteMenu(1L, 1L, userDetails);
+        });
+
+        // then
+        // Menu 생성 시 예외가 발생하는지 검증
+        assertThat(menuCreateException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+        // Menu 수정 시 예외가 발생하는지 검증
+        assertThat(menuUpdateException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+        // Menu 삭제 시 예외가 발생하는지 검증
+        assertThat(menuDeleteException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+    }
+
+
+    @Test
+    @DisplayName("Store 예외 발생")
+    void 매장을_찾을_수_없어_예외_발생() {
+
+        // given
+        MenuRequestDto requestDto = MenuTestDtoFixture.requestDtoMock();
+
+        // 유저 조회
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        // 매장 조회 시 null 반환
+        when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.empty());
+
+        // when
+        // 메뉴 생성 시 예외
+        CustomException menuCreateException = assertThrows(CustomException.class, () ->
+        {
+            menuService.createMenu(1L, requestDto, userDetails);
+        });
+
+        // 메뉴 목록 조회 시 예외
+        CustomException findMenusException = assertThrows(CustomException.class, () ->
+        {
+            menuService.getMenusByStoreId(1L, PageRequest.of(0, 10));
+        });
+
+        // 메뉴 단건 조회 시 예외
+        CustomException findMenuException = assertThrows(CustomException.class, () ->
+        {
+            menuService.getMenuByStore(1L, 1L);
+        });
+
+        // 메뉴 수정 시 예외
+        CustomException menuUpdateException = assertThrows(CustomException.class, () ->
+        {
+            menuService.updateMenu(1L, 1L, MenuTestDtoFixture.updateRequestDtoMock(), userDetails);
+        });
+
+        // 메뉴 삭제 시 예외
+        CustomException menuDeleteException = assertThrows(CustomException.class, () ->
+        {
+            menuService.deleteMenu(1L, 1L, userDetails);
+        });
+
+
+        // then
+        // 메뉴 생성 시 예외가 발생하는지 검증
+        assertThat(menuCreateException.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
+        // 메뉴 목록 조회 시 예외가 발생하는지 검증
+        assertThat(findMenusException.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
+        // 메뉴 단건 조회 시 예외가 발생하는지 검증
+        assertThat(findMenuException.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
+        // 메뉴 수정 시 예외가 발생하는지 검증
+        assertThat(menuUpdateException.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
+        // 메뉴 삭제 시 예외가 발생하는지 검증
+        assertThat(menuDeleteException.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
+    }
 }
