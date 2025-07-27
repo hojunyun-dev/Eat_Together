@@ -41,25 +41,41 @@ public class CartService {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
-        // TODO: StoreId 검증 로직 추가
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseGet(() -> cartRepository.save(Cart.of(user)));
 
+        // 기존 장바구니와 다른 매장의 메뉴 담기 차단
+        if (!cart.getCartItems().isEmpty()) {
+            Long existingStoreId = cart.getCartItems().get(0).getMenu().getStore().getStoreId();
+            if (!existingStoreId.equals(storeId)) {
+                throw new CustomException(ErrorCode.CART_INVALID_STORE);
+            }
+        }
+
+        // 수량 누적 검사(ex. 누적 수량이 90일 때 +10 이상이 들어올 경우)
         cart.getCartItems().stream()
                 .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId()))
                 .findFirst()
                 .ifPresentOrElse(
-                        item -> item.updateQuantity(item.getQuantity() + requestDto.getQuantity()),
+                        item -> {
+                            int newTotal = item.getQuantity() + requestDto.getQuantity();
+                            if (newTotal > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
+                            item.updateQuantity(newTotal);
+                        },
                         () -> {
+                            if (requestDto.getQuantity() > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
                             CartItem newItem = CartItem.of(menu, requestDto.getQuantity());
                             cart.addCartItem(newItem);
                         }
                 );
     }
-
 
     // 2. 장바구니 전체 조회
     @Transactional
@@ -75,14 +91,12 @@ public class CartService {
             throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        Store store = cart.getCartItems().get(0).getMenu().getStore();  // 메뉴에서 store 꺼내기
+        Store store = cart.getCartItems().get(0).getMenu().getStore();
         Long storeId = store.getStoreId();
         double deliveryFee = store.getDeliveryFee();
 
         return new CartResponseDto(storeId, itemDtos, deliveryFee);
     }
-
-
 
     // 3. 장바구니 수량 수정
     @Transactional
