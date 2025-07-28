@@ -1,4 +1,4 @@
-package com.example.eat_together.domain.cart.dto;
+package com.example.eat_together.domain.cart.dto.response;
 
 import com.example.eat_together.domain.cart.entity.CartItem;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.cart.controller;
 
-import com.example.eat_together.domain.cart.dto.CartItemRequestDto;
-import com.example.eat_together.domain.cart.dto.CartResponseDto;
+import com.example.eat_together.domain.cart.dto.request.CartItemRequestDto;
+import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.service.CartService;
 import com.example.eat_together.global.dto.ApiResponse;
 import jakarta.validation.Valid;

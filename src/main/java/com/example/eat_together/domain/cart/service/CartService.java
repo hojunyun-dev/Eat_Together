@@ -1,8 +1,8 @@
 package com.example.eat_together.domain.cart.service;
 
-import com.example.eat_together.domain.cart.dto.CartItemRequestDto;
-import com.example.eat_together.domain.cart.dto.CartItemResponseDto;
-import com.example.eat_together.domain.cart.dto.CartResponseDto;
+import com.example.eat_together.domain.cart.dto.request.CartItemRequestDto;
+import com.example.eat_together.domain.cart.dto.response.CartItemResponseDto;
+import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
 import com.example.eat_together.domain.cart.repository.CartItemRepository;
