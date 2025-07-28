@@ -9,7 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-//수정예정_대략적인 틀입니다.
 @Entity
 @Getter
 @NoArgsConstructor
@@ -19,11 +18,11 @@ public class ChatRoomUser extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -34,7 +33,7 @@ public class ChatRoomUser extends BaseTimeEntity {
     @Column(name = "left_at")
     private LocalDateTime leftAt;
 
-    public static ChatRoomUser of(ChatRoom chatRoom, User user){
+    public static ChatRoomUser of(ChatRoom chatRoom, User user) {
         ChatRoomUser chatRoomUser = new ChatRoomUser();
         chatRoomUser.chatRoom = chatRoom;
         chatRoomUser.user = user;
