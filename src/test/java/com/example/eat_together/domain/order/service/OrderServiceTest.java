@@ -284,7 +284,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("주문 상태 변경 실패 - 권한이 없는 경우")
-    void updateOrderStatus_Fail_() {
+    void updateOrderStatus_Fail_WhenUserIsNotOwner() {
         // given
         Order order = Order.of(user, store);
         ReflectionTestUtils.setField(order, "id", 1L);
@@ -298,7 +298,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("주문 상태 변경 실패 - 가게 오너 Id와 요청한 사용자 Id가 다른 경우")
-    void updateOrderStatus_() {
+    void updateOrderStatus_Fail_WhenUserIsNotStoreOwner() {
         // given
         ReflectionTestUtils.setField(user, "role", UserRole.OWNER);
         Order order = Order.of(user, store);
