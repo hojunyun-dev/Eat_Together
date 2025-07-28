@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 장바구니에 담긴 단일 메뉴 항목을 나타내는 엔티티
+ */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -26,6 +29,13 @@ public class CartItem extends BaseTimeEntity {
 
     private int quantity;
 
+    /**
+     * CartItem 생성 정적 팩토리 메서드
+     *
+     * @param menu     메뉴 정보
+     * @param quantity 수량
+     * @return 생성된 CartItem 인스턴스
+     */
     public static CartItem of(Menu menu, int quantity) {
         CartItem cartItem = new CartItem();
         cartItem.menu = menu;
@@ -33,14 +43,29 @@ public class CartItem extends BaseTimeEntity {
         return cartItem;
     }
 
+    /**
+     * 장바구니 연관 관계 설정
+     *
+     * @param cart 장바구니 엔티티
+     */
     public void setCart(Cart cart) {
         this.cart = cart;
     }
 
+    /**
+     * 수량 변경
+     *
+     * @param quantity 변경할 수량
+     */
     public void updateQuantity(int quantity) {
         this.quantity = quantity;
     }
 
+    /**
+     * 총 가격 계산
+     *
+     * @return 메뉴 가격 * 수량 결과
+     */
     public double getTotalPrice() {
         return menu.getPrice() * quantity;
     }

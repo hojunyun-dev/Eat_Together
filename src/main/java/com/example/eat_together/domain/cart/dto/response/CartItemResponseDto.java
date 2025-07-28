@@ -1,22 +1,30 @@
-package com.example.eat_together.domain.cart.dto;
+package com.example.eat_together.domain.cart.dto.response;
 
 import com.example.eat_together.domain.cart.entity.CartItem;
 import lombok.Getter;
 
+/**
+ * 장바구니 항목 응답 정보를 담는 DTO
+ */
 @Getter
 public class CartItemResponseDto {
 
     private final Long itemId;
     private final String menuName;
     private final int quantity;
-    private final double price;          // 단일 메뉴 가격 (소수점 가능)
-    private final double totalPrice;     // 수량 * 가격
+    private final double price;
+    private final double totalPrice;
 
+    /**
+     * CartItem 엔티티 기반 응답 DTO 생성자
+     *
+     * @param cartItem 장바구니 항목 엔티티
+     */
     public CartItemResponseDto(CartItem cartItem) {
         this.itemId = cartItem.getId();
         this.menuName = cartItem.getMenu().getName();
         this.quantity = cartItem.getQuantity();
-        this.price = cartItem.getMenu().getPrice(); // double로 바로 저장
-        this.totalPrice = cartItem.getTotalPrice(); // 메뉴 엔티티에서 double로 계산된 totalPrice 반환
+        this.price = cartItem.getMenu().getPrice();
+        this.totalPrice = cartItem.getTotalPrice();
     }
 }
