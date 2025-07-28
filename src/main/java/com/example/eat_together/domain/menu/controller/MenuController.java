@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ public class MenuController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse> createMenu(@PathVariable Long storeId,
                                                   @Valid @RequestBody MenuRequestDto requestDto,
                                                   @AuthenticationPrincipal UserDetails userDetails) {
@@ -74,6 +76,7 @@ public class MenuController {
     }
 
     @PatchMapping("/{menuId}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<MenuResponseDto>> updateMenu(@PathVariable Long storeId,
                                                                    @PathVariable Long menuId,
                                                                    @RequestBody MenuUpdateRequestDto request,
@@ -91,6 +94,7 @@ public class MenuController {
     }
 
     @DeleteMapping("/{menuId}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse> deletedMenu(@PathVariable Long storeId,
                                                    @PathVariable Long menuId,
                                                    @AuthenticationPrincipal UserDetails userDetails) {
