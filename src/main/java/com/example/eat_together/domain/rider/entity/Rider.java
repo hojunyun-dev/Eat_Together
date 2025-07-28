@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import com.example.eat_together.domain.user.entity.User;//import문 추가
 
+import java.time.LocalTime;
+
 
 @Entity
 @Getter
@@ -36,21 +38,32 @@ public class Rider {
     private boolean isDeleted = false; //소프트딜리트
 
     @Column(name = "is_available", nullable = false)
-    private boolean isAvailable = true; // 추가
+    private boolean isAvailable = true;
 
-    public static Rider of(User user, String phone) {
+    @Column(name = "open_time") // 라이더 영업 시작시간 추가
+    private LocalTime openTime;
+
+    @Column(name = "close_time") // 라이더 영업 종료시간 추가
+    private LocalTime closeTime;
+
+
+    public static Rider of(User user, String phone, LocalTime openTime, LocalTime closeTime) {
         Rider rider = new Rider();
         rider.user = user;
         rider.name = user.getName();
         rider.phone = phone;
-        rider.isAvailable = true; //
-        rider.status = RiderStatus.AVAILABLE;//추가
+        rider.openTime = openTime; //필드 추가
+        rider.closeTime = closeTime; //추가
+        rider.isAvailable = true;
+        rider.status = RiderStatus.AVAILABLE;
         return rider;
     }
 
     //라이더 정보 수정
-    public void update(String phone) {
+    public void update(String phone, LocalTime openTime, LocalTime closeTime) {
         this.phone = phone;
+        this.openTime = openTime; //새로 반영
+        this.closeTime = closeTime;//
     }
 
     //라이더 삭제
