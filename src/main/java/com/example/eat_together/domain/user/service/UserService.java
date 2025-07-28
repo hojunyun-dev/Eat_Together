@@ -33,6 +33,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> stringRedisTemplate;
+
     // 비밀번호 변경
     @Transactional
     public void changePassword(Long userId, ChangePasswordRequestDto request) {
