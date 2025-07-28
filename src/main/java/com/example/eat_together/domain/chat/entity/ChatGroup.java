@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-//수정예정_대략적인 틀입니다.
 @Entity
 @Getter
 @NoArgsConstructor
@@ -21,7 +20,7 @@ public class ChatGroup extends BaseTimeEntity {
 
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "host_id")
     private User host;
 
@@ -37,13 +36,12 @@ public class ChatGroup extends BaseTimeEntity {
     @OneToOne(mappedBy = "chatGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private ChatRoom chatRoom;
 
-    //최대 인원
     private Integer maxMember;
 
-    //status: 임시채팅방이니 마감/종료/진행
     @Enumerated(EnumType.STRING)
     private Status status;
-    public static ChatGroup of(User user, ChatGroupDto chatGroupDto){
+
+    public static ChatGroup of(User user, ChatGroupDto chatGroupDto) {
         ChatGroup chatGroup = new ChatGroup();
         chatGroup.title = chatGroupDto.getTitle();
         chatGroup.host = user;
