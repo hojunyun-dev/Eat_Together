@@ -1,14 +1,18 @@
 package com.example.eat_together.domain.menu.dto.respones;
 
 import com.example.eat_together.domain.menu.entity.Menu;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PagingMenuResponseDto {
 
     List<MenuResponseDto> menuList;
@@ -18,16 +22,7 @@ public class PagingMenuResponseDto {
                 page
                         .getContent()
                         .stream()
-                        .map(Menu -> MenuResponseDto
-                                .builder()
-                                .menuId(Menu.getMenuId())
-                                .imageUrl(Menu.getImageUrl())
-                                .name(Menu.getName())
-                                .description(Menu.getDescription())
-                                .price(Menu.getPrice())
-                                .createdAt(Menu.getCreatedAt())
-                                .updatedAt(Menu.getUpdatedAt())
-                                .build())
+                        .map(MenuResponseDto::from)
                         .toList();
 
         return PagingMenuResponseDto
