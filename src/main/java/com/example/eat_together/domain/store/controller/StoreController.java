@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,7 @@ public class StoreController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<PagingStoreResponseDto>> getStoresByUserId(@AuthenticationPrincipal UserDetails user,
                                                                                  @PageableDefault Pageable pageable) {
 
@@ -105,6 +107,7 @@ public class StoreController {
     }
 
     @PatchMapping("/{storeId}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(@PathVariable Long storeId,
                                                                      @RequestBody StoreUpdateRequestDto request,
                                                                      @AuthenticationPrincipal UserDetails userDetails) {
@@ -121,6 +124,7 @@ public class StoreController {
     }
 
     @DeleteMapping("/{storeId}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse> deleteStore(@PathVariable Long storeId,
                                                    @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -136,6 +140,7 @@ public class StoreController {
     }
 
     @PatchMapping("/{storeId}/open")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse> openStore(@PathVariable Long storeId) {
 
         storeService.openStore(storeId);
@@ -150,6 +155,7 @@ public class StoreController {
     }
 
     @PatchMapping("/{storeId}/close")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse> closeStore(@PathVariable Long storeId) {
 
         storeService.closeStore(storeId);

@@ -8,6 +8,7 @@ import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.user.entity.UserRole;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
@@ -42,11 +43,12 @@ public class StoreService {
             throw new CustomException(ErrorCode.STORE_INVALID_TIME);
         }
 
-        Long userId = Long.valueOf(userDetails.getUsername());
 
         String foodCategory = requestDto.getCategory();
         FoodCategory category = Optional.ofNullable(FoodCategory.fromKr(foodCategory))
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        Long userId = Long.valueOf(userDetails.getUsername());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -55,6 +57,7 @@ public class StoreService {
             throw new CustomException(ErrorCode.STORE_NAME_DUPLICATED);
         }
 
+        user.setRole(UserRole.OWNER);
 
         Store store = Store.of(user,
                 requestDto.getName(),
