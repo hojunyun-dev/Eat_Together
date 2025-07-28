@@ -24,6 +24,7 @@ public class PagingMenuResponseDto {
                                 .imageUrl(Menu.getImageUrl())
                                 .name(Menu.getName())
                                 .description(Menu.getDescription())
+                                .price(Menu.getPrice())
                                 .createdAt(Menu.getCreatedAt())
                                 .updatedAt(Menu.getUpdatedAt())
                                 .build())
