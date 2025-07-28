@@ -25,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
@@ -51,6 +53,18 @@ public class MenuServiceTest {
     private UserRepository userRepository;
 
 
+    // 캐시 접근을 위한 Mock 객체들
+    @Mock
+    private RedisTemplate<String, PagingMenuResponseDto> pagingMenuRedisTemplate;
+    @Mock
+    private ValueOperations<String, PagingMenuResponseDto> pagingValueOperations;
+
+    // 캐시 접근을 위한 Mock 객체들
+    @Mock
+    private RedisTemplate<String, MenuResponseDto> menuRedisTemplate;
+    @Mock
+    private ValueOperations<String, MenuResponseDto> valueOperations;
+
     User user;
     Store store;
     Menu menu;
@@ -64,6 +78,10 @@ public class MenuServiceTest {
 
         userDetails = mock(UserDetails.class);
         lenient().when(userDetails.getUsername()).thenReturn("1");
+
+        // Redis 호출 시 반환할 Mock 객체 설정, 해당 객체가 쓰이지 않더라도 테스트 통과
+        lenient().when(pagingMenuRedisTemplate.opsForValue()).thenReturn(pagingValueOperations);
+        lenient().when(menuRedisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test()
@@ -104,6 +122,8 @@ public class MenuServiceTest {
         Menu menu4 = MenuTestFixture.리스트용_메뉴_생성(store, "딱딱한 초코칩");
         List<Menu> menuList = List.of(menu1, menu2, menu3, menu4);
 
+        // 캐시 관련 Mock 객체
+        when(pagingValueOperations.get("storeMenus:1")).thenReturn(null);
 
         // 매장 정보 세팅
         when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
@@ -131,6 +151,9 @@ public class MenuServiceTest {
     void 매장_메뉴_단건_조회() {
 
         // given
+        // 캐시 관련 Mock 객체
+        when(valueOperations.get("menu:1")).thenReturn(null);
+
         // 매장 정보 설정
         when(storeRepository.findByStoreIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(store));
 

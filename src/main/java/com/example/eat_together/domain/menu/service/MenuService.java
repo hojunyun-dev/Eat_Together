@@ -15,6 +15,7 @@ import com.example.eat_together.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +26,15 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, PagingMenuResponseDto> pagingMenuRedisTemplate;
+    private final RedisTemplate<String, MenuResponseDto> menuRedisTemplate;
 
-    public MenuService(MenuRepository menuRepository, StoreRepository storeRepository, UserRepository userRepository) {
+    public MenuService(MenuRepository menuRepository, StoreRepository storeRepository, UserRepository userRepository, RedisTemplate<String, PagingMenuResponseDto> pagingMenuRedisTemplate, RedisTemplate<String, MenuResponseDto> menuRedisTemplate) {
         this.menuRepository = menuRepository;
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
+        this.pagingMenuRedisTemplate = pagingMenuRedisTemplate;
+        this.menuRedisTemplate = menuRedisTemplate;
     }
 
     @Transactional
@@ -62,30 +67,50 @@ public class MenuService {
 
     @Transactional(readOnly = true)
     public PagingMenuResponseDto getMenusByStoreId(Long storeId, Pageable pageable) {
+        String cacheKey = "storeMenus:" + storeId;
+
+        PagingMenuResponseDto cache = pagingMenuRedisTemplate.opsForValue().get(cacheKey);
+
+        // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
+        if (cache != null) {
+            return cache;
+        }
 
         Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Pageable menusByStore = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
         Page<Menu> getMenusByStore = menuRepository.findAllByStoreAndIsDeletedFalse(store, menusByStore);
 
-        return PagingMenuResponseDto.formPage(getMenusByStore);
+        PagingMenuResponseDto responseDto = PagingMenuResponseDto.formPage(getMenusByStore);
+        pagingMenuRedisTemplate.opsForValue().set(cacheKey, responseDto);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
     public MenuResponseDto getMenuByStore(Long storeId, Long menuId) {
+        String cacheKey = "menu:" + menuId;
+
+        MenuResponseDto cache = menuRedisTemplate.opsForValue().get(cacheKey);
+
+        // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
+        if (cache != null) {
+            return cache;
+        }
 
         Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Menu menu = menuRepository.findByMenuIdAndStore(menuId, store);
-
         if (menu == null) {
             throw new CustomException(ErrorCode.MENU_NOT_FOUND);
         }
 
-        return MenuResponseDto.from(menu);
+        MenuResponseDto responseDto = MenuResponseDto.from(menu);
+        menuRedisTemplate.opsForValue().set(cacheKey, responseDto);
+
+        return responseDto;
     }
 
     @Transactional

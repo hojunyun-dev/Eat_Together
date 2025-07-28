@@ -1,21 +1,26 @@
 package com.example.eat_together.domain.menu.dto.respones;
 
 import com.example.eat_together.domain.menu.entity.Menu;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 public class MenuResponseDto {
 
-    private final Long menuId;
-    private final String imageUrl;
-    private final String name;
-    private final String description;
-    private final double price;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private Long menuId;
+    private String imageUrl;
+    private String name;
+    private String description;
+    private double price;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
 
     @Builder
     public MenuResponseDto(Long menuId,
