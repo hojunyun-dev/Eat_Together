@@ -26,13 +26,13 @@ public class RiderController {
 
     private final RiderService riderService;
 
-    // 라이더 등록
+    //라이더 등록 (기존: phone만 전달 → requestDto 전체 전달)
     @PostMapping
     public ResponseEntity<ApiResponse<RiderResponseDto>> createRider(
             Principal principal,
             @Valid @RequestBody RiderRequestDto requestDto
     ) {
-        Rider rider = riderService.createRider(principal.getName(), requestDto.getPhone());
+        Rider rider = riderService.createRider(principal.getName(), requestDto); //수정된 서비스에 맞춤
         return ResponseEntity.ok(
                 ApiResponse.of(RiderResponseDto.of(rider), RiderResponse.RIDER_CREATED_SUCCESS.getMessage())
         );
@@ -64,13 +64,13 @@ public class RiderController {
         return ResponseEntity.ok(ApiResponse.success(RiderResponse.RIDER_DELETED_SUCCESS.getMessage()));
     }
 
-    //라이더 정보 수정
+    //라이더 정보 수정 (기존: phone만 넘김 → 전체 DTO 전달)
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RiderResponseDto>> updateRider(
             @PathVariable Long id,
             @Valid @RequestBody RiderRequestDto requestDto
     ) {
-        Rider updated = riderService.updateRider(id, requestDto.getPhone());
+        Rider updated = riderService.updateRider(id, requestDto); //수정된 서비스레 맞춤
         return ResponseEntity.ok(ApiResponse.of(RiderResponseDto.of(updated), RiderResponse.RIDER_UPDATED_SUCCESS.getMessage()));
     }
 

@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
 
     // 400 BAD_REQUEST
@@ -22,8 +21,10 @@ public enum ErrorCode {
     INVALID_SESSION(HttpStatus.BAD_REQUEST, "유효하지 않은 세션입니다."),
     INVALID_URI(HttpStatus.BAD_REQUEST, "유효하지 않은 URI입니다."),
     USER_NOT_DELETE(HttpStatus.BAD_REQUEST,"삭제되지 않은 유저입니다."),
+    CART_EXCEEDS_MAX_QUANTITY(HttpStatus.BAD_REQUEST, "메뉴는 최대 99개까지 담을 수 있습니다."),
+    CART_INVALID_STORE(HttpStatus.BAD_REQUEST, "기존 장바구니와 다른 매장의 메뉴는 담을 수 없습니다."),
 
-    // 403 FORBIDEN
+    // 403 FORBIDDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
     REFRESH_TOKEN_EXPIRED(HttpStatus.FORBIDDEN,"Refresh Token이 만료되었습니다."),
@@ -47,7 +48,6 @@ public enum ErrorCode {
     STORE_NAME_DUPLICATED(HttpStatus.CONFLICT, "동일한 이름의 매장을 등록할 수 없습니다."),
     MENU_NAME_DUPLICATED(HttpStatus.CONFLICT, "매장에 동일한 이름의 메뉴를 등록할 수 없습니다."),
     DUPLICATE_ORDER(HttpStatus.CONFLICT, "이미 처리 중인 주문이 있습니다.");
-
 
     private final HttpStatus status;
     private final String message;

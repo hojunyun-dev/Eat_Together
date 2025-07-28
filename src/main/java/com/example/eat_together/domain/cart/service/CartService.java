@@ -1,8 +1,8 @@
 package com.example.eat_together.domain.cart.service;
 
-import com.example.eat_together.domain.cart.dto.CartItemRequestDto;
-import com.example.eat_together.domain.cart.dto.CartItemResponseDto;
-import com.example.eat_together.domain.cart.dto.CartResponseDto;
+import com.example.eat_together.domain.cart.dto.request.CartItemRequestDto;
+import com.example.eat_together.domain.cart.dto.response.CartItemResponseDto;
+import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
 import com.example.eat_together.domain.cart.repository.CartItemRepository;
@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 장바구니 도메인의 비즈니스 로직을 담당하는 서비스 클래스
+ */
 @Service
 @RequiredArgsConstructor
 public class CartService {
@@ -32,7 +35,13 @@ public class CartService {
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
 
-    // 1. 장바구니에 메뉴 추가
+    /**
+     * 장바구니에 메뉴 항목 추가
+     *
+     * @param userId     사용자 ID
+     * @param storeId    매장 ID
+     * @param requestDto 메뉴 및 수량 정보
+     */
     @Transactional
     public void addItem(Long userId, Long storeId, CartItemRequestDto requestDto) {
         User user = userRepository.findById(userId)
@@ -41,27 +50,46 @@ public class CartService {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
-        // TODO: StoreId 검증 로직 추가
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseGet(() -> cartRepository.save(Cart.of(user)));
 
+        if (!cart.getCartItems().isEmpty()) {
+            Long existingStoreId = cart.getCartItems().get(0).getMenu().getStore().getStoreId();
+            if (!existingStoreId.equals(storeId)) {
+                throw new CustomException(ErrorCode.CART_INVALID_STORE);
+            }
+        }
+
         cart.getCartItems().stream()
                 .filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId()))
                 .findFirst()
                 .ifPresentOrElse(
-                        item -> item.updateQuantity(item.getQuantity() + requestDto.getQuantity()),
+                        item -> {
+                            int newTotal = item.getQuantity() + requestDto.getQuantity();
+                            if (newTotal > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
+                            item.updateQuantity(newTotal);
+                        },
                         () -> {
+                            if (requestDto.getQuantity() > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
                             CartItem newItem = CartItem.of(menu, requestDto.getQuantity());
                             cart.addCartItem(newItem);
                         }
                 );
     }
 
-
-    // 2. 장바구니 전체 조회
+    /**
+     * 사용자 장바구니 전체 조회
+     *
+     * @param userId 사용자 ID
+     * @return 장바구니 응답 DTO
+     */
     @Transactional
     public CartResponseDto getCart(Long userId) {
         Cart cart = cartRepository.findByUserUserId(userId)
@@ -75,16 +103,19 @@ public class CartService {
             throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        Store store = cart.getCartItems().get(0).getMenu().getStore();  // 메뉴에서 store 꺼내기
+        Store store = cart.getCartItems().get(0).getMenu().getStore();
         Long storeId = store.getStoreId();
         double deliveryFee = store.getDeliveryFee();
 
         return new CartResponseDto(storeId, itemDtos, deliveryFee);
     }
 
-
-
-    // 3. 장바구니 수량 수정
+    /**
+     * 장바구니 항목 수량 수정
+     *
+     * @param itemId     항목 ID
+     * @param requestDto 수정할 수량 정보
+     */
     @Transactional
     public void updateQuantity(Long itemId, CartItemRequestDto requestDto) {
         CartItem cartItem = cartItemRepository.findById(itemId)
@@ -93,7 +124,11 @@ public class CartService {
         cartItem.updateQuantity(requestDto.getQuantity());
     }
 
-    // 4. 장바구니 항목 삭제
+    /**
+     * 장바구니 항목 삭제
+     *
+     * @param itemId 삭제할 항목 ID
+     */
     @Transactional
     public void deleteItem(Long itemId) {
         CartItem cartItem = cartItemRepository.findById(itemId)
