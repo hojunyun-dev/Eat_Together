@@ -1,7 +1,9 @@
 package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.dto.ChatGroupDto;
-import com.example.eat_together.domain.chat.dto.ChatMessageDto;
+import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
+import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
+import com.example.eat_together.domain.chat.dto.ChatRoomDto;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
 import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
@@ -30,43 +32,89 @@ public class ChatService {
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatMessageRepository chatMessageRepository;
 
-    public void createChatGroup(Long loginId,  ChatGroupDto chatGroupDto) {
-        Optional<User> optionalHost = userRepository.findById(loginId);
-        if(optionalHost.isEmpty())
+    //채팅방 생성
+    public void createChatGroup(Long userId, ChatGroupDto chatGroupDto) {
+        Optional<User> optionalHost = userRepository.findById(userId);
+        if (optionalHost.isEmpty())
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User host = optionalHost.get();
         ChatGroup chatGroup = ChatGroup.of(host, chatGroupDto);
         ChatRoom chatRoom = ChatRoom.of(chatGroup);
         chatGroupRepository.save(chatGroup);
         chatRoomRepository.save(chatRoom);
+        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host);
+        chatRoomUserRepository.save(chatRoomUser);
     }
 
     //그룹 멤버 저장
-    public void enterChatRoom(Long loginId, Long roomId) {
+    public void enterChatRoom(Long userId, Long roomId) {
         // 사용자 정보
-        User user = getUser(loginId);
+        User user = getUser(userId);
         // 채팅방 정보
         ChatRoom chatRoom = getChatRoom(roomId);
         // 사용자를 채팅방 참여 사용자로 저장
-        if(!isGroupMember(loginId, roomId)){
+        if (!isGroupMember(userId, roomId)) {
             ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, user);
             chatRoomUserRepository.save(chatRoomUser);
         }
     }
 
+    //채팅방 목록 조회
+    public List<ChatRoomDto> getChatRoomList() {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
+        List<ChatRoomDto> chatRoomDtoList = chatRoomList.stream()
+                .map(chatRoom -> ChatRoomDto
+                        .of(
+                                chatRoom.getId(),
+                                chatRoom.getChatGroup().getTitle(),
+                                chatRoom.getChatGroup().getDescription(),
+                                chatRoom.getChatGroup().getFoodType(),
+                                chatRoom.getChatGroup().getMaxMember(),
+                                chatRoom.getChatGroup().getStatus(),
+                                chatRoomUserRepository.countByChatRoomId(chatRoom.getId()))
+                ).toList();
+
+        return chatRoomDtoList;
+    }
+
+    // 메세지 내역 조회
+    public List<ChatMessageResponseDto> getChatMessageList(Long roomId) {
+        List<ChatMessage> chatMessageList = chatMessageRepository.findByChatRoomId(roomId);
+        List<ChatMessageResponseDto> chatMessageResponseDtoList = chatMessageList.stream()
+                .map(chatMessage -> ChatMessageResponseDto
+                        .of(chatMessage.getUser().getUserId(),
+                                chatMessage.getChatRoom().getId(),
+                                chatMessage.getMessage(),
+                                chatMessage.getUpdatedAt()
+                        )).toList();
+
+        return chatMessageResponseDtoList;
+    }
+
+    // 채팅방 퇴장: 멤버에서 삭제
+    public void quitChatRoom(Long userId, Long roomId) {
+
+        if (isGroupMember(userId, roomId)) {
+            chatRoomUserRepository.deleteByUserIdAndRoomId(userId, roomId);
+        }
+    }
+
+    /*
+    활용 메서드
+     */
     //메세지 저장
-    public void saveMessage(ChatMessageDto chatMessageDto, Long loginId, Long roomId){
-        User user = getUser(loginId);
+    public void saveMessage(ChatMessageRequestDto chatMessageRequestDto, Long userId, Long roomId) {
+        User user = getUser(userId);
         ChatRoom chatRoom = getChatRoom(roomId);
 
-        ChatMessage chatMessage = ChatMessage.of(chatMessageDto, user, chatRoom);
+        ChatMessage chatMessage = ChatMessage.of(chatMessageRequestDto, user, chatRoom);
         chatMessageRepository.save(chatMessage);
     }
 
     //사용자
-    private User getUser(Long userId){
+    private User getUser(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty())
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User user = optionalUser.get();
 
@@ -74,17 +122,17 @@ public class ChatService {
     }
 
     //채팅방
-    private ChatRoom getChatRoom(Long roomId){
+    private ChatRoom getChatRoom(Long roomId) {
         Optional<ChatRoom> optionalChatRoom = chatRoomRepository.findById(roomId);
-        if(optionalChatRoom.isEmpty())
+        if (optionalChatRoom.isEmpty())
             throw new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM);
         ChatRoom chatRoom = optionalChatRoom.get();
 
         return chatRoom;
     }
 
-    //리스트 반환
-    private List<ChatRoomUser> getList(Long roomId){
+    //멤버 리스트 반환
+    private List<ChatRoomUser> getList(Long roomId) {
         ChatRoom chatRoom = getChatRoom(roomId);
         List<ChatRoomUser> chatRoomUserList = chatRoom.getChatRoomUserList();
 
@@ -92,16 +140,17 @@ public class ChatService {
     }
 
     // 그룹 멤버 여부 확인
-    private boolean isGroupMember(Long userId, Long roomId){
+    private boolean isGroupMember(Long userId, Long roomId) {
         System.out.println("userId: " + userId);
         List<ChatRoomUser> chatRoomUserList = getList(roomId);
-        for(ChatRoomUser chatRoomUser : chatRoomUserList){
+        for (ChatRoomUser chatRoomUser : chatRoomUserList) {
             Long matchId = chatRoomUser.getUser().getUserId();
-            if(matchId.equals(userId)) {
+            if (matchId.equals(userId)) {
                 System.out.println("userId: " + matchId);
                 return true;
             }
         }
         return false;
     }
+
 }

@@ -19,9 +19,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        System.out.println("이건 등록된거란 뜻이지");
-        registry.addHandler(chatMessageHandler, "/chats/**")
+        //WebSocketHandler 등록
+        registry.addHandler(chatMessageHandler, "/chats/send/**")
                 .setAllowedOrigins("*")
-                .setHandshakeHandler(new WebSocketHandShakeHandler(jwtUtil));
+                .setHandshakeHandler(new WebSocketHandShakeHandler(jwtUtil));//토큰 가져오기 위해 HadnShakeHandler 등록
     }
 }

@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test_db;MODE=MySQL;
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate.ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+
+logging:
+  level:
+    io.lettuce.core.protocol.CommandEncoder: TRACE
+    io.lettuce.core.protocol.RedisStateMachine: TRACE
+    org.springframework.data.redis.core.RedisTemplate: DEBUG
