@@ -141,7 +141,7 @@ public class StoreService {
     @Transactional(readOnly = true)
     public PagingStoreResponseDto getStoresByCategory(FoodCategory category, Pageable pageable) {
 
-        String cacheKey = "storeList:" + category + "page:" + pageable.getPageNumber();
+        String cacheKey = "storeList:" + category + ":page:" + pageable.getPageNumber();
 
         PagingStoreResponseDto cache = pagingStoreRedisTemplate.opsForValue().get(cacheKey);
 
