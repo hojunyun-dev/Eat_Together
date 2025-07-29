@@ -1,27 +1,29 @@
 package com.example.eat_together.domain.store.dto.request;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 
 @Getter
+@NoArgsConstructor
 public class StoreUpdateRequestDto {
 
-    private final String name;
+    private String name;
 
-    private final String description;
+    private String description;
 
-    private final String address;
+    private String address;
 
-    private final LocalTime openTime;
+    private LocalTime openTime;
 
-    private final LocalTime closeTime;
+    private LocalTime closeTime;
 
-    private final Double deliveryFee;
+    private Double deliveryFee;
 
-    private final String category;
+    private String category;
 
-    private final String phoneNumber;
+    private String phoneNumber;
 
     public StoreUpdateRequestDto(String name,
                                  String description,
