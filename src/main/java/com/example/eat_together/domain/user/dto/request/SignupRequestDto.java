@@ -4,9 +4,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(force = true) // Jakcson이 역직렬화할 수 있도록 기본 생성자 강제 생성
+@AllArgsConstructor // 모든 필드를 인자로 받는 생성자 자동 생성
 public class SignupRequestDto {
 
     @NotBlank(message = "아이디는 필수입력값 입니다")
@@ -32,11 +36,11 @@ public class SignupRequestDto {
     @Size(min = 4, max = 20, message = "닉네임은 4-20자 사이로 입력해주세요")
     private final String nickname;
 
-    public SignupRequestDto(String loginId, String name, String password, String email, String nickname) {
-        this.loginId = loginId;
-        this.name = name;
-        this.password = password;
-        this.email = email;
-        this.nickname = nickname;
-    }
+//    public SignupRequestDto(String loginId, String name, String password, String email, String nickname) {
+//        this.loginId = loginId;
+//        this.name = name;
+//        this.password = password;
+//        this.email = email;
+//        this.nickname = nickname;
+//    }
 }
