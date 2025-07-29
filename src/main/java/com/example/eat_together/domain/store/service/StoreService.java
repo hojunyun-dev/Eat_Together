@@ -17,6 +17,7 @@ import com.example.eat_together.global.util.JwtUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -36,12 +37,16 @@ public class StoreService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final StringRedisTemplate stringRedisTemplate;
+    private final RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate;
+    private final RedisTemplate<String, StoreResponseDto> storeRedisTemplate;
 
-    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate) {
+    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate, RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate, RedisTemplate<String, StoreResponseDto> storeRedisTemplate) {
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.stringRedisTemplate = stringRedisTemplate;
+        this.pagingStoreRedisTemplate = pagingStoreRedisTemplate;
+        this.storeRedisTemplate = storeRedisTemplate;
     }
 
     @Transactional
@@ -136,11 +141,23 @@ public class StoreService {
     @Transactional(readOnly = true)
     public PagingStoreResponseDto getStoresByCategory(FoodCategory category, Pageable pageable) {
 
+        String cacheKey = "storeList:" + category + ":page:" + pageable.getPageNumber();
+
+        PagingStoreResponseDto cache = pagingStoreRedisTemplate.opsForValue().get(cacheKey);
+
+        // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
+        if (cache != null) {
+            return cache;
+        }
+
         Pageable storesByCategory = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
         Page<Store> getStoresByCategory = storeRepository.findByFoodCategoryAndIsDeletedFalse(category, storesByCategory);
 
-        return PagingStoreResponseDto.formPage(getStoresByCategory);
+        PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(getStoresByCategory);
+        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -161,10 +178,24 @@ public class StoreService {
     @Transactional(readOnly = true)
     public StoreResponseDto getStore(Long storeId) {
 
+        String cacheKey = "store:" + storeId;
+
+        StoreResponseDto cache = storeRedisTemplate.opsForValue().get(cacheKey);
+
+        // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
+        if (cache != null) {
+            return cache;
+        }
+
+
         Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
-        return StoreResponseDto.from(store);
+
+        StoreResponseDto responseDto = StoreResponseDto.from(store);
+        storeRedisTemplate.opsForValue().set(cacheKey, responseDto);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
