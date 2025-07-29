@@ -40,6 +40,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
     STORE_SEARCH_NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.NOT_FOUND,"Refresh Token을 찾을 수 없습니다."),
+    INVALID_SEARCH_CRITERIA(HttpStatus.NOT_FOUND,"검색된 결과가 없습니다."),
 
     // 409 CONFLICT
     DUPLICATE_USER(HttpStatus.CONFLICT, "중복된 유저가 있습니다"),
