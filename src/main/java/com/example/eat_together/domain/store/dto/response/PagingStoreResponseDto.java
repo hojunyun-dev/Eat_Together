@@ -1,14 +1,18 @@
 package com.example.eat_together.domain.store.dto.response;
 
 import com.example.eat_together.domain.store.entity.Store;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PagingStoreResponseDto {
 
     List<StoreResponseDto> storeList;
