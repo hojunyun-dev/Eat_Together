@@ -1,17 +1,19 @@
 package com.example.eat_together.domain.menu.dto.request;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class MenuUpdateRequestDto {
 
-    private final String imageUrl;
+    private String imageUrl;
 
-    private final String name;
+    private String name;
 
-    private final Double price;
+    private Double price;
 
-    private final String description;
+    private String description;
 
     public MenuUpdateRequestDto(String imageUrl, String name, double price, String description) {
         this.imageUrl = imageUrl;
