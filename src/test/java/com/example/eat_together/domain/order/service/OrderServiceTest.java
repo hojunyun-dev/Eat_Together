@@ -2,20 +2,25 @@ package com.example.eat_together.domain.order.service;
 
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
+import com.example.eat_together.domain.cart.fixture.CartTestFixture;
 import com.example.eat_together.domain.cart.repository.CartRepository;
 import com.example.eat_together.domain.menu.entity.Menu;
+import com.example.eat_together.domain.menu.fixture.MenuTestFixture;
 import com.example.eat_together.domain.order.dto.response.OrderDetailResponseDto;
 import com.example.eat_together.domain.order.dto.response.OrderResponseDto;
 import com.example.eat_together.domain.order.dto.response.OrderStatusUpdateResponseDto;
 import com.example.eat_together.domain.order.entity.Order;
+import com.example.eat_together.domain.order.fixture.OrderTestFixture;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.store.entity.Store;
+import com.example.eat_together.domain.store.fixture.StoreTestFixture;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.entity.UserRole;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
+import com.example.eat_together.global.fixture.UserTestFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,45 +67,22 @@ class OrderServiceTest {
     private Menu menu1;
     private Menu menu2;
     private Cart cart;
+    private CartItem cartItem1;
+    private CartItem cartItem2;
+    private Order order;
 
     @BeforeEach
     void setUp() {
-        user = User.createAuth(
-                "test1",
-                "테스트 이름",
-                "!1Password",
-                "test@example.com",
-                "테스트 닉네임");
-        ReflectionTestUtils.setField(user, "userId", 1L);
-
-        store = Store.of(user,
-                "테스트 가게 이름",
-                "테스트 가게 설명",
-                "테스트 가게 주소",
-                true,
-                LocalTime.of(9, 0),
-                LocalTime.of(21, 0),
-                3000.0, KOREAN,
-                "010-1234-1234");
-        ReflectionTestUtils.setField(store, "storeId", 1L);
-
-        menu1 = Menu.of(store,
-                "https://i.namu.wiki/i/abZPxKt_L98I8ttqw56pLHtGiR5pAV4YYmpR3Ny3_n0yvff5IDoKEQFof7EbzJUSZ_-uzR5S7tzTzGQ346Qixw.webp",
-                "테스트 메뉴 이름1",
-                5000.0,
-                "테스트 메뉴 설명1");
-        menu2 = Menu.of(store,
-                "https://i.namu.wiki/i/abZPxKt_L98I8ttqw56pLHtGiR5pAV4YYmpR3Ny3_n0yvff5IDoKEQFof7EbzJUSZ_-uzR5S7tzTzGQ346Qixw.webp",
-                "테스트 메뉴 이름2",
-                6000.0,
-                "테스트 메뉴 설명2");
-
-        CartItem cartItem1 = CartItem.of(menu1, 2);
-        CartItem cartItem2 = CartItem.of(menu2, 3);
-
-        cart = Cart.of(user);
+        user = UserTestFixture.유저_생성(1L);
+        store = StoreTestFixture.매장_생성(user);
+        menu1 = MenuTestFixture.리스트용_메뉴_생성(store, "테스트 메뉴1");
+        menu2 = MenuTestFixture.리스트용_메뉴_생성(store, "테스트 메뉴2");
+        cartItem1 = CartTestFixture.장바구니_아이템_생성(menu1, 2);
+        cartItem2 = CartTestFixture.장바구니_아이템_생성(menu2, 3);
+        cart = CartTestFixture.장바구니_생성(user);
         cart.addCartItem(cartItem1);
         cart.addCartItem(cartItem2);
+        order = OrderTestFixture.주문_생성(user, store);
     }
 
     @Test
@@ -147,9 +129,7 @@ class OrderServiceTest {
     void createOrder_Fail_WhenOrderIsDuplicated() {
         // given
         given(cartRepository.findByUserUserId(user.getUserId())).willReturn(Optional.of(cart));
-
-        List<Order> existingOrder = List.of(Order.of(user, store));
-        given(orderRepository.findByUserIdAndStoreIdAndStatus(user.getUserId(), store.getStoreId(), OrderStatus.ORDERED)).willReturn(existingOrder);
+        given(orderRepository.findByUserIdAndStoreIdAndStatus(user.getUserId(), store.getStoreId(), OrderStatus.ORDERED)).willReturn(List.of(order));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> orderService.createOrder(user.getUserId()));
@@ -160,8 +140,8 @@ class OrderServiceTest {
     @DisplayName("주문 내역 목록 조회 성공")
     void getOrders_Success() {
         // given
-        Order order1 = Order.of(user, store);
-        Order order2 = Order.of(user, store);
+        Order order1 = OrderTestFixture.리스트용_주문_생성(user, store);
+        Order order2 = OrderTestFixture.리스트용_주문_생성(user, store);
         ReflectionTestUtils.setField(order1, "id", 1L);
         ReflectionTestUtils.setField(order2, "id", 2L);
 
@@ -190,8 +170,8 @@ class OrderServiceTest {
     @DisplayName("주문 내역 목록 조회 성공 - 날짜 파라미터 없는 경우")
     void getOrders_Success_WhenNullStartDateAndEndDate() {
         // given
-        Order order1 = Order.of(user, store);
-        Order order2 = Order.of(user, store);
+        Order order1 = OrderTestFixture.리스트용_주문_생성(user, store);
+        Order order2 = OrderTestFixture.리스트용_주문_생성(user, store);
         ReflectionTestUtils.setField(order1, "id", 1L);
         ReflectionTestUtils.setField(order2, "id", 2L);
 
@@ -249,8 +229,6 @@ class OrderServiceTest {
     @DisplayName("주문 내역 단건 조회 성공")
     void getOrder_Success() {
         // given
-        Order order = Order.of(user, store);
-        ReflectionTestUtils.setField(order, "id", 1L);
         given(userRepository.findById(user.getUserId())).willReturn(Optional.of(user));
         given(orderRepository.findByIdAndUserId(order.getId(), user.getUserId())).willReturn(Optional.of(order));
 
@@ -268,8 +246,6 @@ class OrderServiceTest {
     void updateOrderStatus_Success() {
         // given
         ReflectionTestUtils.setField(user, "role", UserRole.OWNER); // 권한을 owner 로 설정
-        Order order = Order.of(user, store);
-        ReflectionTestUtils.setField(order, "id", 1L);
 
         given(userRepository.findById(user.getUserId())).willReturn(Optional.of(user));
         given(orderRepository.findById(order.getId())).willReturn(Optional.of(order));
@@ -286,9 +262,6 @@ class OrderServiceTest {
     @DisplayName("주문 상태 변경 실패 - 권한이 없는 경우")
     void updateOrderStatus_Fail_WhenUserIsNotOwner() {
         // given
-        Order order = Order.of(user, store);
-        ReflectionTestUtils.setField(order, "id", 1L);
-
         given(userRepository.findById(user.getUserId())).willReturn(Optional.of(user));
 
         // when & then
@@ -301,23 +274,21 @@ class OrderServiceTest {
     void updateOrderStatus_Fail_WhenUserIsNotStoreOwner() {
         // given
         ReflectionTestUtils.setField(user, "role", UserRole.OWNER);
-        Order order = Order.of(user, store);
         ReflectionTestUtils.setField(order, "id", 1L);
 
         User user2 = User.createAuth("owner2", "다른 오너", "!1Password", "owner2@example.com", "다른 오너닉네임");
         ReflectionTestUtils.setField(user2, "userId", 5L);
+        ReflectionTestUtils.setField(user2, "role", UserRole.OWNER);
 
         Store store2 = Store.of(user2, "다른 가게", "설명", "주소", true,
                 LocalTime.of(9, 0), LocalTime.of(21, 0), 3000.0, KOREAN, "010-9999-9999");
         ReflectionTestUtils.setField(store2, "storeId", 5L);
 
         Order order2 = Order.of(user2, store2);
-        ReflectionTestUtils.setField(user2, "role", UserRole.OWNER);
-        ReflectionTestUtils.setField(order2, "id", 1L);
+        ReflectionTestUtils.setField(order2, "id", 5L);
 
         given(userRepository.findById(user.getUserId())).willReturn(Optional.of(user));
         given(orderRepository.findById(order2.getId())).willReturn(Optional.of(order2));
-
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> orderService.updateOrderStatus(user.getUserId(), order2.getId(), OrderStatus.DELIVERING));
@@ -326,9 +297,8 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("주문 내역 단건 삭제(소프트 딜리트)")
-    void deleterOrder_Success() {
+    void deleteOrder_Success() {
         // given
-        Order order = Order.of(user, store);
         given(userRepository.findById(user.getUserId())).willReturn(Optional.of(user));
         given(orderRepository.findByIdAndUserId(order.getId(), user.getUserId())).willReturn(Optional.of(order));
 
