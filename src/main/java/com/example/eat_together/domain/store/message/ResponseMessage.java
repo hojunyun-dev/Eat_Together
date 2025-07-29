@@ -7,6 +7,7 @@ public enum ResponseMessage {
 
 
     STORE_CREATED_SUCCESS("매장 등록이 완료되었습니다."),
+    STORE_TOKEN_CREATED_SUCCESS("매장 등록 및 토큰 발급이 완료되었습니다."),
     STORE_LIST_FETCH_SUCCESS("매장 목록 조회가 완료되었습니다."),
     STORE_MY_LIST_FETCH_SUCCESS("내 매장 목록 조회가 완료되었습니다."),
     STORE_FETCH_SUCCESS("매장 조회가 완료되었습니다."),

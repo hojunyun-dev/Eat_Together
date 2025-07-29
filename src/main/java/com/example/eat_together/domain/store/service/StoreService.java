@@ -10,31 +10,42 @@ import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.domain.user.entity.UserRole;
 import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
+import com.example.eat_together.global.util.JwtUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    public StoreService(StoreRepository storeRepository, UserRepository userRepository) {
+    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate) {
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Transactional
-    public void createStore(UserDetails userDetails, StoreRequestDto requestDto) {
+    public TokenResponse createStore(UserDetails userDetails, StoreRequestDto requestDto) {
 
         LocalTime openTime = requestDto.getOpenTime();
         LocalTime closeTime = requestDto.getCloseTime();
@@ -57,7 +68,53 @@ public class StoreService {
             throw new CustomException(ErrorCode.STORE_NAME_DUPLICATED);
         }
 
-        user.setRole(UserRole.OWNER);
+        // 유저 권한이 점주가 아니라면 권한 부여 및 토큰 재발급
+        if (user.getRole() != UserRole.OWNER) {
+
+            user.setRole(UserRole.OWNER);
+
+            // 기존 토큰 Redis에서 삭제
+            String redisKey = "refreshToken:" + user.getUserId();
+            stringRedisTemplate.delete(redisKey);
+
+            // 권한 반영된 토큰 생성
+            TokenResponse newToken = jwtUtil.createToken
+                    (
+                            user.getUserId(),
+                            user.getLoginId(),
+                            user.getRole()
+                    );
+
+            // Refresh Token을 Redis에 저장
+            redisKey = "refreshToken:" + user.getUserId();
+            String refreshTokenField = "refreshToken";
+            String refreshToken = newToken.getRefreshToken();
+            long refreshTokenTime = jwtUtil.getRefreshTokenTime();
+
+            String fullRefreshTokenFromGeneratedToken = newToken.getRefreshToken();
+            String cleanRefreshTokenForRedis;
+
+            // 'Bearer ' 접두사가 있는지 확인하고, 있다면 제거 후 양쪽 공백도 제거
+            if (StringUtils.hasText(fullRefreshTokenFromGeneratedToken) && fullRefreshTokenFromGeneratedToken.startsWith(JwtUtil.BEARER_PREFIX)) {
+                cleanRefreshTokenForRedis = fullRefreshTokenFromGeneratedToken.substring(JwtUtil.BEARER_PREFIX.length()).trim();
+            } else {
+                // 혹시라도 접두사 없이 토큰이 생성되었다면 (일반적이지 않음) 그냥 trim()만 적용
+                cleanRefreshTokenForRedis = fullRefreshTokenFromGeneratedToken.trim();
+            }
+
+            // 새로운 Refresh Token 및 추가 정보 해시 테이블에 저장
+            Map<String, String> hashData = new HashMap<>();
+            hashData.put(refreshTokenField, cleanRefreshTokenForRedis);
+            hashData.put("loginId", user.getLoginId()); // 로그인 ID도 함께 저장하여 활용 가능
+
+            // 해시 테이블 형식으로 Redis에 저장
+            stringRedisTemplate.opsForHash().putAll(redisKey, hashData);
+
+            // 5.3 해시 테이블 전체에 만료 시간 설정
+            stringRedisTemplate.expire(redisKey, refreshTokenTime, TimeUnit.MILLISECONDS);
+
+            return newToken;
+        }
 
         Store store = Store.of(user,
                 requestDto.getName(),
@@ -72,6 +129,8 @@ public class StoreService {
         );
 
         storeRepository.save(store);
+
+        return null;
     }
 
     @Transactional(readOnly = true)

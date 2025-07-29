@@ -9,6 +9,7 @@ import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.message.ResponseMessage;
 import com.example.eat_together.domain.store.service.StoreService;
 import com.example.eat_together.global.dto.ApiResponse;
+import com.example.eat_together.global.dto.TokenResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,15 +34,29 @@ public class StoreController {
     public ResponseEntity<ApiResponse> createStore(@AuthenticationPrincipal UserDetails user,
                                                    @Valid @RequestBody StoreRequestDto requestDto) {
 
-        storeService.createStore(user, requestDto);
+        TokenResponse store = storeService.createStore(user, requestDto);
 
-        ApiResponse response = new ApiResponse<>
-                (
-                        ResponseMessage.STORE_CREATED_SUCCESS.getMessage(),
-                        null
-                );
+        // 기존 권한이 USER였던 경우 권한 부여와 함께 새 토큰 발급
+        if (store != null) {
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+            ApiResponse response = new ApiResponse<>
+                    (
+                            ResponseMessage.STORE_TOKEN_CREATED_SUCCESS.getMessage(),
+                            store
+                    );
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } else {
+
+            ApiResponse response = new ApiResponse<>
+                    (
+                            ResponseMessage.STORE_CREATED_SUCCESS.getMessage(),
+                            null
+                    );
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
     }
 
     @GetMapping
