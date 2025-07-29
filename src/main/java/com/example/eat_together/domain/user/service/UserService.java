@@ -1,14 +1,11 @@
 package com.example.eat_together.domain.user.service;
 
-import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
-import com.example.eat_together.domain.user.dto.request.ReissueRequestDto;
-import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
+import com.example.eat_together.domain.user.dto.request.*;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
-import com.example.eat_together.domain.user.dto.request.ChangePasswordRequestDto;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
