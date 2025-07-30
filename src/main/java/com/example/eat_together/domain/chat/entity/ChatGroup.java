@@ -1,13 +1,16 @@
 package com.example.eat_together.domain.chat.entity;
 
+import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
-import com.example.eat_together.domain.chat.chatEnum.Status;
 import com.example.eat_together.domain.chat.dto.ChatGroupDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -39,7 +42,7 @@ public class ChatGroup extends BaseTimeEntity {
     private Integer maxMember;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ChatGroupStatus chatGroupStatus;
 
     public static ChatGroup of(User user, ChatGroupDto chatGroupDto) {
         ChatGroup chatGroup = new ChatGroup();
@@ -49,8 +52,12 @@ public class ChatGroup extends BaseTimeEntity {
         chatGroup.foodType = chatGroupDto.getFoodType();
         chatGroup.isDeleted = false;
         chatGroup.maxMember = chatGroupDto.getMaxMember();
-        chatGroup.status = chatGroupDto.getStatus();
+        chatGroup.chatGroupStatus = ChatGroupStatus.OPEN;
 
         return chatGroup;
+    }
+
+    public void update(ChatGroupStatus chatGroupStatus) {
+        this.chatGroupStatus = chatGroupStatus;
     }
 }

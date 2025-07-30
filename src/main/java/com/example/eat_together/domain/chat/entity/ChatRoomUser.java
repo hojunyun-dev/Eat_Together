@@ -25,7 +25,12 @@ public class ChatRoomUser extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+/*
+    @Column(name = "is_left")
+    private boolean isLeft;
 
+
+ */
     @CreatedDate
     @Column(name = "joined_at", updatable = false)
     private LocalDateTime joinedAt;
@@ -35,6 +40,7 @@ public class ChatRoomUser extends BaseTimeEntity {
 
     public static ChatRoomUser of(ChatRoom chatRoom, User user) {
         ChatRoomUser chatRoomUser = new ChatRoomUser();
+      //  chatRoomUser.isLeft = false;
         chatRoomUser.chatRoom = chatRoom;
         chatRoomUser.user = user;
 

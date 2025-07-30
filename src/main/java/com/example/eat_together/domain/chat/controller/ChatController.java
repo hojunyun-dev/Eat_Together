@@ -23,7 +23,6 @@ public class ChatController {
     private final ChatService chatService;
 
     //채팅방 생성
-    @Transactional
     @PostMapping()
     public ResponseEntity<ApiResponse<Void>> createChatGroup(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ChatGroupDto chatGroupDto) {
         chatService.createChatGroup(Long.valueOf(userDetails.getUsername()), chatGroupDto);
@@ -32,16 +31,16 @@ public class ChatController {
     }
 
     //채팅방 참여 및 입장
-    @Transactional
     @PostMapping("/{roomId}/enter")
     public ResponseEntity<ApiResponse<Void>> enterChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
-        chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.PARTICIPATE_CHAT_ROOM.getMessage()));
+        boolean result = chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
+        if(result)
+            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.ENTER_CHAT_ROOM.getMessage()));
+        else
+            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.PARTICIPATE_CHAT_ROOM.getMessage()));
     }
 
     //채팅방 조회
-    @Transactional
     @GetMapping()
     public ResponseEntity<ApiResponse<List<ChatRoomDto>>> getChatRoomList() {
         List<ChatRoomDto> chatRoomDtoList = chatService.getChatRoomList();
@@ -50,7 +49,6 @@ public class ChatController {
     }
 
     //기존 채팅 내역 조회
-    @Transactional
     @GetMapping("/{roomId}")
     public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
         List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
@@ -59,7 +57,6 @@ public class ChatController {
     }
 
     //채팅방 퇴장
-    @Transactional
     @DeleteMapping("/{roomId}/quit")
     public ResponseEntity<ApiResponse<Void>> quitChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
         chatService.quitChatRoom(Long.valueOf(userDetails.getUsername()), roomId);

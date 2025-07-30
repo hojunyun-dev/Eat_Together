@@ -23,11 +23,13 @@ public enum ErrorCode {
     USER_NOT_DELETE(HttpStatus.BAD_REQUEST,"삭제되지 않은 유저입니다."),
     CART_EXCEEDS_MAX_QUANTITY(HttpStatus.BAD_REQUEST, "메뉴는 최대 99개까지 담을 수 있습니다."),
     CART_INVALID_STORE(HttpStatus.BAD_REQUEST, "기존 장바구니와 다른 매장의 메뉴는 담을 수 없습니다."),
+    ENTER_CHAT_ROOM_INAVAILABLE(HttpStatus.BAD_REQUEST, "제한 인원에 도달했거나 만료된 채팅방에 입장할 수 없습니다."),
 
     // 403 FORBIDDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
     REFRESH_TOKEN_EXPIRED(HttpStatus.FORBIDDEN,"Refresh Token이 만료되었습니다."),
+    NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "채팅방 멤버가 아닙니다."),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
