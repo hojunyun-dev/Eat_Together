@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
+import com.example.eat_together.domain.chat.chatEnum.MemberRole;
 import com.example.eat_together.domain.chat.dto.ChatGroupDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
@@ -45,7 +46,7 @@ public class ChatService {
         ChatGroup chatGroup = ChatGroup.of(host, chatGroupDto);
         //chatGroup 생성 시 chatRoom 함께 생성
         ChatRoom chatRoom = ChatRoom.of(chatGroup);
-        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host);
+        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host, MemberRole.HOST);
 
         chatGroupRepository.save(chatGroup);
         chatRoomRepository.save(chatRoom);
@@ -64,7 +65,7 @@ public class ChatService {
         Long maxMember = Long.valueOf(chatGroup.getMaxMember());
         System.out.println("maxMember: " + maxMember);
 
-        if(chatUtil.isGroupMember(userId, roomId))
+        if(chatUtil.getGroupMember(userId, roomId) != null)
             return true;
         else if (memberCount >= 1L && memberCount < maxMember){
             chatUtil.saveNewMember(chatRoom, userId);
@@ -121,9 +122,18 @@ public class ChatService {
     // 채팅방 퇴장: 멤버에서 삭제
     @Transactional
     public void quitChatRoom(Long userId, Long roomId) {
-
-        if (chatUtil.isGroupMember(userId, roomId)) {
+        if (chatUtil.getGroupMember(userId, roomId) != null)
             chatRoomUserRepository.deleteByUserIdAndRoomId(userId, roomId);
-        }
+    }
+
+    // 채팅방 삭제
+    @Transactional
+    public void deleteChatRoom(Long userId, Long roomId) {
+        MemberRole memberRole = chatUtil.getGroupMember(userId, roomId).getMemberRole();
+        ChatGroup chatGroup = chatUtil.getChatRoom(roomId).getChatGroup();
+        if (chatUtil.getGroupMember(userId, roomId) != null && memberRole == MemberRole.HOST) {
+            chatGroupRepository.delete(chatGroup);
+        } else
+            throw new CustomException(ErrorCode.NOT_HOST);
     }
 }
