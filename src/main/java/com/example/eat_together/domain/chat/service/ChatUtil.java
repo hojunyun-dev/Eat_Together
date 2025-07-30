@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.chat.service;
 
+import com.example.eat_together.domain.chat.chatEnum.MemberRole;
 import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
@@ -58,21 +59,21 @@ public class ChatUtil {
     }
 
     // 그룹 멤버 여부 확인
-    public boolean isGroupMember(Long userId, Long roomId) {
+    public ChatRoomUser getGroupMember(Long userId, Long roomId) {
         List<ChatRoomUser> chatRoomUserList = getList(roomId);
         for (ChatRoomUser chatRoomUser : chatRoomUserList) {
             Long matchId = chatRoomUser.getUser().getUserId();
             if (matchId.equals(userId)) {
-                return true;
+                return chatRoomUser;
             }
         }
-        return false;
+        return null;
     }
 
     //멤버 추가
     protected void saveNewMember(ChatRoom chatRoom, Long userId){
         User user = getUser(userId);
-        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, user);
+        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, user, MemberRole.MEMBER);
         chatRoomUserRepository.save(chatRoomUser);
     }
 

@@ -24,10 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -135,6 +137,26 @@ public class StoreService {
 
         storeRepository.save(store);
 
+        // 매장 생성 시 캐시 키 삭제를 위해 조회 시 사용하는 키 생성
+        String key = "storeList:" + store.getFoodCategory() + ":page:";
+        /**
+         * 페이지 넘버를 받아올 수 없으므로,
+         * Set 컬렉션을 통해 중복 제거
+         * pagingStoreRedisTemplate의 키중 "storeList:" + store.getFoodCategory() + ":page:" + * (모든 값)
+         * 즉 카테고리가 일치하는 매장의 모든 캐시 삭제를 위한 키 생성
+         */
+        Set<String> deleteKey = pagingStoreRedisTemplate.keys(key + "*");
+        pagingStoreRedisTemplate.delete(deleteKey);
+
+        // 단건 조회용 키도 삭제
+        /**
+         * 매장 생성 직후이므로 삭제할 필요가 없을 수 있으나,
+         * 다른 누군가 잘못된 요청을 보내 해당 캐시 키가 존재하게 된 경우를 상정하여 안전하게 삭제처리
+         * 코스트가 낮은 연산이므로 비용 부담도 적기 때문에, 데이터 안정성을 위해 삭제
+         */
+        String deleteKey2 = "store:" + store.getStoreId();
+        storeRedisTemplate.delete(deleteKey2);
+
         return null;
     }
 
@@ -155,7 +177,7 @@ public class StoreService {
         Page<Store> getStoresByCategory = storeRepository.findByFoodCategoryAndIsDeletedFalse(category, storesByCategory);
 
         PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(getStoresByCategory);
-        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
@@ -187,13 +209,11 @@ public class StoreService {
             return cache;
         }
 
-
         Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
-
         StoreResponseDto responseDto = StoreResponseDto.from(store);
-        storeRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        storeRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
@@ -277,6 +297,21 @@ public class StoreService {
             throw new CustomException(ErrorCode.UPDATE_CONTENT_REQUIRED);
         }
 
+        // 매장 수정 시 캐시 키 삭제를 위해 조회 시 사용하는 키 생성
+        String key = "storeList:" + store.getFoodCategory() + ":page:";
+        /**
+         * 페이지 넘버를 받아올 수 없으므로,
+         * Set 컬렉션을 통해 중복 제거
+         * pagingStoreRedisTemplate의 키중 "storeList:" + store.getFoodCategory() + ":page:" + * (모든 값)
+         * 즉 카테고리가 일치하는 매장의 모든 캐시 삭제를 위한 키 생성
+         */
+        Set<String> deleteKey = pagingStoreRedisTemplate.keys(key + "*");
+        pagingStoreRedisTemplate.delete(deleteKey);
+
+        // 단건 조회용 키도 삭제
+        String deleteKey2 = "store:" + store.getStoreId();
+        storeRedisTemplate.delete(deleteKey2);
+
         return StoreResponseDto.from(store);
     }
 
@@ -296,6 +331,21 @@ public class StoreService {
         }
 
         store.deleted();
+
+        // 매장 수정 시 캐시 키 삭제를 위해 조회 시 사용하는 키 생성
+        String key = "storeList:" + store.getFoodCategory() + ":page:";
+        /**
+         * 페이지 넘버를 받아올 수 없으므로,
+         * Set 컬렉션을 통해 중복 제거
+         * pagingStoreRedisTemplate의 키중 "storeList:" + store.getFoodCategory() + ":page:" + * (모든 값)
+         * 즉 카테고리가 일치하는 매장의 모든 캐시 삭제를 위한 키 생성
+         */
+        Set<String> deleteKey = pagingStoreRedisTemplate.keys(key + "*");
+        pagingStoreRedisTemplate.delete(deleteKey);
+
+        // 단건 조회용 키도 삭제
+        String deleteKey2 = "store:" + store.getStoreId();
+        storeRedisTemplate.delete(deleteKey2);
     }
 
     @Transactional
@@ -309,6 +359,10 @@ public class StoreService {
         }
 
         store.openStore();
+
+        // 가게 오픈 정보가 TTL 만료 전까지 반영되지 않을 수 있으므로, 단건 조회용 캐시 삭제
+        String deleteKey = "store:" + store.getStoreId();
+        storeRedisTemplate.delete(deleteKey);
     }
 
     @Transactional
@@ -322,5 +376,9 @@ public class StoreService {
         }
 
         store.closeStore();
+
+        // 가게 영업 종료 정보가 TTL 만료 전까지 반영되지 않을 수 있으므로, 단건 조회용 캐시 삭제
+        String deleteKey = "store:" + store.getStoreId();
+        storeRedisTemplate.delete(deleteKey);
     }
 }
