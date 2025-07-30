@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.user.controller;
 
 import com.example.eat_together.domain.user.dto.request.*;
+import com.example.eat_together.domain.user.dto.response.UserInfoResponseDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.enums.MessageEnum;
 import com.example.eat_together.global.dto.ApiResponse;
@@ -31,8 +32,8 @@ public class UserController {
     // 비밀번호 변경
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(@AuthenticationPrincipal UserDetails userDetails,
-                                                           @Valid @RequestBody ChangePasswordRequestDto request){
-        userService.changePassword(Long.valueOf(userDetails.getUsername()),request);
+                                                            @Valid @RequestBody ChangePasswordRequestDto request) {
+        userService.changePassword(Long.valueOf(userDetails.getUsername()), request);
 
         return ResponseEntity.ok(ApiResponse.success(MessageEnum.CHANGE_PASSWORD.getMessage()));
     }
@@ -40,27 +41,41 @@ public class UserController {
     // 개인 정보 수정 ( email, name, nickname )
     @PatchMapping("/update/profile")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
-                                                      @Valid @RequestBody UpdateUserInfoRequestDto request){
+                                                                      @Valid @RequestBody UpdateUserInfoRequestDto request) {
         log.info(String.valueOf(userDetails));
-        UserResponseDto userResponseDto = userService.updateProfile(Long.valueOf(userDetails.getUsername()),request);
+        UserResponseDto userResponseDto = userService.updateProfile(Long.valueOf(userDetails.getUsername()), request);
 
-        return ResponseEntity.ok(ApiResponse.of(userResponseDto,MessageEnum.UPDATE_INFO.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(userResponseDto, MessageEnum.UPDATE_INFO.getMessage()));
     }
 
     // 유저 단건 조회 ( ADMIN 전용 )
     @GetMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponseDto>> findUser(@PathVariable Long userId){
+    public ResponseEntity<ApiResponse<UserResponseDto>> findUser(@PathVariable Long userId) {
 
         UserResponseDto user = userService.findUser(userId);
 
-        return ResponseEntity.ok(ApiResponse.of(user,MessageEnum.SEARCH_INFO.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(user, MessageEnum.SEARCH_INFO.getMessage()));
+    }
+
+    /*
+     *
+     * 유저 조회 ( USER 용 )
+     * 닉네임 or 이름 검색 기능을 가짐
+     *
+     */
+    @PostMapping("/find/user")
+    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfo(@Valid @RequestBody UserSearchRequestDto request){
+
+        List<UserInfoResponseDto> userInfo = userService.findByUserInfo(request);
+
+        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
     }
 
     // 유저 전체 조회 ( ADMIN 전용 )
     @GetMapping("/find/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(Pageable pageable){
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(Pageable pageable) {
 
         // Pageable 적용 ( page, size 값 입력해야함 )
         // ex) page = 0, size = 3 첫번째 페이지에 3명 출력
@@ -73,17 +88,17 @@ public class UserController {
 
     // 마이 페이지 조회
     @GetMapping("/find/me")
-    public ResponseEntity<ApiResponse<UserResponseDto>> findMyProfile(@AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<ApiResponse<UserResponseDto>> findMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
 
         UserResponseDto myProfile = userService.findMyProfile(Long.valueOf(userDetails.getUsername()));
 
-        return ResponseEntity.ok(ApiResponse.of(myProfile,MessageEnum.SEARCH_INFO.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(myProfile, MessageEnum.SEARCH_INFO.getMessage()));
     }
 
     // 유저 삭제
     @PostMapping("/delete")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetails userDetails,
-                                        @Valid @RequestBody PasswordRequestDto request){
+                                                        @Valid @RequestBody PasswordRequestDto request) {
 
         userService.deleteUser(request, Long.valueOf(userDetails.getUsername()));
 
@@ -98,24 +113,24 @@ public class UserController {
 
         String reissue = userService.reissue(request);
 
-        return ResponseEntity.ok(ApiResponse.of(reissue,MessageEnum.TOKEN_REISSU.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(reissue, MessageEnum.TOKEN_REISSU.getMessage()));
     }
 
     // 어드민 전용 삭제된 유저 복구
     @PostMapping("/{userId}/restoration")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponseDto>> restoration(@PathVariable Long userId){
+    public ResponseEntity<ApiResponse<UserResponseDto>> restoration(@PathVariable Long userId) {
 
         UserResponseDto restoration = userService.restoration(userId);
 
-        return ResponseEntity.ok(ApiResponse.of(restoration,MessageEnum.USER_RESTORATION.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(restoration, MessageEnum.USER_RESTORATION.getMessage()));
     }
 
     /*
-    *
-    * 이 API는 단순 redis 연동 확인용 API 입니다.
-    *
-    * */
+     *
+     * 이 API는 단순 redis 연동 확인용 API 입니다.
+     *
+     * */
     @GetMapping("/redis")
     public ResponseEntity<String> checkRedisConnection() {
         try {
