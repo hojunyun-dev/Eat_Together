@@ -120,6 +120,20 @@ public class StoreService {
             // 5.3 해시 테이블 전체에 만료 시간 설정
             stringRedisTemplate.expire(redisKey, refreshTokenTime, TimeUnit.MILLISECONDS);
 
+            Store store = Store.of(user,
+                    requestDto.getName(),
+                    requestDto.getDescription(),
+                    requestDto.getAddress(),
+                    true,
+                    requestDto.getOpenTime(),
+                    requestDto.getCloseTime(),
+                    requestDto.getDeliveryFee(),
+                    category,
+                    requestDto.getPhoneNumber()
+            );
+
+            storeRepository.save(store);
+
             return newToken;
         }
 
