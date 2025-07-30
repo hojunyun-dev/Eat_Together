@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -176,7 +177,7 @@ public class StoreService {
         Page<Store> getStoresByCategory = storeRepository.findByFoodCategoryAndIsDeletedFalse(category, storesByCategory);
 
         PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(getStoresByCategory);
-        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
@@ -208,13 +209,11 @@ public class StoreService {
             return cache;
         }
 
-
         Store store = storeRepository.findByStoreIdAndIsDeletedFalse(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
-
         StoreResponseDto responseDto = StoreResponseDto.from(store);
-        storeRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        storeRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
