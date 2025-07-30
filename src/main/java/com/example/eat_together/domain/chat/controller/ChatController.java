@@ -33,9 +33,11 @@ public class ChatController {
     //채팅방 참여 및 입장
     @PostMapping("/{roomId}/enter")
     public ResponseEntity<ApiResponse<Void>> enterChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
-        chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.PARTICIPATE_CHAT_ROOM.getMessage()));
+        boolean result = chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
+        if(result)
+            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.ENTER_CHAT_ROOM.getMessage()));
+        else
+            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.PARTICIPATE_CHAT_ROOM.getMessage()));
     }
 
     //채팅방 조회
@@ -55,7 +57,6 @@ public class ChatController {
     }
 
     //채팅방 퇴장
-    @Transactional
     @DeleteMapping("/{roomId}/quit")
     public ResponseEntity<ApiResponse<Void>> quitChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
         chatService.quitChatRoom(Long.valueOf(userDetails.getUsername()), roomId);

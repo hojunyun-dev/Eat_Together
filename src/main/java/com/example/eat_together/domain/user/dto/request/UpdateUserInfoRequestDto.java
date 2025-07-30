@@ -2,8 +2,10 @@ package com.example.eat_together.domain.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(force = true) // Jakcson이 역직렬화할 수 있도록 기본 생성자 강제 생성
 public class UpdateUserInfoRequestDto {
 
     @Email(message = "올바른 이메일 형식이여야 합니다")

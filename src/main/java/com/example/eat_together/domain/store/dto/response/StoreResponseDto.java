@@ -2,26 +2,30 @@ package com.example.eat_together.domain.store.dto.response;
 
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
+@NoArgsConstructor
 public class StoreResponseDto {
 
-    private final Long storeId;
-    private final String name;
-    private final String description;
-    private final String address;
-    private final boolean isOpen;
-    private final LocalTime openTime;
-    private final LocalTime closeTime;
-    private final FoodCategory category;
-    private final String phoneNumber;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private Long storeId;
+    private String name;
+    private String description;
+    private String address;
+    @JsonProperty("open")
+    private boolean isOpen;
+    private LocalTime openTime;
+    private LocalTime closeTime;
+    private FoodCategory category;
+    private String phoneNumber;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Builder
     public StoreResponseDto(Long storeId,

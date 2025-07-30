@@ -2,6 +2,7 @@ package com.example.eat_together.global.websocket;
 
 import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.service.ChatService;
+import com.example.eat_together.domain.chat.service.ChatUtil;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,14 +27,18 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     static Map<Long, Set<WebSocketSession>> nowChattingRooms = new HashMap<>();
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
+    private final ChatUtil chatUtil;
 
     //WebSocket 연결 시 동작
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
-        Long roomId = extractRoomId(session);
         Long userId = extractLoginId(session);
-        chatService.enterChatRoom(userId, roomId);  //멤버로 저장
+        Long roomId = extractRoomId(session);
+
+        if(!chatUtil.isGroupMember(userId, roomId))
+            throw new CustomException(ErrorCode.NOT_CHAT_ROOM_MEMBER);
+        
         nowChattingRooms.putIfAbsent(roomId, new HashSet<>());  //접속중인 클라이언트에 대한 웹소켓 삽입
 
         //특정 채팅방의 접속중 세션을 저장하는 set
@@ -72,7 +77,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         Set<WebSocketSession> nowChattingRoomSession = extractCurrentSession(roomId);
 
         //db에 메세지 저장
-        chatService.saveMessage(chatMessageRequestDto, loginId, roomId);
+        chatUtil.saveMessage(chatMessageRequestDto, loginId, roomId);
 
         for (WebSocketSession webSocketSession : nowChattingRoomSession) {
             if (webSocketSession.isOpen()) {

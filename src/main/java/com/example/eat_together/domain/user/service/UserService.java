@@ -1,14 +1,12 @@
 package com.example.eat_together.domain.user.service;
 
-import com.example.eat_together.domain.user.dto.request.PasswordRequestDto;
-import com.example.eat_together.domain.user.dto.request.ReissueRequestDto;
-import com.example.eat_together.domain.user.dto.request.UpdateUserInfoRequestDto;
+import com.example.eat_together.domain.user.dto.request.*;
+import com.example.eat_together.domain.user.dto.response.UserInfoResponseDto;
 import com.example.eat_together.domain.user.dto.response.UserResponseDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
-import com.example.eat_together.domain.user.dto.request.ChangePasswordRequestDto;
 import com.example.eat_together.domain.user.repository.UserRepository;
 import com.example.eat_together.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -21,8 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,6 +30,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> stringRedisTemplate;
+
     // 비밀번호 변경
     @Transactional
     public void changePassword(Long userId, ChangePasswordRequestDto request) {
@@ -165,6 +163,7 @@ public class UserService {
         return accessToken;
     }
 
+    // 삭제된 유저 복구
     @Transactional
     public UserResponseDto restoration(Long userId) {
         User user = userRepository.findById(userId)
@@ -179,5 +178,34 @@ public class UserService {
         user.restoration();
 
         return new UserResponseDto(user);
+    }
+
+    // 유저 닉네임 or 이름 검색기능
+    public List<UserInfoResponseDto> findByUserInfo(UserSearchRequestDto request) {
+
+        List<User> foundUsers;
+
+        // 1. 이름으로 검색 (이름이 제공된 경우)
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            foundUsers = userRepository.findByName(request.getName());
+        }
+
+        // 2. 닉네임으로 검색 (이름이 없고 닉네임이 제공된 경우)
+        else if (request.getNickname() != null && !request.getNickname().isEmpty()) {
+            foundUsers = userRepository.findByNickname(request.getNickname());
+        }
+
+        // 3. 아무런 검색 조건도 없는 경우
+        else {
+            throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
+        }
+
+        // 검색 결과가 없는 경우
+        if (foundUsers.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // 조회한 User 리스트를 UserInfoResponseDto 리스트로 변환하여 리턴
+        return UserInfoResponseDto.todo(foundUsers);
     }
 }
