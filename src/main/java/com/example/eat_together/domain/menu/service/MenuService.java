@@ -65,6 +65,20 @@ public class MenuService {
         );
 
         menuRepository.save(menu);
+
+        // 매장 메뉴 목록 캐시 삭제 키 생성
+        String deleteKey = "storeMenus:" + store.getStoreId();
+        pagingMenuRedisTemplate.delete(deleteKey);
+
+        // 메뉴 단건 조회 캐시 삭제 키 생성
+        /**
+         * 메뉴 생성 직후이므로 삭제할 필요가 없을 수 있으나,
+         * 다른 누군가 잘못된 요청을 보내 해당 캐시 키가 존재하게 된 경우를 상정하여 안전하게 삭제처리
+         * 코스트가 낮은 연산이므로 비용 부담도 적기 때문에, 데이터 안정성을 위해 삭제
+         */
+        String deleteKey2 = "menu:" + menu.getMenuId();
+        pagingMenuRedisTemplate.delete(deleteKey2);
+
     }
 
     @Transactional(readOnly = true)
@@ -161,6 +175,14 @@ public class MenuService {
             throw new CustomException(ErrorCode.UPDATE_CONTENT_REQUIRED);
         }
 
+        // 매장 메뉴 목록 캐시 삭제 키 생성
+        String deleteKey = "storeMenus:" + store.getStoreId();
+        pagingMenuRedisTemplate.delete(deleteKey);
+
+        // 메뉴 단건 조회 캐시 삭제 키 생성
+        String deleteKey2 = "menu:" + menu.getMenuId();
+        pagingMenuRedisTemplate.delete(deleteKey2);
+
         return MenuResponseDto.from(menu);
     }
 
@@ -185,5 +207,13 @@ public class MenuService {
         }
 
         menu.deleted();
+
+        // 매장 메뉴 목록 캐시 삭제 키 생성
+        String deleteKey = "storeMenus:" + store.getStoreId();
+        pagingMenuRedisTemplate.delete(deleteKey);
+
+        // 메뉴 단건 조회 캐시 삭제 키 생성
+        String deleteKey2 = "menu:" + menu.getMenuId();
+        pagingMenuRedisTemplate.delete(deleteKey2);
     }
 }
