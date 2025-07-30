@@ -77,7 +77,7 @@ public class MenuService {
          * 코스트가 낮은 연산이므로 비용 부담도 적기 때문에, 데이터 안정성을 위해 삭제
          */
         String deleteKey2 = "menu:" + menu.getMenuId();
-        pagingMenuRedisTemplate.delete(deleteKey2);
+        menuRedisTemplate.delete(deleteKey2);
 
     }
 
@@ -181,7 +181,7 @@ public class MenuService {
 
         // 메뉴 단건 조회 캐시 삭제 키 생성
         String deleteKey2 = "menu:" + menu.getMenuId();
-        pagingMenuRedisTemplate.delete(deleteKey2);
+        menuRedisTemplate.delete(deleteKey2);
 
         return MenuResponseDto.from(menu);
     }
@@ -214,6 +214,6 @@ public class MenuService {
 
         // 메뉴 단건 조회 캐시 삭제 키 생성
         String deleteKey2 = "menu:" + menu.getMenuId();
-        pagingMenuRedisTemplate.delete(deleteKey2);
+        menuRedisTemplate.delete(deleteKey2);
     }
 }
