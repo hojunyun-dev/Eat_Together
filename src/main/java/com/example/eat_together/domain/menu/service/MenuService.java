@@ -20,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+
 @Service
 public class MenuService {
 
@@ -83,7 +85,7 @@ public class MenuService {
         Page<Menu> getMenusByStore = menuRepository.findAllByStoreAndIsDeletedFalse(store, menusByStore);
 
         PagingMenuResponseDto responseDto = PagingMenuResponseDto.formPage(getMenusByStore);
-        pagingMenuRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        pagingMenuRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
@@ -108,7 +110,7 @@ public class MenuService {
         }
 
         MenuResponseDto responseDto = MenuResponseDto.from(menu);
-        menuRedisTemplate.opsForValue().set(cacheKey, responseDto);
+        menuRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
 
         return responseDto;
     }
