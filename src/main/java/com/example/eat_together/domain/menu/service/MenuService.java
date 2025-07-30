@@ -76,7 +76,7 @@ public class MenuService {
          * 다른 누군가 잘못된 요청을 보내 해당 캐시 키가 존재하게 된 경우를 상정하여 안전하게 삭제처리
          * 코스트가 낮은 연산이므로 비용 부담도 적기 때문에, 데이터 안정성을 위해 삭제
          */
-        String deleteKey2 = "menu:" + menu.getMenuId();
+        String deleteKey2 = "store:" + storeId + "menu:" + menu.getMenuId();
         menuRedisTemplate.delete(deleteKey2);
 
     }
@@ -106,7 +106,7 @@ public class MenuService {
 
     @Transactional(readOnly = true)
     public MenuResponseDto getMenuByStore(Long storeId, Long menuId) {
-        String cacheKey = "menu:" + menuId;
+        String cacheKey = "store:" + storeId + ":menu:" + menuId;
 
         MenuResponseDto cache = menuRedisTemplate.opsForValue().get(cacheKey);
 
@@ -180,7 +180,7 @@ public class MenuService {
         pagingMenuRedisTemplate.delete(deleteKey);
 
         // 메뉴 단건 조회 캐시 삭제 키 생성
-        String deleteKey2 = "menu:" + menu.getMenuId();
+        String deleteKey2 = "store:" + storeId + "menu:" + menu.getMenuId();
         menuRedisTemplate.delete(deleteKey2);
 
         return MenuResponseDto.from(menu);
@@ -213,7 +213,7 @@ public class MenuService {
         pagingMenuRedisTemplate.delete(deleteKey);
 
         // 메뉴 단건 조회 캐시 삭제 키 생성
-        String deleteKey2 = "menu:" + menu.getMenuId();
+        String deleteKey2 = "store:" + storeId + "menu:" + menu.getMenuId();
         menuRedisTemplate.delete(deleteKey2);
     }
 }
