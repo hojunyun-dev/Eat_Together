@@ -1,5 +1,6 @@
 package com.example.eat_together.domain.chat.service;
 
+import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.dto.ChatGroupDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
@@ -18,6 +19,7 @@ import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,35 +33,59 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatUtil chatUtil;
 
     //채팅방 생성
+    @Transactional
     public void createChatGroup(Long userId, ChatGroupDto chatGroupDto) {
         Optional<User> optionalHost = userRepository.findById(userId);
         if (optionalHost.isEmpty())
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User host = optionalHost.get();
         ChatGroup chatGroup = ChatGroup.of(host, chatGroupDto);
+        //chatGroup 생성 시 chatRoom 함께 생성
         ChatRoom chatRoom = ChatRoom.of(chatGroup);
+        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host);
+
         chatGroupRepository.save(chatGroup);
         chatRoomRepository.save(chatRoom);
-        ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host);
         chatRoomUserRepository.save(chatRoomUser);
     }
 
     //그룹 멤버 저장
-    public void enterChatRoom(Long userId, Long roomId) {
-        // 사용자 정보
-        User user = getUser(userId);
-        // 채팅방 정보
-        ChatRoom chatRoom = getChatRoom(roomId);
-        // 사용자를 채팅방 참여 사용자로 저장
-        if (!isGroupMember(userId, roomId)) {
-            ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, user);
-            chatRoomUserRepository.save(chatRoomUser);
+    @Transactional
+    public boolean enterChatRoom(Long userId, Long roomId) {
+        ChatRoom chatRoom = chatUtil.getChatRoom(roomId);
+        ChatGroup chatGroup = chatRoom.getChatGroup();
+
+        //멤버 수 확인
+        Long memberCount = chatRoomUserRepository.countByChatRoomId(roomId);
+        System.out.println("memberCount: " + memberCount);
+        Long maxMember = Long.valueOf(chatGroup.getMaxMember());
+        System.out.println("maxMember: " + maxMember);
+
+        if(chatUtil.isGroupMember(userId, roomId))
+            return true;
+        else if (memberCount >= 1L && memberCount < maxMember){
+            chatUtil.saveNewMember(chatRoom, userId);
+            memberCount = chatRoomUserRepository.countByChatRoomId(roomId);
+            //호스트 외 한 명이라도 입장 시 상태 변경
+            if(memberCount.equals(2L)) {
+                chatGroup.update(ChatGroupStatus.IN_PROGRESS);
+            }
+            //제한 인원 도달하면 상태 변경
+            if(memberCount.equals(maxMember)) {
+                chatGroup.update(ChatGroupStatus.FULL);
+            }
+            return false;
+        }//제한 인원 도달
+        else {
+            throw new CustomException(ErrorCode.ENTER_CHAT_ROOM_INAVAILABLE);
         }
     }
 
     //채팅방 목록 조회
+    @Transactional
     public List<ChatRoomDto> getChatRoomList() {
         List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
         List<ChatRoomDto> chatRoomDtoList = chatRoomList.stream()
@@ -70,7 +96,7 @@ public class ChatService {
                                 chatRoom.getChatGroup().getDescription(),
                                 chatRoom.getChatGroup().getFoodType(),
                                 chatRoom.getChatGroup().getMaxMember(),
-                                chatRoom.getChatGroup().getStatus(),
+                                chatRoom.getChatGroup().getChatGroupStatus(),
                                 chatRoomUserRepository.countByChatRoomId(chatRoom.getId()))
                 ).toList();
 
@@ -78,6 +104,7 @@ public class ChatService {
     }
 
     // 메세지 내역 조회
+    @Transactional
     public List<ChatMessageResponseDto> getChatMessageList(Long roomId) {
         List<ChatMessage> chatMessageList = chatMessageRepository.findByChatRoomId(roomId);
         List<ChatMessageResponseDto> chatMessageResponseDtoList = chatMessageList.stream()
@@ -92,65 +119,11 @@ public class ChatService {
     }
 
     // 채팅방 퇴장: 멤버에서 삭제
+    @Transactional
     public void quitChatRoom(Long userId, Long roomId) {
 
-        if (isGroupMember(userId, roomId)) {
+        if (chatUtil.isGroupMember(userId, roomId)) {
             chatRoomUserRepository.deleteByUserIdAndRoomId(userId, roomId);
         }
     }
-
-    /*
-    활용 메서드
-     */
-    //메세지 저장
-    public void saveMessage(ChatMessageRequestDto chatMessageRequestDto, Long userId, Long roomId) {
-        User user = getUser(userId);
-        ChatRoom chatRoom = getChatRoom(roomId);
-
-        ChatMessage chatMessage = ChatMessage.of(chatMessageRequestDto, user, chatRoom);
-        chatMessageRepository.save(chatMessage);
-    }
-
-    //사용자
-    private User getUser(Long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty())
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        User user = optionalUser.get();
-
-        return user;
-    }
-
-    //채팅방
-    private ChatRoom getChatRoom(Long roomId) {
-        Optional<ChatRoom> optionalChatRoom = chatRoomRepository.findById(roomId);
-        if (optionalChatRoom.isEmpty())
-            throw new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM);
-        ChatRoom chatRoom = optionalChatRoom.get();
-
-        return chatRoom;
-    }
-
-    //멤버 리스트 반환
-    private List<ChatRoomUser> getList(Long roomId) {
-        ChatRoom chatRoom = getChatRoom(roomId);
-        List<ChatRoomUser> chatRoomUserList = chatRoom.getChatRoomUserList();
-
-        return chatRoomUserList;
-    }
-
-    // 그룹 멤버 여부 확인
-    private boolean isGroupMember(Long userId, Long roomId) {
-        System.out.println("userId: " + userId);
-        List<ChatRoomUser> chatRoomUserList = getList(roomId);
-        for (ChatRoomUser chatRoomUser : chatRoomUserList) {
-            Long matchId = chatRoomUser.getUser().getUserId();
-            if (matchId.equals(userId)) {
-                System.out.println("userId: " + matchId);
-                return true;
-            }
-        }
-        return false;
-    }
-
 }
