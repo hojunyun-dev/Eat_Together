@@ -63,4 +63,12 @@ public class ChatController {
 
         return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.QUIT_CHAT_ROOM.getMessage()));
     }
+
+    //채팅방 삭제
+    @DeleteMapping("/{roomId}/remove")
+    public ResponseEntity<ApiResponse<Void>> deleteChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
+        chatService.deleteChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
+
+        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.DELETE_CHAT_ROOM.getMessage()));
+    }
 }

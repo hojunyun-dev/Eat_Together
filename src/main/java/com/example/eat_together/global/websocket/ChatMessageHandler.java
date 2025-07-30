@@ -36,9 +36,9 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         Long userId = extractLoginId(session);
         Long roomId = extractRoomId(session);
 
-        if(!chatUtil.isGroupMember(userId, roomId))
+        if(chatUtil.getGroupMember(userId, roomId) == null)
             throw new CustomException(ErrorCode.NOT_CHAT_ROOM_MEMBER);
-        
+
         nowChattingRooms.putIfAbsent(roomId, new HashSet<>());  //접속중인 클라이언트에 대한 웹소켓 삽입
 
         //특정 채팅방의 접속중 세션을 저장하는 set
