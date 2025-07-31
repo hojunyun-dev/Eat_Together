@@ -4,7 +4,6 @@ import com.example.eat_together.domain.users.common.dto.request.ChangePasswordRe
 import com.example.eat_together.domain.users.common.dto.request.PasswordRequestDto;
 import com.example.eat_together.domain.users.common.dto.request.ReissueRequestDto;
 import com.example.eat_together.domain.users.common.dto.request.UpdateUserInfoRequestDto;
-import com.example.eat_together.domain.users.dto.request.*;
 import com.example.eat_together.domain.users.common.dto.response.UserResponseDto;
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.domain.users.common.enums.UserRole;
