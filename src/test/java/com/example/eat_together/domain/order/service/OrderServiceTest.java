@@ -154,10 +154,10 @@ class OrderServiceTest {
         List<OrderResponseDto> orderDtoList = List.of(dto1, dto2);
         Page<OrderResponseDto> page = new PageImpl<>(orderDtoList);
 
-        given(orderRepository.findOrdersByUserId(eq(user.getUserId()), any(Pageable.class), any(), any(), any())).willReturn(page);
+        given(orderRepository.findOrdersByUserId(eq(user.getUserId()), any(Pageable.class), any(), any(), any(), any(), any())).willReturn(page);
 
         // when
-        Page<OrderResponseDto> response = orderService.getOrders(user.getUserId(), 1, 10, startDate, endDate, OrderStatus.ORDERED);
+        Page<OrderResponseDto> response = orderService.getOrders(user.getUserId(), 1, 10, null, null, startDate, endDate, OrderStatus.ORDERED);
 
         // then
         assertNotNull(response);
@@ -181,10 +181,10 @@ class OrderServiceTest {
         List<OrderResponseDto> orderDtoList = List.of(dto1, dto2);
         Page<OrderResponseDto> page = new PageImpl<>(orderDtoList);
 
-        given(orderRepository.findOrdersByUserId(eq(user.getUserId()), any(Pageable.class), any(), any(), any())).willReturn(page);
+        given(orderRepository.findOrdersByUserId(eq(user.getUserId()), any(Pageable.class), any(), any(), any(), any(), any())).willReturn(page);
 
         // when
-        Page<OrderResponseDto> response = orderService.getOrders(user.getUserId(), 1, 10, null, null, OrderStatus.ORDERED);
+        Page<OrderResponseDto> response = orderService.getOrders(user.getUserId(), 1, 10, null, null, null, null, OrderStatus.ORDERED);
 
         // then
         assertNotNull(response);
@@ -201,7 +201,7 @@ class OrderServiceTest {
         LocalDate endDate1 = null;
 
         // when & then
-        CustomException exception1 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, startDate1, endDate1, OrderStatus.ORDERED));
+        CustomException exception1 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, null, null, startDate1, endDate1, OrderStatus.ORDERED));
         assertEquals(ErrorCode.ORDER_PERIOD_MISMATCH.getMessage(), exception1.getMessage());
 
         // given
@@ -209,7 +209,7 @@ class OrderServiceTest {
         LocalDate endDate2 = LocalDate.of(2025, 7, 31);
 
         // when & then
-        CustomException exception2 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, startDate2, endDate2, OrderStatus.ORDERED));
+        CustomException exception2 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, null, null, startDate2, endDate2, OrderStatus.ORDERED));
         assertEquals(ErrorCode.ORDER_PERIOD_MISMATCH.getMessage(), exception2.getMessage());
     }
 
@@ -221,7 +221,7 @@ class OrderServiceTest {
         LocalDate endDate1 = LocalDate.of(2025, 6, 1);
 
         // when & then
-        CustomException exception1 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, startDate1, endDate1, OrderStatus.ORDERED));
+        CustomException exception1 = assertThrows(CustomException.class, () -> orderService.getOrders(user.getUserId(), 1, 10, null, null, startDate1, endDate1, OrderStatus.ORDERED));
         assertEquals(ErrorCode.ORDER_INVALID_PERIOD.getMessage(), exception1.getMessage());
     }
 

@@ -72,7 +72,7 @@ public class OrderService {
 
     // 주문 목록 조회
     @Transactional(readOnly = true)
-    public Page<OrderResponseDto> getOrders(Long userId, int page, int size, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+    public Page<OrderResponseDto> getOrders(Long userId, int page, int size, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
         // 조회 시작일과 종료일 중에 하나만 입력했을 경우 예외 발생
@@ -84,7 +84,7 @@ public class OrderService {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.ORDER_INVALID_PERIOD);
         }
-        return orderRepository.findOrdersByUserId(userId, pageable, startDate, endDate, status);
+        return orderRepository.findOrdersByUserId(userId, pageable, menuName, storeName, startDate, endDate, status);
     }
 
     // 주문 목록 단일 조회

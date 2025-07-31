@@ -19,6 +19,8 @@ public class OrderDetailResponseDto {
 
     private final Long storeId;
 
+    private final String storeName;
+
     private final OrderStatus status;
 
     private final double deliveryFee;
@@ -35,6 +37,7 @@ public class OrderDetailResponseDto {
         this.id = order.getId();
         this.userId = order.getUser().getUserId();
         this.storeId = order.getStore().getStoreId();
+        this.storeName = order.getStore().getName();
         this.status = order.getStatus();
         this.deliveryFee = order.getStore().getDeliveryFee();
         this.totalPrice = order.getTotalPrice();
