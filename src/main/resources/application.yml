@@ -44,14 +44,27 @@ sns:
   kakao:
     url: https://kauth.kakao.com/oauth/authorize # 카카오 인증 요청 URL
     client:
-      id: ${KAKAO_OAUTH_CLIENT_ID} # 카카오 REST API 키
-      secret: ${KAKAO_OAUTH_CLIENT_SECRET} # 카카오 클라이언트 시크릿 (필요시)
+      id: ${KAKAO_OAUTH_CLIENT_ID}
+      secret: ${KAKAO_OAUTH_CLIENT_SECRET}
     callback:
-      url: http://localhost:8080/social/kakao/callback # 카카오 콜백 URI (애플리케이션의 리다이렉트 URI)
+      url: http://localhost:8080/social/kakao/callback
     token:
-      url: https://kauth.kakao.com/oauth/token # 카카오 토큰 요청 URL
-    user-info-url: https://kapi.kakao.com/v2/user/me # 카카오 사용자 정보 API URL
-    scope: profile_nickname,profile_image,account_email # 카카오에서 요청할 동의 항목 (콤마로 구분)
+      url: https://kauth.kakao.com/oauth/token
+    user-info-url: https://kapi.kakao.com/v2/user/me
+    scope: profile_nickname,profile_image,account_email
+
+  # 네이버 OAuth 속성 추가
+  naver:
+    url: https://nid.naver.com/oauth2.0/authorize # 네이버 인증 요청 URL
+    client:
+      id: ${NAVER_OAUTH_CLIENT_ID} # 네이버 개발자 센터에서 발급받은 클라이언트 ID
+      secret: ${NAVER_OAUTH_CLIENT_SECRET} # 네이버 개발자 센터에서 발급받은 클라이언트 시크릿
+    callback:
+      url: http://localhost:8080/social/naver/callback # 네이버 콜백 URI (애플리케이션의 리다이렉트 URI)
+    token:
+      url: https://nid.naver.com/oauth2.0/token # 네이버 토큰 요청 URL
+    user-info-url: https://openapi.naver.com/v1/nid/me # 네이버 사용자 정보 API URL
+    state: random_string # CSRF 방지를 위한 임의의 문자열 (필수)
 
 
 jwt:
