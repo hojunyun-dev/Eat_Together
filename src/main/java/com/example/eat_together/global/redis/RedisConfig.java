@@ -1,4 +1,4 @@
-package com.example.eat_together.global.config;
+package com.example.eat_together.global.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
