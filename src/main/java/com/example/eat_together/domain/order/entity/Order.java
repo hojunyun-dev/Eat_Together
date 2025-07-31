@@ -3,7 +3,7 @@ package com.example.eat_together.domain.order.entity;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.store.entity.Store;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

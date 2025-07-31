@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.store.entity;
 
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

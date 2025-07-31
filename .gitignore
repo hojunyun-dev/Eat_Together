@@ -28,6 +28,7 @@ out/
 !**/src/main/**/out/
 !**/src/resources/application.yml
 !**/src/test/**/out/
+.env
 
 
 ### NetBeans ###
@@ -39,4 +40,3 @@ out/
 
 ### VS Code ###
 .vscode/
-/src/main/resources/application.yml

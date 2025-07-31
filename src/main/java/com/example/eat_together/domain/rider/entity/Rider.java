@@ -4,7 +4,7 @@ import com.example.eat_together.domain.rider.riderEnum.RiderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.example.eat_together.domain.user.entity.User;//import문 추가
+import com.example.eat_together.domain.users.common.entity.User;//import문 추가
 
 import java.time.LocalTime;
 
