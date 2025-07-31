@@ -24,6 +24,7 @@ public class SocialService {
 
     private final GoogleOauth googleOauth;
     private final KakaoOauth kakaoOauth;
+    private final NaverOauth naverOauth;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RedisService redisService;
@@ -36,6 +37,10 @@ public class SocialService {
         } else if (socialLoginType == SocialLoginType.KAKAO) { // KAKAO 로그인 요청 처리
             String redirectUrl = kakaoOauth.getOauthRedirectURL();
             log.info("SocialService에서 Kakao Redirect URL 반환: {}", redirectUrl);
+            return redirectUrl;
+        } else if (socialLoginType == SocialLoginType.NAVER) { // NAVER 로그인 요청 처리
+            String redirectUrl = naverOauth.getOauthRedirectURL();
+            log.info("SocialService에서 Naver Redirect URL 반환: {}", redirectUrl);
             return redirectUrl;
         }
 
@@ -50,6 +55,8 @@ public class SocialService {
             userInfo = googleOauth.requestAccessTokenAndGetUserInfo(code);
         } else if (socialLoginType == SocialLoginType.KAKAO) { // KAKAO Access Token 및 사용자 정보 가져오기
             userInfo = kakaoOauth.requestAccessTokenAndGetUserInfo(code);
+        } else if (socialLoginType == SocialLoginType.NAVER) { // NAVER Access Token 및 사용자 정보 가져오기
+            userInfo = naverOauth.requestAccessTokenAndGetUserInfo(code);
         } else {
             log.error("지원하지 않는 소셜 로그인 타입입니다 ::: {}", socialLoginType);
             throw new IllegalArgumentException("지원하지 않는 소셜 로그인 타입입니다: " + socialLoginType);
@@ -84,28 +91,44 @@ public class SocialService {
             Optional<User> optionalUser = userRepository.findByEmail(email);
 
             if (optionalUser.isEmpty()) {
-                // 사용자 없으면 회원가입
-                user = User.socialLogin() // User.socialLogin() 빌더 사용
+                // 새로운 사용자 회원가입
+                user = User.socialLogin()
                         .email(email)
-                        .nickname(nickname) // 임시 닉네임 설정
+                        .nickname(nickname)
                         .name(name)
-                        .socialLoginType(socialLoginType)
-                        // profilePictureUrl 필드가 없으므로 빌더에서 설정하지 않음
+                        .socialLoginType(socialLoginType) // 현재 소셜 로그인 타입으로 설정
                         .build();
 
                 userRepository.save(user);
-                log.info("새로운 {} 사용자 가입: {}", socialLoginType, email);
+                log.info("새로운 {} 사용자 가입: 이메일={}, 닉네임={}, 이름={}, 저장된 소셜타입={}",
+                        socialLoginType, email, nickname, name, user.getSocialLoginType()); // 저장 후 확인
             } else {
-                // 사용자 있으면 로그인
+                // 기존 사용자 처리
                 user = optionalUser.get();
-                log.info("기존 {} 사용자 로그인: {}", socialLoginType, email);
-                // 소셜 로그인 사용자의 프로필 정보 업데이트 (이름, 닉네임 변경 시)
-                // User 엔티티의 updateSocialProfile 메서드가 name, nickname만 받도록 수정 필요
-                user.updateSocialProfile(name, nickname); // <-- picture 인자 제거
-                userRepository.save(user);
+                log.info("기존 사용자 발견: 이메일={}, DB에서 조회된 소셜타입={}, 현재 시도 소셜타입={}",
+                        email, user.getSocialLoginType(), socialLoginType);
+
+                // 일반 계정으로 가입된 이메일로 소셜 로그인 시도하는 경우
+                if (user.getSocialLoginType() == null) {
+                    log.error("이메일 '{}'는 이미 일반 계정으로 가입되어 있습니다. 현재 시도: {}", email, socialLoginType);
+                    throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED_WITH_OTHER_SOCIAL_TYPE);
+                }
+                // 이미 다른 소셜 계정으로 가입된 이메일로 현재 소셜 로그인 시도하는 경우
+                else if (user.getSocialLoginType() != socialLoginType) {
+                    log.error("이메일 '{}'는 이미 다른 소셜 계정({})으로 가입되어 있습니다. 현재 시도: {}",
+                            email, user.getSocialLoginType(), socialLoginType);
+                    throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED_WITH_OTHER_SOCIAL_TYPE);
+                }
+                // 같은 소셜 타입으로 재로그인하는 경우
+                else {
+                    log.info("기존 {} 사용자 재로그인: 이메일={}, 닉네임={}, 이름={}",
+                            socialLoginType, email, nickname, name);
+                    user.updateSocialProfile(name, nickname);
+                    userRepository.save(user);
+                }
             }
         } catch (IncorrectResultSizeDataAccessException e) {
-            log.error("이메일 '{}'로 중복된 사용자가 발견되었습니다.", email, e);
+            log.error("이메일 '{}'로 중복된 사용자가 데이터베이스에 발견되었습니다. (DB 데이터 무결성 문제)", email, e);
             throw new CustomException(ErrorCode.DUPLICATE_USER_EMAIL);
         }
 

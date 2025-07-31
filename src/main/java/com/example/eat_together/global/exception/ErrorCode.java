@@ -52,6 +52,7 @@ public enum ErrorCode {
     STORE_NAME_DUPLICATED(HttpStatus.CONFLICT, "동일한 이름의 매장을 등록할 수 없습니다."),
     MENU_NAME_DUPLICATED(HttpStatus.CONFLICT, "매장에 동일한 이름의 메뉴를 등록할 수 없습니다."),
     DUPLICATE_ORDER(HttpStatus.CONFLICT, "이미 처리 중인 주문이 있습니다."),
+    EMAIL_ALREADY_REGISTERED_WITH_OTHER_SOCIAL_TYPE(HttpStatus.CONFLICT, "해당 이메일은 이미 다른 소셜 계정 또는 일반 계정으로 가입되어 있습니다. 기존 방식으로 로그인해주세요."),
     DUPLICATE_USER_EMAIL(HttpStatus.CONFLICT, "이미 가입된 이메일입니다.");
 
     private final HttpStatus status;
