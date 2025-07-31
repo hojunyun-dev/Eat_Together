@@ -235,6 +235,16 @@ public class StoreService {
     @Transactional(readOnly = true)
     public PagingStoreResponseDto getStoreBySearch(String keyword, Pageable pageable) {
 
+
+        String cacheKey = "storeSearch:" + keyword;
+
+        PagingStoreResponseDto cache = pagingStoreRedisTemplate.opsForValue().get(cacheKey);
+
+        // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
+        if (cache != null) {
+            return cache;
+        }
+
         Pageable bySearch = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
         Page<Store> response = storeRepository.findBySearch(keyword, bySearch);
@@ -243,7 +253,10 @@ public class StoreService {
             throw new CustomException(ErrorCode.STORE_SEARCH_NO_RESULT);
         }
 
-        return PagingStoreResponseDto.formPage(response);
+        PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(response);
+        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
+
+        return responseDto;
     }
 
     @Transactional
