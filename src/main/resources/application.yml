@@ -17,6 +17,11 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
 mvc:
   pathmatch:
     matching-strategy: ant_path_matcher
@@ -24,10 +29,6 @@ mvc:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
 
 sns:
   google:
@@ -39,6 +40,18 @@ sns:
       url: http://localhost:8080/social/google/callback
     token:
       url: https://oauth2.googleapis.com/token
+
+  kakao:
+    url: https://kauth.kakao.com/oauth/authorize # 카카오 인증 요청 URL
+    client:
+      id: ${KAKAO_OAUTH_CLIENT_ID} # 카카오 REST API 키
+      secret: ${KAKAO_OAUTH_CLIENT_SECRET} # 카카오 클라이언트 시크릿 (필요시)
+    callback:
+      url: http://localhost:8080/social/kakao/callback # 카카오 콜백 URI (애플리케이션의 리다이렉트 URI)
+    token:
+      url: https://kauth.kakao.com/oauth/token # 카카오 토큰 요청 URL
+    user-info-url: https://kapi.kakao.com/v2/user/me # 카카오 사용자 정보 API URL
+    scope: profile_nickname,profile_image,account_email # 카카오에서 요청할 동의 항목 (콤마로 구분)
 
 
 jwt:
