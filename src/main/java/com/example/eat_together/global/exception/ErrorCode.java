@@ -24,7 +24,7 @@ public enum ErrorCode {
     CART_EXCEEDS_MAX_QUANTITY(HttpStatus.BAD_REQUEST, "메뉴는 최대 99개까지 담을 수 있습니다."),
     CART_INVALID_STORE(HttpStatus.BAD_REQUEST, "기존 장바구니와 다른 매장의 메뉴는 담을 수 없습니다."),
     ENTER_CHAT_ROOM_INAVAILABLE(HttpStatus.BAD_REQUEST, "제한 인원에 도달했거나 만료된 채팅방에 입장할 수 없습니다."),
-
+    SOCIAL_NOCHANGE_PASSWORD(HttpStatus.BAD_REQUEST,"소셜 로그인 인원은 비밀번호 변경이 불가능 합니다."),
     // 403 FORBIDDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),

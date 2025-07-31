@@ -39,6 +39,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if(!(user.getSocialLoginType() == null)){
+            throw new CustomException(ErrorCode.SOCIAL_NOCHANGE_PASSWORD);
+        }
         // 현재 비밀번호와 바꿀 비밀번호 비교
         if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
             throw new CustomException(ErrorCode.PASSWORD_WRONG);
