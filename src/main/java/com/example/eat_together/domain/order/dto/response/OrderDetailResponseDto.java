@@ -2,12 +2,16 @@ package com.example.eat_together.domain.order.dto.response;
 
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class OrderDetailResponseDto {
     private final Long id;
 
