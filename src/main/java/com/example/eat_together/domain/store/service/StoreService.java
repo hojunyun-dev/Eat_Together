@@ -41,14 +41,16 @@ public class StoreService {
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate;
     private final RedisTemplate<String, StoreResponseDto> storeRedisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate, RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate, RedisTemplate<String, StoreResponseDto> storeRedisTemplate) {
+    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate, RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate, RedisTemplate<String, StoreResponseDto> storeRedisTemplate, RedisTemplate<String, String> redisTemplate) {
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.stringRedisTemplate = stringRedisTemplate;
         this.pagingStoreRedisTemplate = pagingStoreRedisTemplate;
         this.storeRedisTemplate = storeRedisTemplate;
+        this.redisTemplate = redisTemplate;
     }
 
     @Transactional
@@ -242,6 +244,9 @@ public class StoreService {
 
         String cacheKey = "storeSearch:" + cleanKeyword;
 
+        // Zset의 incrementScore로 해당 키의 값을 1씩 증가
+        Double searchCount = redisTemplate.opsForZSet().incrementScore("searchCount:", cleanKeyword, 1);
+
         PagingStoreResponseDto cache = pagingStoreRedisTemplate.opsForValue().get(cacheKey);
 
         // 캐싱된 키가 존재할 시 즉시 캐시 데이터 반환
@@ -258,7 +263,11 @@ public class StoreService {
         }
 
         PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(response);
-        pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
+
+        // searchCount가 20 이상인 경우만 캐싱
+        if (searchCount != null && searchCount >= 20) {
+            pagingStoreRedisTemplate.opsForValue().set(cacheKey, responseDto, Duration.ofMinutes(5));
+        }
 
         return responseDto;
     }
