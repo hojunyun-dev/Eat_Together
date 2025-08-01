@@ -3,11 +3,10 @@ package com.example.eat_together.domain.chat.entity;
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 
 @Entity
 @Builder(toBuilder = true)

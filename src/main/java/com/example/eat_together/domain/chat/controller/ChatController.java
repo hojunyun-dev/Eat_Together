@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.chat.controller;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatResponse;
+import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatGroupUpdateRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
@@ -42,12 +43,13 @@ public class ChatController {
 
     //채팅방 조회
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<ChatRoomDto>>> getChatRoomList() {
-        List<ChatRoomDto> chatRoomDtoList = chatService.getChatRoomList();
+    public ResponseEntity<ApiResponse<List<ChatRoomDto>>> getChatRoomList(@RequestParam(required = false) FoodType foodType, @RequestParam(required = false) String keyWord) {
+        List<ChatRoomDto> chatRoomDtoList = chatService.getChatRoomList(foodType, keyWord);
 
         return ResponseEntity.ok(ApiResponse.of(chatRoomDtoList, ChatResponse.READ_CHAT_ROOM_LIST.getMessage()));
     }
 
+    //채팅방 수정
     @PatchMapping("/{roomId}")
     public ResponseEntity<ApiResponse<Void>> updateChatGroup(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId, @RequestBody ChatGroupUpdateRequestDto chatGroupUpdateRequestDto) {
         chatService.updateChatGroup(Long.valueOf(userDetails.getUsername()), roomId, chatGroupUpdateRequestDto);
