@@ -2,6 +2,7 @@ package com.example.eat_together.global.config;
 
 import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
+import com.example.eat_together.domain.order.dto.response.OrderDetailResponseDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,6 +83,22 @@ public class CacheConfig {
 
         Jackson2JsonRedisSerializer<PagingStoreResponseDto> serializer =
                 new Jackson2JsonRedisSerializer<>(PagingStoreResponseDto.class);
+
+        serializer.setObjectMapper(objectMapper());
+        template.setValueSerializer(serializer);
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    // 주문 단건 조회 Redis 설정
+    @Bean
+    public RedisTemplate<String, OrderDetailResponseDto> orderDetailResponseDtoRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, OrderDetailResponseDto> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+
+        Jackson2JsonRedisSerializer<OrderDetailResponseDto> serializer =
+                new Jackson2JsonRedisSerializer<>(OrderDetailResponseDto.class);
 
         serializer.setObjectMapper(objectMapper());
         template.setValueSerializer(serializer);

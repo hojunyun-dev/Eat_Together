@@ -1,6 +1,6 @@
 package com.example.eat_together.global.util;
 
-import com.example.eat_together.domain.user.entity.UserRole;
+import com.example.eat_together.domain.users.common.enums.UserRole;
 import com.example.eat_together.global.dto.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

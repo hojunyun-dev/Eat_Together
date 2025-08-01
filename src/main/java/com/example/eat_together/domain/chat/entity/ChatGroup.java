@@ -8,6 +8,7 @@ import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

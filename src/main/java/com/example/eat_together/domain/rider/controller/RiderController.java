@@ -7,13 +7,10 @@ import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.rider.service.RiderService;
 import com.example.eat_together.domain.rider.riderEnum.RiderResponse;
 import com.example.eat_together.global.dto.ApiResponse;
-import com.example.eat_together.global.exception.CustomException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.eat_together.domain.user.entity.User;//추가
-import org.springframework.security.core.annotation.AuthenticationPrincipal;//추가
 
 
 import java.security.Principal;

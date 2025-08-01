@@ -1,6 +1,6 @@
 package com.example.eat_together.global.fixture;
 
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class UserTestFixture {

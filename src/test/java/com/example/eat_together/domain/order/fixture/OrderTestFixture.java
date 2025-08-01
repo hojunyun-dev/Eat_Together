@@ -2,7 +2,7 @@ package com.example.eat_together.domain.order.fixture;
 
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.store.entity.Store;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class OrderTestFixture {
