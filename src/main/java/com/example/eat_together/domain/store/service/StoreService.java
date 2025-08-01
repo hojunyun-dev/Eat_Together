@@ -236,7 +236,11 @@ public class StoreService {
     public PagingStoreResponseDto getStoreBySearch(String keyword, Pageable pageable) {
 
 
-        String cacheKey = "storeSearch:" + keyword;
+        String cleanKeyword = keyword.replaceAll("[^가-힣a-zA-Z0-9]", "")   // 특수문자 제거 정규식
+                .replaceAll("\\s+", "")     // 공백 제거 정규식
+                .toLowerCase();// 대문자는 소문자로 변환
+
+        String cacheKey = "storeSearch:" + cleanKeyword;
 
         PagingStoreResponseDto cache = pagingStoreRedisTemplate.opsForValue().get(cacheKey);
 
