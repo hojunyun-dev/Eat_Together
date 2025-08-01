@@ -2,6 +2,7 @@ package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.chatEnum.MemberRole;
 import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
+import com.example.eat_together.domain.chat.entity.ChatGroup;
 import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
 import com.example.eat_together.domain.chat.entity.ChatRoomUser;
@@ -68,10 +69,26 @@ public class ChatUtil {
     }
 
     //멤버 추가
-    protected void saveNewMember(ChatRoom chatRoom, Long userId){
+    protected void saveNewMember(ChatRoom chatRoom, Long userId) {
         User user = getUser(userId);
         ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, user, MemberRole.MEMBER);
         chatRoomUserRepository.save(chatRoomUser);
+    }
+
+    // 역할 확인
+    protected MemberRole getMemberRole(Long userId, Long roomId){
+        ChatRoomUser chatRoomUser = getGroupMember(userId, roomId);
+        MemberRole memberRole = chatRoomUser.getMemberRole();
+
+        return memberRole;
+    }
+
+    // 그룹 확인
+    protected ChatGroup getChatGroup(Long roomId){
+        ChatRoom chatRoom = getChatRoom(roomId);
+        ChatGroup chatGroup = chatRoom.getChatGroup();
+
+        return chatGroup;
     }
 
     //메세지 저장

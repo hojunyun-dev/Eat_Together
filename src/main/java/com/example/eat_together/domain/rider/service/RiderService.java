@@ -4,6 +4,7 @@ import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.rider.dto.request.RiderRequestDto;
+import com.example.eat_together.domain.rider.dto.response.RiderResponseDto;
 import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.rider.repository.RiderRepository;
 import com.example.eat_together.domain.rider.riderEnum.RiderStatus;
@@ -12,6 +13,8 @@ import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,10 +44,17 @@ public class RiderService {
         return riderRepository.save(rider);
     }
 
+
+
+    /*기존에는 RiderRepository -> List<Rider>를 반환하는 방식
+    Page<Rider>를 받아 Page<RiderResponseDto>로 변환하는 방식으로 변경했습니다.*/
     // 전체 라이더 목록 조회
-    public List<Rider> getAllRiders() {
-        return riderRepository.findAllActiveRiders();
+    @Transactional(readOnly = true)
+    public Page<RiderResponseDto> getRiders(Pageable pageable) {
+        return riderRepository.findAllActiveRiders(pageable)
+                .map(RiderResponseDto::of);
     }
+
 
     // 라이더 단건 조회
     public Rider getRiderById(Long id) {

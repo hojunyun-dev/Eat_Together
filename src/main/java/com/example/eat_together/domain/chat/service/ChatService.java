@@ -1,10 +1,9 @@
 package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
+import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.chatEnum.MemberRole;
-import com.example.eat_together.domain.chat.dto.ChatGroupDto;
-import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
-import com.example.eat_together.domain.chat.dto.ChatRoomDto;
+import com.example.eat_together.domain.chat.dto.*;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
 import com.example.eat_together.domain.chat.entity.ChatMessage;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
@@ -34,15 +33,17 @@ public class ChatService {
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatUtil chatUtil;
+    private final NullIgnoreMapper nullIgnoreMapper;
+
 
     //채팅방 생성
     @Transactional
-    public void createChatGroup(Long userId, ChatGroupDto chatGroupDto) {
+    public void createChatGroup(Long userId, ChatGroupCreateRequestDto chatGroupCreateRequestDto) {
         Optional<User> optionalHost = userRepository.findById(userId);
         if (optionalHost.isEmpty())
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User host = optionalHost.get();
-        ChatGroup chatGroup = ChatGroup.of(host, chatGroupDto);
+        ChatGroup chatGroup = ChatGroup.of(host, chatGroupCreateRequestDto);
         //chatGroup 생성 시 chatRoom 함께 생성
         ChatRoom chatRoom = ChatRoom.of(chatGroup);
         ChatRoomUser chatRoomUser = ChatRoomUser.of(chatRoom, host, MemberRole.HOST);
@@ -86,8 +87,8 @@ public class ChatService {
 
     //채팅방 목록 조회
     @Transactional
-    public List<ChatRoomDto> getChatRoomList() {
-        List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
+    public List<ChatRoomDto> getChatRoomList(FoodType foodType, String keyWord) {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAll(foodType, keyWord);
         List<ChatRoomDto> chatRoomDtoList = chatRoomList.stream()
                 .map(chatRoom -> ChatRoomDto
                         .of(
@@ -97,10 +98,39 @@ public class ChatService {
                                 chatRoom.getChatGroup().getFoodType(),
                                 chatRoom.getChatGroup().getMaxMember(),
                                 chatRoom.getChatGroup().getChatGroupStatus(),
-                                chatRoomUserRepository.countByChatRoomId(chatRoom.getId()))
+                                Integer.valueOf(chatRoomUserRepository.countByChatRoomId(chatRoom.getId()).toString()))
                 ).toList();
 
         return chatRoomDtoList;
+    }
+
+    // 채팅방 정보 수정
+    @Transactional
+    public void updateChatGroup(Long userId, Long roomId, ChatGroupUpdateRequestDto chatGroupUpdateRequestDto){
+        if(chatUtil.getMemberRole(userId, roomId) == (MemberRole.MEMBER))
+            throw new CustomException(ErrorCode.NOT_HOST);
+        ChatGroup chatGroup = chatUtil.getChatGroup(roomId);
+
+        chatGroup = nullIgnoreMapper.updateChatGroup(chatGroupUpdateRequestDto, chatGroup.toBuilder());
+        chatGroupRepository.save(chatGroup);
+    }
+
+    // 채팅방 퇴장: 멤버에서 삭제
+    @Transactional
+    public void quitChatRoom(Long userId, Long roomId) {
+        if (chatUtil.getGroupMember(userId, roomId) != null)
+            chatRoomUserRepository.deleteByUserIdAndRoomId(userId, roomId);
+    }
+
+    // 채팅방 삭제
+    @Transactional
+    public void deleteChatRoom(Long userId, Long roomId) {
+        MemberRole memberRole = chatUtil.getMemberRole(userId, roomId);
+        ChatGroup chatGroup = chatUtil.getChatGroup(roomId);
+        if (chatUtil.getGroupMember(userId, roomId) != null && memberRole == MemberRole.HOST) {
+            chatGroupRepository.delete(chatGroup);
+        } else
+            throw new CustomException(ErrorCode.NOT_HOST);
     }
 
     // 메세지 내역 조회
@@ -116,23 +146,5 @@ public class ChatService {
                         )).toList();
 
         return chatMessageResponseDtoList;
-    }
-
-    // 채팅방 퇴장: 멤버에서 삭제
-    @Transactional
-    public void quitChatRoom(Long userId, Long roomId) {
-        if (chatUtil.getGroupMember(userId, roomId) != null)
-            chatRoomUserRepository.deleteByUserIdAndRoomId(userId, roomId);
-    }
-
-    // 채팅방 삭제
-    @Transactional
-    public void deleteChatRoom(Long userId, Long roomId) {
-        MemberRole memberRole = chatUtil.getGroupMember(userId, roomId).getMemberRole();
-        ChatGroup chatGroup = chatUtil.getChatRoom(roomId).getChatGroup();
-        if (chatUtil.getGroupMember(userId, roomId) != null && memberRole == MemberRole.HOST) {
-            chatGroupRepository.delete(chatGroup);
-        } else
-            throw new CustomException(ErrorCode.NOT_HOST);
     }
 }
