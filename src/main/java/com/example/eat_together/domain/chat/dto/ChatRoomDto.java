@@ -2,10 +2,12 @@ package com.example.eat_together.domain.chat.dto;
 
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class ChatRoomDto {
     private Long roomId;
@@ -14,9 +16,9 @@ public class ChatRoomDto {
     private FoodType foodType;
     private Integer maxMember;
     private ChatGroupStatus chatGroupStatus;
-    private Long currentMemberCount;
+    private Integer currentMemberCount;
 
-    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, ChatGroupStatus chatGroupStatus, Long currentMemberCount) {
+    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, ChatGroupStatus chatGroupStatus, Integer currentMemberCount) {
         ChatRoomDto chatRoomDto = new ChatRoomDto();
         chatRoomDto.roomId = roomId;
         chatRoomDto.title = title;

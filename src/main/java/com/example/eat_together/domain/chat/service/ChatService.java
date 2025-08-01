@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.chat.service;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
+import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.chatEnum.MemberRole;
 import com.example.eat_together.domain.chat.dto.*;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
@@ -86,8 +87,8 @@ public class ChatService {
 
     //채팅방 목록 조회
     @Transactional
-    public List<ChatRoomDto> getChatRoomList() {
-        List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
+    public List<ChatRoomDto> getChatRoomList(FoodType foodType, String keyWord) {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAll(foodType, keyWord);
         List<ChatRoomDto> chatRoomDtoList = chatRoomList.stream()
                 .map(chatRoom -> ChatRoomDto
                         .of(
@@ -97,7 +98,7 @@ public class ChatService {
                                 chatRoom.getChatGroup().getFoodType(),
                                 chatRoom.getChatGroup().getMaxMember(),
                                 chatRoom.getChatGroup().getChatGroupStatus(),
-                                chatRoomUserRepository.countByChatRoomId(chatRoom.getId()))
+                                Integer.valueOf(chatRoomUserRepository.countByChatRoomId(chatRoom.getId()).toString()))
                 ).toList();
 
         return chatRoomDtoList;
