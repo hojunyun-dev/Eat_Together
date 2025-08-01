@@ -2,17 +2,15 @@ package com.example.eat_together.domain.chat.entity;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
-import com.example.eat_together.domain.chat.dto.ChatGroupDto;
+import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
 import com.example.eat_together.domain.user.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalTime;
+import lombok.*;
 
 @Entity
+@Builder(toBuilder = true)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor
 @Table(name = "chat_groups")
@@ -44,14 +42,20 @@ public class ChatGroup extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ChatGroupStatus chatGroupStatus;
 
-    public static ChatGroup of(User user, ChatGroupDto chatGroupDto) {
+    public static ChatGroup of(User user, ChatGroupCreateRequestDto chatGroupCreateRequestDto) {
         ChatGroup chatGroup = new ChatGroup();
-        chatGroup.title = chatGroupDto.getTitle();
+        chatGroup.title = chatGroupCreateRequestDto.getTitle();
         chatGroup.host = user;
-        chatGroup.description = chatGroupDto.getDescription();
-        chatGroup.foodType = chatGroupDto.getFoodType();
+        chatGroup.description = chatGroupCreateRequestDto.getDescription();
+        if(chatGroup.description == null)
+            chatGroup.description = "같이 나눠먹어요~!";
+        chatGroup.foodType = chatGroupCreateRequestDto.getFoodType();
+        if(chatGroup.foodType == null)
+            chatGroup.foodType = FoodType.ALL;
         chatGroup.isDeleted = false;
-        chatGroup.maxMember = chatGroupDto.getMaxMember();
+        chatGroup.maxMember = chatGroupCreateRequestDto.getMaxMember();
+        if(chatGroup.maxMember == null)
+            chatGroup.maxMember = 1;
         chatGroup.chatGroupStatus = ChatGroupStatus.OPEN;
 
         return chatGroup;

@@ -1,7 +1,8 @@
 package com.example.eat_together.domain.chat.controller;
 
 import com.example.eat_together.domain.chat.chatEnum.ChatResponse;
-import com.example.eat_together.domain.chat.dto.ChatGroupDto;
+import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
+import com.example.eat_together.domain.chat.dto.ChatGroupUpdateRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
 import com.example.eat_together.domain.chat.dto.ChatRoomDto;
 import com.example.eat_together.domain.chat.service.ChatService;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class ChatController {
 
     //채팅방 생성
     @PostMapping()
-    public ResponseEntity<ApiResponse<Void>> createChatGroup(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ChatGroupDto chatGroupDto) {
-        chatService.createChatGroup(Long.valueOf(userDetails.getUsername()), chatGroupDto);
+    public ResponseEntity<ApiResponse<Void>> createChatGroup(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ChatGroupCreateRequestDto chatGroupCreateRequestDto) {
+        chatService.createChatGroup(Long.valueOf(userDetails.getUsername()), chatGroupCreateRequestDto);
 
         return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.CREATE_CHAT_ROOM.getMessage()));
     }
@@ -48,12 +48,11 @@ public class ChatController {
         return ResponseEntity.ok(ApiResponse.of(chatRoomDtoList, ChatResponse.READ_CHAT_ROOM_LIST.getMessage()));
     }
 
-    //기존 채팅 내역 조회
-    @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
-        List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
+    @PatchMapping("/{roomId}")
+    public ResponseEntity<ApiResponse<Void>> updateChatGroup(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId, @RequestBody ChatGroupUpdateRequestDto chatGroupUpdateRequestDto) {
+        chatService.updateChatGroup(Long.valueOf(userDetails.getUsername()), roomId, chatGroupUpdateRequestDto);
 
-        return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
+        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.UPDATE_CHAT_ROOM.getMessage()));
     }
 
     //채팅방 퇴장
@@ -70,5 +69,13 @@ public class ChatController {
         chatService.deleteChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
 
         return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.DELETE_CHAT_ROOM.getMessage()));
+    }
+
+    //기존 채팅 내역 조회
+    @GetMapping("/{roomId}")
+    public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
+        List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
+
+        return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
     }
 }
