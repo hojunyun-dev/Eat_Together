@@ -11,12 +11,11 @@ import com.example.eat_together.domain.chat.repository.ChatGroupRepository;
 import com.example.eat_together.domain.chat.repository.ChatMessageRepository;
 import com.example.eat_together.domain.chat.repository.ChatRoomRepository;
 import com.example.eat_together.domain.chat.repository.ChatRoomUserRepository;
-import com.example.eat_together.domain.user.entity.User;
-import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.domain.users.common.entity.User;
+import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

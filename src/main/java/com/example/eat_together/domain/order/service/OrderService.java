@@ -9,11 +9,12 @@ import com.example.eat_together.domain.order.dto.response.OrderStatusUpdateRespo
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.entity.OrderItem;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
+import com.example.eat_together.domain.order.repository.OrderCacheRepository;
 import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.store.entity.Store;
-import com.example.eat_together.domain.user.entity.User;
-import com.example.eat_together.domain.user.entity.UserRole;
-import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.domain.users.common.entity.User;
+import com.example.eat_together.domain.users.common.enums.UserRole;
+import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final OrderCacheRepository orderCacheRepository;
 
     // 주문 생성
     @Transactional
@@ -69,7 +71,8 @@ public class OrderService {
     }
 
     // 주문 목록 조회
-    public Page<OrderResponseDto> getOrders(Long userId, int page, int size, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDto> getOrders(Long userId, int page, int size, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
         // 조회 시작일과 종료일 중에 하나만 입력했을 경우 예외 발생
@@ -81,14 +84,24 @@ public class OrderService {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.ORDER_INVALID_PERIOD);
         }
-        return orderRepository.findOrdersByUserId(userId, pageable, startDate, endDate, status);
+        return orderRepository.findOrdersByUserId(userId, pageable, menuName, storeName, startDate, endDate, status);
     }
 
     // 주문 목록 단일 조회
+    @Transactional(readOnly = true)
     public OrderDetailResponseDto getOrder(Long userId, Long orderId) {
+        // 캐시가 존재하면 캐시 조회
+        OrderDetailResponseDto cached = orderCacheRepository.getOrder(userId, orderId);
+        if (cached != null) {
+            return cached;
+        }
+
+        // 캐시가 존재하지 않으면 DB 조회 후 캐시에 저장
         userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Order order = orderRepository.findByIdAndUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-        return new OrderDetailResponseDto(order);
+        OrderDetailResponseDto response = new OrderDetailResponseDto(order);
+        orderCacheRepository.saveOrderCache(userId, orderId, response);
+        return response;
     }
 
     // 주문 상태 변경(가게 권한)
@@ -108,8 +121,12 @@ public class OrderService {
         }
 
         order.updateStatus(status);
-
         orderRepository.save(order);
+
+        OrderDetailResponseDto updatedDto = new OrderDetailResponseDto(order);
+
+        // 주문 상태 변경 후 캐시에 저장
+        orderCacheRepository.saveOrderCache(userId, orderId, updatedDto);
 
         return new OrderStatusUpdateResponseDto(order);
     }
@@ -120,6 +137,9 @@ public class OrderService {
         userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Order order = orderRepository.findByIdAndUserId(orderId, userId).orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 캐시 삭제
+        orderCacheRepository.evictOrder(userId, orderId);
 
         order.deletedOrder();
     }

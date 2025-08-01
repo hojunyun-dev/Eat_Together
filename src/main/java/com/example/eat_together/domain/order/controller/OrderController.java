@@ -40,11 +40,13 @@ public class OrderController {
     public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(@AuthenticationPrincipal UserDetails userDetails,
                                                                          @RequestParam(value = "page", defaultValue = "1") int page,
                                                                          @RequestParam(value = "size", defaultValue = "10") int size,
+                                                                         @RequestParam(required = false) String menuName,
+                                                                         @RequestParam(required = false) String storeName,
                                                                          @RequestParam(required = false) LocalDate startDate,
                                                                          @RequestParam(required = false) LocalDate endDate,
                                                                          @RequestParam(required = false) OrderStatus status) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.of(orderService.getOrders(Long.valueOf(userDetails.getUsername()), page, size, startDate, endDate, status), OrderResponse.ORDER_LIST_FOUND.getMessage()));
+                .body(ApiResponse.of(orderService.getOrders(Long.valueOf(userDetails.getUsername()), page, size, menuName, storeName, startDate, endDate, status), OrderResponse.ORDER_LIST_FOUND.getMessage()));
     }
 
     // 주문 목록 단일 조회

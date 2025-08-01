@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.eat_together.domain.order.entity.QOrder.order;
+import static com.example.eat_together.domain.order.entity.QOrderItem.orderItem;
 
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -41,18 +42,29 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return status != null ? order.status.eq(status) : null;
     }
 
-    private BooleanExpression searchOrder(Long userId, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+    private BooleanExpression menuNameCheck(String menuName) {
+        return menuName != null ? order.orderItems.any().menu.name.containsIgnoreCase(menuName) : null;
+    }
+
+    private BooleanExpression storeNameCheck(String storeName) {
+        return storeName != null ? order.store.name.containsIgnoreCase(storeName) : null;
+    }
+
+    private BooleanExpression searchOrder(Long userId, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         return order.isDeleted.eq(false)
                 .and(order.user.userId.eq(userId))
+                .and(menuNameCheck(menuName))
+                .and(storeNameCheck(storeName))
                 .and(dateCheck(startDate, endDate))
                 .and(statusCheck(status));
     }
 
     @Override
-    public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+    public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
                 .from(order)
-                .where(searchOrder(userId, startDate, endDate, status))
+                .join(order.store).fetchJoin() // // 주문과 가게 정보를 한 번에 조회
+                .where(searchOrder(userId, menuName, storeName, startDate, endDate, status))
                 .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -60,7 +72,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
         JPAQuery<Long> countQuery = queryFactory.select(order.count())
                 .from(order)
-                .where(searchOrder(userId, startDate, endDate, status));
+                .where(searchOrder(userId, menuName, storeName, startDate, endDate, status));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -68,6 +80,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     @Override
     public Optional<Order> findByIdAndUserId(Long orderId, Long userId) {
         return Optional.ofNullable(queryFactory.selectFrom(order)
+                .join(order.store).fetchJoin() // // 주문과 가게 정보를 한 번에 조회
+                .leftJoin(order.orderItems, orderItem).fetchJoin() // 주문과 주문아이템을 한 번에 조회
+                .leftJoin(orderItem.menu).fetchJoin() // 주문아이템과 메뉴를 한 번에 조회
                 .where(order.isDeleted.eq(false),
                         order.user.userId.eq(userId),
                         order.id.eq(orderId))

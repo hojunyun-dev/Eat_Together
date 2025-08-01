@@ -33,6 +33,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // Spring Security OAuth 2.0 Client (Google, Kakao 등 OAuth Provider 연동)
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
     // 데이터베이스
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'

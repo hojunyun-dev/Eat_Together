@@ -7,9 +7,9 @@ import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.repository.StoreRepository;
-import com.example.eat_together.domain.user.entity.User;
-import com.example.eat_together.domain.user.entity.UserRole;
-import com.example.eat_together.domain.user.repository.UserRepository;
+import com.example.eat_together.domain.users.common.entity.User;
+import com.example.eat_together.domain.users.common.enums.UserRole;
+import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
@@ -119,6 +119,20 @@ public class StoreService {
 
             // 5.3 해시 테이블 전체에 만료 시간 설정
             stringRedisTemplate.expire(redisKey, refreshTokenTime, TimeUnit.MILLISECONDS);
+
+            Store store = Store.of(user,
+                    requestDto.getName(),
+                    requestDto.getDescription(),
+                    requestDto.getAddress(),
+                    true,
+                    requestDto.getOpenTime(),
+                    requestDto.getCloseTime(),
+                    requestDto.getDeliveryFee(),
+                    category,
+                    requestDto.getPhoneNumber()
+            );
+
+            storeRepository.save(store);
 
             return newToken;
         }

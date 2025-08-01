@@ -2,18 +2,24 @@ package com.example.eat_together.domain.order.dto.response;
 
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class OrderDetailResponseDto {
     private final Long id;
 
     private final Long userId;
 
     private final Long storeId;
+
+    private final String storeName;
 
     private final OrderStatus status;
 
@@ -31,6 +37,7 @@ public class OrderDetailResponseDto {
         this.id = order.getId();
         this.userId = order.getUser().getUserId();
         this.storeId = order.getStore().getStoreId();
+        this.storeName = order.getStore().getName();
         this.status = order.getStatus();
         this.deliveryFee = order.getStore().getDeliveryFee();
         this.totalPrice = order.getTotalPrice();
