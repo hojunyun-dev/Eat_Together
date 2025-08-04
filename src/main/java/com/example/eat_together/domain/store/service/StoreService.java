@@ -77,6 +77,11 @@ public class StoreService {
             throw new CustomException(ErrorCode.STORE_NAME_DUPLICATED);
         }
 
+        // 정규화된 매장 이름 컬럼에 사용할 변수
+        String normalizationName = requestDto.getName().replaceAll("[^가-힣a-zA-Z0-9]", "")   // 특수문자 제거 정규식
+                .replaceAll("\\s+", "")     // 공백 제거 정규식
+                .toLowerCase();// 대문자는 소문자로 변환
+
         // 유저 권한이 점주가 아니라면 권한 부여 및 토큰 재발급
         if (user.getRole() != UserRole.OWNER) {
 
@@ -131,7 +136,8 @@ public class StoreService {
                     requestDto.getCloseTime(),
                     requestDto.getDeliveryFee(),
                     category,
-                    requestDto.getPhoneNumber()
+                    requestDto.getPhoneNumber(),
+                    normalizationName
             );
 
             storeRepository.save(store);
@@ -148,7 +154,8 @@ public class StoreService {
                 requestDto.getCloseTime(),
                 requestDto.getDeliveryFee(),
                 category,
-                requestDto.getPhoneNumber()
+                requestDto.getPhoneNumber(),
+                normalizationName
         );
 
         storeRepository.save(store);
@@ -256,7 +263,7 @@ public class StoreService {
 
         Pageable bySearch = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Store> response = storeRepository.findBySearch(keyword, bySearch);
+        Page<Store> response = storeRepository.findBySearch(cleanKeyword, bySearch);
 
         if (response.isEmpty()) {
             throw new CustomException(ErrorCode.STORE_SEARCH_NO_RESULT);

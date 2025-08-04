@@ -21,7 +21,12 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     boolean existsByUserAndNameAndIsDeletedFalse(User user, String name);
 
-    @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword,  '%')) ORDER BY s.createdAt DESC ")
+    @Query("SELECT s " +
+            "FROM Store s " +
+            "WHERE s.isDeleted = false AND " +
+            "LOWER(s.normalizationName) " +
+            "LIKE LOWER(CONCAT('%', :keyword,  '%')) " +
+            "ORDER BY s.createdAt DESC ")
     Page<Store> findBySearch(String keyword, Pageable pageable);
 
     Optional<Store> findByStoreIdAndIsDeletedFalse(Long storeId);

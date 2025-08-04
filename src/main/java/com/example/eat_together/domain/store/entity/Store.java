@@ -54,6 +54,9 @@ public class Store extends BaseTimeEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "normalization_name", nullable = false)
+    private String normalizationName;
+
 
     public static Store of(User user,
                            String name,
@@ -64,7 +67,8 @@ public class Store extends BaseTimeEntity {
                            LocalTime closeTime,
                            double deliveryFee,
                            FoodCategory foodCategory,
-                           String phoneNumber
+                           String phoneNumber,
+                           String normalizationName
     ) {
         Store store = new Store();
         store.user = user;
@@ -77,11 +81,16 @@ public class Store extends BaseTimeEntity {
         store.deliveryFee = deliveryFee;
         store.foodCategory = foodCategory;
         store.phoneNumber = phoneNumber;
+        store.normalizationName = normalizationName;
         return store;
     }
 
     public void updateName(String name) {
         this.name = name;
+        // 매장 이름 수정 시 정규화 컬럼값도 변경
+        this.normalizationName = name.replaceAll("[^가-힣a-zA-Z0-9]", "")   // 특수문자 제거 정규식
+                .replaceAll("\\s+", "")     // 공백 제거 정규식
+                .toLowerCase();// 대문자는 소문자로 변환
     }
 
     public void updateDescription(String description) {
