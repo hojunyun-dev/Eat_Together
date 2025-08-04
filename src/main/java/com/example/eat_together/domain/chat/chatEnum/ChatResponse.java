@@ -11,6 +11,7 @@ public enum ChatResponse {
     PARTICIPATE_CHAT_ROOM("채팅에에 참여합니다."),
     READ_CHAT_ROOM_LIST("채팅방을 조회합니다."),
     READ_CHAT_MESSAGE_LIST("채팅 내역을 조회합니다."),
+    UPDATE_CHAT_ROOM("채팅방 정보를 수정합니다."),
     QUIT_CHAT_ROOM("채팅방에서 퇴장합니다."),
     DELETE_CHAT_ROOM("채팅방을 삭제합니다.");
 

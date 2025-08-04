@@ -4,13 +4,17 @@ import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 //기본 생성자 getter 필수
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
-public class ChatGroupDto {
-    @NotNull
+public class ChatGroupUpdateRequestDto {
+
     private String title;
 
     private String description;
@@ -21,14 +25,4 @@ public class ChatGroupDto {
 
     private ChatGroupStatus chatGroupStatus;
 
-    public static ChatGroupDto of(ChatGroup chatGroup) {
-        ChatGroupDto chatGroupDto = new ChatGroupDto();
-        chatGroupDto.title = chatGroup.getTitle();
-        chatGroupDto.description = chatGroup.getDescription();
-        chatGroupDto.foodType = chatGroup.getFoodType();
-        chatGroupDto.maxMember = chatGroup.getMaxMember();
-        chatGroupDto.chatGroupStatus = chatGroup.getChatGroupStatus();
-
-        return chatGroupDto;
-    }
 }
