@@ -53,39 +53,41 @@ public class ChatService {
         chatRoomUserRepository.save(chatRoomUser);
     }
 
-    //그룹 멤버 저장
+    /* 그룹 멤버 저장 */
     @Transactional
     public boolean enterChatRoom(Long userId, Long roomId) {
         ChatRoom chatRoom = chatUtil.getChatRoom(roomId);
         ChatGroup chatGroup = chatRoom.getChatGroup();
 
-        //멤버 수 확인
+        //현재 멤버 수 확인
         Long memberCount = chatRoomUserRepository.countByChatRoomId(roomId);
-        System.out.println("memberCount: " + memberCount);
+        //제한 인원 확인
         Long maxMember = Long.valueOf(chatGroup.getMaxMember());
-        System.out.println("maxMember: " + maxMember);
 
+        //이미 멤버인 경우: 참가x 입장o
         if(chatUtil.getGroupMember(userId, roomId) != null)
             return true;
         else if (memberCount >= 1L && memberCount < maxMember){
             chatUtil.saveNewMember(chatRoom, userId);
             memberCount = chatRoomUserRepository.countByChatRoomId(roomId);
-            //호스트 외 한 명이라도 입장 시 상태 변경
+            chatRoom.updateCount(memberCount);
+
+            //호스트 포함 두 명 참가 시 상태 변경
             if(memberCount.equals(2L)) {
-                chatGroup.update(ChatGroupStatus.IN_PROGRESS);
+                chatGroup.updateStatus(ChatGroupStatus.IN_PROGRESS);
             }
-            //제한 인원 도달하면 상태 변경
+            //제한 인원 도달 시 상태 변경
             if(memberCount.equals(maxMember)) {
-                chatGroup.update(ChatGroupStatus.FULL);
+                chatGroup.updateStatus(ChatGroupStatus.FULL);
             }
             return false;
-        }//제한 인원 도달
+        }//멤버가 아니며, 채팅방 만 원일 시 참가 불가
         else {
             throw new CustomException(ErrorCode.ENTER_CHAT_ROOM_INAVAILABLE);
         }
     }
 
-    //채팅방 목록 조회
+    /* 채팅방 목록 조회 */
     @Transactional
     public List<ChatRoomDto> getChatRoomList(FoodType foodType, String keyWord) {
         List<ChatRoom> chatRoomList = chatRoomRepository.findAll(foodType, keyWord);
@@ -98,7 +100,7 @@ public class ChatService {
                                 chatRoom.getChatGroup().getFoodType(),
                                 chatRoom.getChatGroup().getMaxMember(),
                                 chatRoom.getChatGroup().getChatGroupStatus(),
-                                Integer.valueOf(chatRoomUserRepository.countByChatRoomId(chatRoom.getId()).toString()))
+                                chatRoom.getCurrentMemberCount())
                 ).toList();
 
         return chatRoomDtoList;
@@ -133,7 +135,7 @@ public class ChatService {
             throw new CustomException(ErrorCode.NOT_HOST);
     }
 
-    // 메세지 내역 조회
+    /* 메세지 내역 조회 */
     @Transactional
     public List<ChatMessageResponseDto> getChatMessageList(Long roomId) {
         List<ChatMessage> chatMessageList = chatMessageRepository.findByChatRoomId(roomId);
