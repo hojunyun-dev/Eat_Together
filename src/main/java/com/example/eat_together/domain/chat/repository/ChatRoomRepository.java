@@ -14,7 +14,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("""
                 SELECT cr
                 FROM ChatRoom cr
-                JOIN cr.chatGroup cg
+                JOIN FETCH cr.chatGroup cg
+                JOIN FETCH cr.chatRoomUserList crul
+                JOIN FETCH crul.user u
                 WHERE (:foodType IS NULL AND :keyWord IS NULL)
                     OR (:foodType IS NOT NULL AND :keyWord IS NULL
                         AND cg.foodType = :foodType)

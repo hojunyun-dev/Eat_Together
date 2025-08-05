@@ -16,9 +16,9 @@ public class ChatRoomDto {
     private FoodType foodType;
     private Integer maxMember;
     private ChatGroupStatus chatGroupStatus;
-    private Integer currentMemberCount;
+    private Long currentMemberCount;
 
-    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, ChatGroupStatus chatGroupStatus, Integer currentMemberCount) {
+    public static ChatRoomDto of(Long roomId, String title, String description, FoodType foodType, Integer maxMember, ChatGroupStatus chatGroupStatus, Long currentMemberCount) {
         ChatRoomDto chatRoomDto = new ChatRoomDto();
         chatRoomDto.roomId = roomId;
         chatRoomDto.title = title;
