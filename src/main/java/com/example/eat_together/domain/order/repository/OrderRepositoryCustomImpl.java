@@ -10,10 +10,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,13 +63,28 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
     @Override
     public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
-        List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
+
+        // order id 먼저 조회
+        List<Long> idList = queryFactory
+                .select(order.id)
                 .from(order)
-                .join(order.store).fetchJoin() // // 주문과 가게 정보를 한 번에 조회
                 .where(searchOrder(userId, menuName, storeName, startDate, endDate, status))
                 .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .fetch();
+
+        // idList가 비어있는 경우 빈 페이지 반환
+        if (idList.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        // id로 실제 데이터 조회
+        List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
+                .from(order)
+                .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
+                .where(order.id.in(idList))
+                .orderBy(order.createdAt.desc())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory.select(order.count())
@@ -75,12 +92,13 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .where(searchOrder(userId, menuName, storeName, startDate, endDate, status));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+
     }
 
     @Override
     public Optional<Order> findByIdAndUserId(Long orderId, Long userId) {
         return Optional.ofNullable(queryFactory.selectFrom(order)
-                .join(order.store).fetchJoin() // // 주문과 가게 정보를 한 번에 조회
+                .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
                 .leftJoin(order.orderItems, orderItem).fetchJoin() // 주문과 주문아이템을 한 번에 조회
                 .leftJoin(orderItem.menu).fetchJoin() // 주문아이템과 메뉴를 한 번에 조회
                 .where(order.isDeleted.eq(false),
