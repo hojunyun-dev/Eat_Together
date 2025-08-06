@@ -5,8 +5,10 @@ import com.example.eat_together.domain.store.dto.request.StoreUpdateRequestDto;
 import com.example.eat_together.domain.store.dto.response.PagingStoreResponseDto;
 import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.example.eat_together.domain.store.entity.Store;
+import com.example.eat_together.domain.store.entity.StoreDocument;
 import com.example.eat_together.domain.store.entity.category.FoodCategory;
 import com.example.eat_together.domain.store.repository.StoreRepository;
+import com.example.eat_together.domain.store.repository.StoreSearchRepository;
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.domain.users.common.enums.UserRole;
 import com.example.eat_together.domain.users.user.repository.UserRepository;
@@ -14,6 +16,7 @@ import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.global.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,13 +29,11 @@ import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 public class StoreService {
 
     private final StoreRepository storeRepository;
@@ -42,16 +43,8 @@ public class StoreService {
     private final RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate;
     private final RedisTemplate<String, StoreResponseDto> storeRedisTemplate;
     private final RedisTemplate<String, String> redisTemplate;
+    private final StoreSearchRepository storeSearchRepository;
 
-    public StoreService(StoreRepository storeRepository, UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate stringRedisTemplate, RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate, RedisTemplate<String, StoreResponseDto> storeRedisTemplate, RedisTemplate<String, String> redisTemplate) {
-        this.storeRepository = storeRepository;
-        this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
-        this.stringRedisTemplate = stringRedisTemplate;
-        this.pagingStoreRedisTemplate = pagingStoreRedisTemplate;
-        this.storeRedisTemplate = storeRedisTemplate;
-        this.redisTemplate = redisTemplate;
-    }
 
     @Transactional
     public TokenResponse createStore(UserDetails userDetails, StoreRequestDto requestDto) {
@@ -142,6 +135,10 @@ public class StoreService {
 
             storeRepository.save(store);
 
+            // 매장 등록 시 매장 ID와 이름 정보를 ElasticSearch에 저장
+            StoreDocument doc = StoreDocument.from(store);
+            storeSearchRepository.save(doc);
+
             return newToken;
         }
 
@@ -159,6 +156,10 @@ public class StoreService {
         );
 
         storeRepository.save(store);
+
+        // 매장 등록 시 매장 ID와 이름 정보를 ElasticSearch에 저장
+        StoreDocument doc = StoreDocument.from(store);
+        storeSearchRepository.save(doc);
 
         // 매장 생성 시 캐시 키 삭제를 위해 조회 시 사용하는 키 생성
         String key = "storeList:" + store.getFoodCategory() + ":page:";
@@ -261,15 +262,21 @@ public class StoreService {
             return cache;
         }
 
-        Pageable bySearch = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        // ElasticSearch에서 키워드로 검색하여 StoreID 추출 후 List에 담기
+        List<Long> storeIds = storeSearchRepository.findByNormalizationNameContaining(cleanKeyword, pageable)
+                .getContent()
+                .stream()
+                .map(doc -> Long.valueOf(doc.getId()))
+                .toList();
 
-        Page<Store> response = storeRepository.findBySearch(cleanKeyword, bySearch);
+        // 추출한 ID로 매장 조회하여 페이지로 받기
+        Page<Store> findBySearch = storeRepository.findByStoreIdInAndIsDeletedFalse(storeIds, pageable);
 
-        if (response.isEmpty()) {
+        if (findBySearch.isEmpty()) {
             throw new CustomException(ErrorCode.STORE_SEARCH_NO_RESULT);
         }
 
-        PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(response);
+        PagingStoreResponseDto responseDto = PagingStoreResponseDto.formPage(findBySearch);
 
         // searchCount가 20 이상인 경우만 캐싱
         if (searchCount != null && searchCount >= 20) {
@@ -359,6 +366,10 @@ public class StoreService {
         String deleteKey2 = "store:" + store.getStoreId();
         storeRedisTemplate.delete(deleteKey2);
 
+        // 매장 수정 시 ElasticSearch에 저장된 데이터 덮어쓰기
+        StoreDocument doc = StoreDocument.from(store);
+        storeSearchRepository.save(doc);
+
         return StoreResponseDto.from(store);
     }
 
@@ -378,6 +389,9 @@ public class StoreService {
         }
 
         store.deleted();
+
+        // 매장 삭제 시 ElasticSearch에 저장된 데이터 삭제
+        storeSearchRepository.deleteById(String.valueOf(store.getStoreId()));
 
         // 매장 수정 시 캐시 키 삭제를 위해 조회 시 사용하는 키 생성
         String key = "storeList:" + store.getFoodCategory() + ":page:";
