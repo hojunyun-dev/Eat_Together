@@ -61,7 +61,7 @@ public class ChatGroup extends BaseTimeEntity {
         return chatGroup;
     }
 
-    public void update(ChatGroupStatus chatGroupStatus) {
+    public void updateStatus(ChatGroupStatus chatGroupStatus) {
         this.chatGroupStatus = chatGroupStatus;
     }
 }
