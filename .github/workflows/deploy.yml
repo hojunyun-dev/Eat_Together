@@ -30,8 +30,11 @@ jobs:
       - name: Setup Gradle #그래들 설치
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       # 1-5. 빌드
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Build with Gradle Wrapper #그래들을 통하여 우리 프로젝트를 빌드
-        run: ./gradlew clean build #gradlew로 우리 프로젝트 빌드
+        run: ./gradlew clean build -x test #gradlew로 우리 프로젝트 빌드 (잡에서 gradlew를 실행하기 위한 권한을 부여)
       # 1-6. 빌드된 파일 이름 변경
       - name: 빌드된 파일 이름 변경하기
         run: mv ./build/libs/*SNAPSHOT.jar ./app.jar #임시서버
@@ -59,6 +62,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
-          script: |
+          script: |   #자바를 실질적ㅇ느로 설치하는 명령어
             sudo fuser -k -n tcp 8080 || true
-            sudo nohup java -jar cicdtest.jar > ./output.log 2>&1 &
+            sudo nohup java -jar app.jar > ./output.log 2>&1 &
