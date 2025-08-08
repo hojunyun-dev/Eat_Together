@@ -11,6 +11,8 @@ import com.example.eat_together.domain.order.entity.OrderItem;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderCacheRepository;
 import com.example.eat_together.domain.order.repository.OrderRepository;
+import com.example.eat_together.domain.payment.entity.Payment;
+import com.example.eat_together.domain.payment.repository.PaymentRepository;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.domain.users.common.enums.UserRole;
@@ -34,6 +36,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final OrderCacheRepository orderCacheRepository;
+    private final PaymentRepository paymentRepository;
 
     // 주문 생성
     @Transactional
@@ -68,11 +71,17 @@ public class OrderService {
 
         orderRepository.save(order);
 
+        Payment payment = Payment.of(order);
+        paymentRepository.save(payment);
     }
 
     // 주문 목록 조회
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> getOrders(Long userId, int page, int size, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+        // 페이지 사이즈를 최대 50으로 지정
+        int maxSize = 50;
+        size = Math.min(size, maxSize);
+
         Pageable pageable = PageRequest.of(page - 1, size);
 
         // 조회 시작일과 종료일 중에 하나만 입력했을 경우 예외 발생

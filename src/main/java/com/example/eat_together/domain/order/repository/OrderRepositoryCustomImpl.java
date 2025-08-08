@@ -45,11 +45,11 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     private BooleanExpression menuNameCheck(String menuName) {
-        return menuName != null ? order.orderItems.any().menu.name.containsIgnoreCase(menuName) : null;
+        return (menuName != null && !menuName.isBlank()) ? order.orderItems.any().menu.name.containsIgnoreCase(menuName) : null;
     }
 
     private BooleanExpression storeNameCheck(String storeName) {
-        return storeName != null ? order.store.name.containsIgnoreCase(storeName) : null;
+        return (storeName != null && !storeName.isBlank()) ? order.store.name.containsIgnoreCase(storeName) : null;
     }
 
     private BooleanExpression searchOrder(Long userId, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
