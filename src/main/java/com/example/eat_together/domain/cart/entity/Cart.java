@@ -30,6 +30,14 @@ public class Cart extends BaseTimeEntity {
     private List<CartItem> cartItems = new ArrayList<>();
 
     /**
+     * 배달팁 (기본값 0)
+     * - 개인 주문 시 전체 배달팁
+     * - 공유 복사 시 사용자 분담 배달팁
+     */
+    @Column(nullable = false)
+    private double deliveryFee = 0.0;
+
+    /**
      * Cart 생성 정적 팩토리 메서드
      *
      * @param user 사용자 엔티티
@@ -56,5 +64,12 @@ public class Cart extends BaseTimeEntity {
      */
     public void clearItems() {
         cartItems.clear();
+    }
+
+    /**
+     * 배달팁 설정
+     */
+    public void setDeliveryFee(double deliveryFee) {
+        this.deliveryFee = deliveryFee;
     }
 }

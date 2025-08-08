@@ -31,6 +31,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.FORBIDDEN,"Refresh Token이 만료되었습니다."),
     NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "채팅방 멤버가 아닙니다."),
     NOT_HOST(HttpStatus.FORBIDDEN, "호스트가 아닙니다."),
+    SHARED_CART_ITEM_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 공유 장바구니 항목에 접근할 수 없습니다."),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),

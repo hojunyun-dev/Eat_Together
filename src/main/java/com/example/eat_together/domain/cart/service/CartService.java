@@ -5,6 +5,7 @@ import com.example.eat_together.domain.cart.dto.response.CartItemResponseDto;
 import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
+import com.example.eat_together.domain.cart.entity.SharedCartItem;
 import com.example.eat_together.domain.cart.repository.CartItemRepository;
 import com.example.eat_together.domain.cart.repository.CartRepository;
 import com.example.eat_together.domain.menu.entity.Menu;
@@ -96,19 +97,27 @@ public class CartService {
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
 
         List<CartItemResponseDto> itemDtos = cart.getCartItems().stream()
-                .map(CartItemResponseDto::new)
+                .map(CartItemResponseDto::from)
                 .collect(Collectors.toList());
 
         if (itemDtos.isEmpty()) {
             throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        Store store = cart.getCartItems().get(0).getMenu().getStore();
-        Long storeId = store.getStoreId();
-        double deliveryFee = store.getDeliveryFee();
+        Long storeId = cart.getCartItems().get(0).getMenu().getStore().getStoreId();
+        double deliveryFee = cart.getDeliveryFee();
+        double subPrice = itemDtos.stream().mapToDouble(CartItemResponseDto::getTotalPrice).sum();
 
-        return new CartResponseDto(storeId, itemDtos, deliveryFee);
+        return CartResponseDto.builder()
+                .storeId(storeId)
+                .content(itemDtos)
+                .subPrice(subPrice)
+                .deliveryFee(deliveryFee)
+                .storeTotalPrice(subPrice + deliveryFee)
+                .build();
     }
+
+
 
     /**
      * 장바구니 항목 수량 수정
@@ -118,11 +127,16 @@ public class CartService {
      */
     @Transactional
     public void updateQuantity(Long itemId, CartItemRequestDto requestDto) {
+        if (requestDto.getQuantity() > 99) {
+            throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+        }
+
         CartItem cartItem = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         cartItem.updateQuantity(requestDto.getQuantity());
     }
+
 
     /**
      * 장바구니 항목 삭제
