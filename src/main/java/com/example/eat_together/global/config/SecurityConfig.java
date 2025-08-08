@@ -35,8 +35,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup",
                                 "/auth/login",
+                                "/social/**",
                                 "/users/reissue",
                                 "/users/redis",
+                                "/favicon.ico",
                                 "/chats/**")
                         .permitAll()
                         // 그 외의 요청은 @PreAuthorize를 사용하여 확인

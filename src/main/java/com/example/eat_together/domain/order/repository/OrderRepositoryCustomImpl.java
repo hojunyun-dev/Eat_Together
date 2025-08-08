@@ -10,14 +10,17 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static com.example.eat_together.domain.order.entity.QOrder.order;
+import static com.example.eat_together.domain.order.entity.QOrderItem.orderItem;
 
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -41,33 +44,63 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return status != null ? order.status.eq(status) : null;
     }
 
-    private BooleanExpression searchOrder(Long userId, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+    private BooleanExpression menuNameCheck(String menuName) {
+        return (menuName != null && !menuName.isBlank()) ? order.orderItems.any().menu.name.containsIgnoreCase(menuName) : null;
+    }
+
+    private BooleanExpression storeNameCheck(String storeName) {
+        return (storeName != null && !storeName.isBlank()) ? order.store.name.containsIgnoreCase(storeName) : null;
+    }
+
+    private BooleanExpression searchOrder(Long userId, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
         return order.isDeleted.eq(false)
                 .and(order.user.userId.eq(userId))
+                .and(menuNameCheck(menuName))
+                .and(storeNameCheck(storeName))
                 .and(dateCheck(startDate, endDate))
                 .and(statusCheck(status));
     }
 
     @Override
-    public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate, OrderStatus status) {
-        List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
+    public Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status) {
+
+        // order id 먼저 조회
+        List<Long> idList = queryFactory
+                .select(order.id)
                 .from(order)
-                .where(searchOrder(userId, startDate, endDate, status))
+                .where(searchOrder(userId, menuName, storeName, startDate, endDate, status))
                 .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // idList가 비어있는 경우 빈 페이지 반환
+        if (idList.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        // id로 실제 데이터 조회
+        List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
+                .from(order)
+                .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
+                .where(order.id.in(idList))
+                .orderBy(order.createdAt.desc())
+                .fetch();
+
         JPAQuery<Long> countQuery = queryFactory.select(order.count())
                 .from(order)
-                .where(searchOrder(userId, startDate, endDate, status));
+                .where(searchOrder(userId, menuName, storeName, startDate, endDate, status));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+
     }
 
     @Override
     public Optional<Order> findByIdAndUserId(Long orderId, Long userId) {
         return Optional.ofNullable(queryFactory.selectFrom(order)
+                .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
+                .leftJoin(order.orderItems, orderItem).fetchJoin() // 주문과 주문아이템을 한 번에 조회
+                .leftJoin(orderItem.menu).fetchJoin() // 주문아이템과 메뉴를 한 번에 조회
                 .where(order.isDeleted.eq(false),
                         order.user.userId.eq(userId),
                         order.id.eq(orderId))

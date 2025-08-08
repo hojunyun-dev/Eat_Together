@@ -7,13 +7,12 @@ import com.example.eat_together.domain.rider.entity.Rider;
 import com.example.eat_together.domain.rider.service.RiderService;
 import com.example.eat_together.domain.rider.riderEnum.RiderResponse;
 import com.example.eat_together.global.dto.ApiResponse;
-import com.example.eat_together.global.exception.CustomException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.eat_together.domain.user.entity.User;//추가
-import org.springframework.security.core.annotation.AuthenticationPrincipal;//추가
 
 
 import java.security.Principal;
@@ -39,14 +38,18 @@ public class RiderController {
     }
 
 
+/*    API 응답 타입을 Page<RiderResponseDto>로 변경하고
+    PageRequest를 이용해 page,size 파라미터로 페이징되도록 하였습니다.*/
     // 전체 라이더 목록 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<RiderResponseDto>>> getAllRiders() {
-        List<Rider> riders = riderService.getAllRiders();
-        List<RiderResponseDto> response = riders.stream()
-                .map(RiderResponseDto::of)
-                .toList();
-        return ResponseEntity.ok(ApiResponse.of(response, RiderResponse.RIDER_LIST_FOUND_SUCCESS.getMessage()));
+    public ResponseEntity<ApiResponse<Page<RiderResponseDto>>> getAllRiders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<RiderResponseDto> riders = riderService.getRiders(pageRequest);
+        return ResponseEntity.ok(
+                ApiResponse.of(riders, RiderResponse.RIDER_LIST_FOUND_SUCCESS.getMessage()));
     }
 
 

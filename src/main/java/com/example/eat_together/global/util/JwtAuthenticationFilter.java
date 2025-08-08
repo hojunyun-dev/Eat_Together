@@ -9,10 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -20,21 +23,42 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
+
+    private static final List<String> PERMIT_ALL_PATHS = Arrays.asList(
+            "/auth/signup",
+            "/auth/login",
+            "/social/**",
+            "/users/reissue",
+            "/users/redis",
+            "/favicon.ico"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Request Header에서 JWT 토큰 추출
+        String requestUri = request.getRequestURI();
+        log.info("요청 URI: {}", requestUri); // 요청 URI 로그 추가
+
+        // 1. permitAll() 경로에 해당하는 요청인지 확인합니다.
+        // 해당 경로일 경우 JWT 검증을 건너뛰고 다음 필터로 넘깁니다.
+        for (String path : PERMIT_ALL_PATHS) {
+            if (antPathMatcher.match(path, requestUri)) {
+                log.info("PermitAll 경로에 대한 요청: {}. JWT 필터 건너뜀.", requestUri);
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // 2. PermitAll 경로가 아닐 경우에만 JWT 토큰 검증 로직을 수행합니다.
         String jwt = resolveToken(request);
 
-        // 2. 토큰 유효성 검사 및 인증 처리
         if (StringUtils.hasText(jwt) && jwtUtil.isValidToken(jwt)) {
             // SecurityContextHolder에 이미 인증 정보가 없는 경우에만 처리
-            // (이미 인증된 요청이거나 다른 필터에서 처리했을 경우 중복 방지)
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 try {
                     // JwtUtil을 통해 토큰에서 Authentication 객체 생성

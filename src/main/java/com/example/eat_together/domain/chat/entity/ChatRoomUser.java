@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.chat.entity;
 
 import com.example.eat_together.domain.chat.chatEnum.MemberRole;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,10 +31,6 @@ public class ChatRoomUser extends BaseTimeEntity {
     @Column(name = "member_role")
     private MemberRole memberRole;
 
-/*
-    @Column(name = "is_left")
-    private boolean isLeft;
- */
     @CreatedDate
     @Column(name = "joined_at", updatable = false)
     private LocalDateTime joinedAt;
@@ -47,7 +43,6 @@ public class ChatRoomUser extends BaseTimeEntity {
         chatRoomUser.chatRoom = chatRoom;
         chatRoomUser.user = user;
         chatRoomUser.memberRole = memberRole;
-        //  chatRoomUser.isLeft = false;
 
         return chatRoomUser;
     }

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepositoryCustom {
-    Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate, OrderStatus status);
+    Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status);
 
     Optional<Order> findByIdAndUserId(Long orderId, Long userId);
 

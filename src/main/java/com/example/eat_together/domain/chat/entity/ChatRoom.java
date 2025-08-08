@@ -11,16 +11,15 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "chat_rooms")
 public class ChatRoom extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "is_deleted")
-    Boolean isDeleted;
+    private Boolean isDeleted;
 
     @OneToOne
     @JoinColumn(name = "group_id")
@@ -29,11 +28,18 @@ public class ChatRoom extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRoomUserList = new ArrayList<>();
 
+    private Long currentMemberCount;
+
     public static ChatRoom of(ChatGroup chatGroup) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.chatGroup = chatGroup;
         chatRoom.isDeleted = false;
+        chatRoom.currentMemberCount = 1L;
 
         return chatRoom;
+    }
+
+    public void updateCount(Long currentMemberCount){
+        this.currentMemberCount = currentMemberCount;
     }
 }

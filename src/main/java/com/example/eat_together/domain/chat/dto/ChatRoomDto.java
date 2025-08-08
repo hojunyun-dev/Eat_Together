@@ -2,10 +2,12 @@ package com.example.eat_together.domain.chat.dto;
 
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class ChatRoomDto {
     private Long roomId;
