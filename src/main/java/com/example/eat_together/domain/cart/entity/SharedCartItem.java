@@ -1,7 +1,7 @@
 package com.example.eat_together.domain.cart.entity;
 
 import com.example.eat_together.domain.menu.entity.Menu;
-import com.example.eat_together.domain.user.entity.User;
+import com.example.eat_together.domain.users.common.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
