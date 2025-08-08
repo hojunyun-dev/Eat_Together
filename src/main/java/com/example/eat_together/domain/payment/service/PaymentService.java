@@ -1,7 +1,6 @@
 package com.example.eat_together.domain.payment.service;
 
 import com.example.eat_together.domain.order.entity.Order;
-import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.payment.dto.response.PaymentResponseDto;
 import com.example.eat_together.domain.payment.entity.Payment;
@@ -37,10 +36,7 @@ public class PaymentService {
         payment.confirm();
         paymentRepository.save(payment);
 
-        // 주문 상태도 결제 완료로 전환
         Order order = payment.getOrder();
-        order.updateStatus(OrderStatus.ORDERED);
-        orderRepository.save(order);
 
         return new PaymentResponseDto(order.getId(), order.getTotalPrice(), payment.getStatus(), payment.getCreatedAt(), payment.getUpdatedAt());
     }
