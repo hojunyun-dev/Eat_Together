@@ -83,7 +83,7 @@ management:
         include: health,info,prometheus
 
 elasticsearch:
-  uris: http://localhost:9200
+  uris: http://elasticsearch:9200
 
 ---
 
