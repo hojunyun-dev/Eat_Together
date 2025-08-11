@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s # 15초에 한번씩 정보 수집
+  scrape_timeout: 10s # 타겟으로부터 지표를 수집하기 위해 기다리는 최대 시간
+
+
+scrape_configs:
+  - job_name: 'redis_exporter' # redis에서 발생하는 모든 지표를 수집
+    static_configs:
+      - targets: ['host.docker.internal:9121']
+
+  - job_name: 'celuveatdev' # 스프링 부트 애플리케이션을 모니터링 하는 작업
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+
+  # MySQL Exporter에서 지표를 가져오기 위한 새로운 작업 추가
+  - job_name: 'mysqld_exporter'
+    static_configs:
+      - targets: ['host.docker.internal:9104']

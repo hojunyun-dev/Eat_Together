@@ -82,6 +82,9 @@ management:
       exposure:
         include: health,info,prometheus
 
+elasticsearch:
+  uris: http://localhost:9200
+
 ---
 
 cors:
