@@ -6,9 +6,9 @@ import com.example.eat_together.domain.users.common.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -21,8 +21,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     boolean existsByUserAndNameAndIsDeletedFalse(User user, String name);
 
-    @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword,  '%')) ORDER BY s.createdAt DESC ")
-    Page<Store> findBySearch(String keyword, Pageable pageable);
+    Page<Store> findByStoreIdInAndIsDeletedFalse(List<Long> storeIds, Pageable pageable);
 
     Optional<Store> findByStoreIdAndIsDeletedFalse(Long storeId);
 }
