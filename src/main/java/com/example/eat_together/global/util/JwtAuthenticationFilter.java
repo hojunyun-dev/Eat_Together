@@ -34,7 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/social/**",
             "/users/reissue",
             "/users/redis",
-            "/favicon.ico"
+            "/favicon.ico",
+            "/chats/send/**",
+            "/ws/**"
     );
 
     @Override

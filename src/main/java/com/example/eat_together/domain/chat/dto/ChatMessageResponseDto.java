@@ -11,14 +11,12 @@ public class ChatMessageResponseDto {
     private Long userId;
     private Long roomId;
     private String message;
-    private LocalDateTime updateAt;
 
-    public static ChatMessageResponseDto of(Long userId, Long roomId, String message, LocalDateTime updateAt) {
+    public static ChatMessageResponseDto of(Long userId, Long roomId, String message) {
         ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto();
         chatMessageResponseDto.userId = userId;
         chatMessageResponseDto.roomId = roomId;
         chatMessageResponseDto.message = message;
-        chatMessageResponseDto.updateAt = updateAt;
 
         return chatMessageResponseDto;
     }

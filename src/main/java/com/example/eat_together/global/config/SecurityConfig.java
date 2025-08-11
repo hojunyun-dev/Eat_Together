@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 "/users/reissue",
                                 "/users/redis",
                                 "/favicon.ico",
-                                "/chats/**")
+                                "/ws/**")
                         .permitAll()
                         // 그 외의 요청은 @PreAuthorize를 사용하여 확인
                         .anyRequest().authenticated()
