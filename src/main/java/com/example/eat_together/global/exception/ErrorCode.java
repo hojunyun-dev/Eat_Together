@@ -20,7 +20,7 @@ public enum ErrorCode {
     ORDER_PERIOD_MISMATCH(HttpStatus.BAD_REQUEST, "조회 시작일과 종료일은 함께 입력되어야 합니다."),
     INVALID_SESSION(HttpStatus.BAD_REQUEST, "유효하지 않은 세션입니다."),
     INVALID_URI(HttpStatus.BAD_REQUEST, "유효하지 않은 URI입니다."),
-    USER_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제되지 않은 유저입니다."),
+    USER_NOT_DELETE(HttpStatus.BAD_REQUEST,"삭제되지 않은 유저입니다."),
     CART_EXCEEDS_MAX_QUANTITY(HttpStatus.BAD_REQUEST, "메뉴는 최대 99개까지 담을 수 있습니다."),
     CART_INVALID_STORE(HttpStatus.BAD_REQUEST, "기존 장바구니와 다른 매장의 메뉴는 담을 수 없습니다."),
     ENTER_CHAT_ROOM_INAVAILABLE(HttpStatus.BAD_REQUEST, "제한 인원에 도달했거나 만료된 채팅방에 입장할 수 없습니다."),
@@ -33,6 +33,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.FORBIDDEN, "Refresh Token이 만료되었습니다."),
     NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "채팅방 멤버가 아닙니다."),
     NOT_HOST(HttpStatus.FORBIDDEN, "호스트가 아닙니다."),
+    SHARED_CART_ITEM_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 공유 장바구니 항목에 접근할 수 없습니다."),
     PAYMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 결제에 대한 권한이 없습니다."),
 
     // 404 NOT_FOUND
