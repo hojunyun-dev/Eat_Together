@@ -10,8 +10,10 @@ services:
     networks:
       - monitoring
     depends_on:
-      - redis # Redis가 먼저 시작되도록 의존성 추가
-      - mysql # MySQL이 먼저 시작되도록 의존성 추가
+      redis:
+        condition: service_started
+      mysql:
+        condition: service_healthy  # MySQL 이 완전히 작동된 후 실행
     environment:
       # application.yml에서 설정된 Redis 호스트와 포트는 그대로 사용합니다.
       - spring.data.redis.host=redis
@@ -36,6 +38,12 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - monitoring
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ] # MySQL 서버가 응답하는지 확인
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s # 시작 후 30초 동안은 실패해도 재시도
 
   # MySQL Exporter를 위한 새로운 서비스
   mysqld_exporter:
