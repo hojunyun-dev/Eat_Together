@@ -20,12 +20,13 @@ public enum ErrorCode {
     ORDER_PERIOD_MISMATCH(HttpStatus.BAD_REQUEST, "조회 시작일과 종료일은 함께 입력되어야 합니다."),
     INVALID_SESSION(HttpStatus.BAD_REQUEST, "유효하지 않은 세션입니다."),
     INVALID_URI(HttpStatus.BAD_REQUEST, "유효하지 않은 URI입니다."),
-    USER_NOT_DELETE(HttpStatus.BAD_REQUEST,"삭제되지 않은 유저입니다."),
+    USER_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제되지 않은 유저입니다."),
     CART_EXCEEDS_MAX_QUANTITY(HttpStatus.BAD_REQUEST, "메뉴는 최대 99개까지 담을 수 있습니다."),
     CART_INVALID_STORE(HttpStatus.BAD_REQUEST, "기존 장바구니와 다른 매장의 메뉴는 담을 수 없습니다."),
     ENTER_CHAT_ROOM_INAVAILABLE(HttpStatus.BAD_REQUEST, "제한 인원에 도달했거나 만료된 채팅방에 입장할 수 없습니다."),
     SOCIAL_NOCHANGE_PASSWORD(HttpStatus.BAD_REQUEST, "소셜 로그인 인원은 비밀번호 변경이 불가능 합니다."),
     ALREADY_PAID(HttpStatus.BAD_REQUEST, "이미 결제를 하였습니다."),
+    NO_CHATROOM_LEADER(HttpStatus.BAD_REQUEST, "채팅방 방장이 존재하지 않습니다"),
 
     // 403 FORBIDDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),
