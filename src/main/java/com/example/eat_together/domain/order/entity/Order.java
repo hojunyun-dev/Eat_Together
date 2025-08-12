@@ -69,6 +69,15 @@ public class Order extends BaseTimeEntity {
         this.totalPrice = total;
     }
 
+    public void calculateSharedTotalPrice(double personalDeliveryFee) {
+        double total = 0;
+        for (OrderItem orderItem : orderItems) {
+            total += orderItem.getPrice() * orderItem.getQuantity();
+        }
+        total += personalDeliveryFee;
+        this.totalPrice = total;
+    }
+
     public void updateStatus(OrderStatus status) {
         this.status = status;
     }

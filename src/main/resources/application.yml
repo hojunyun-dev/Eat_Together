@@ -82,6 +82,9 @@ management:
       exposure:
         include: health,info,prometheus
 
+elasticsearch:
+  uris: http://elasticsearch:9200
+
 ---
 
 cors:

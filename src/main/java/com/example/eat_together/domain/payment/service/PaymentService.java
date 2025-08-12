@@ -1,7 +1,6 @@
 package com.example.eat_together.domain.payment.service;
 
 import com.example.eat_together.domain.order.entity.Order;
-import com.example.eat_together.domain.order.repository.OrderRepository;
 import com.example.eat_together.domain.payment.dto.response.PaymentResponseDto;
 import com.example.eat_together.domain.payment.entity.Payment;
 import com.example.eat_together.domain.payment.paymentEnum.PaymentStatus;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
 
     public PaymentResponseDto confirmPayment(Long userId, Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)

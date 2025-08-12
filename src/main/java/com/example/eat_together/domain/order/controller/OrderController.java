@@ -26,7 +26,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // 주문 생성
+    // 주문 생성 (개인)
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> createOrder(@AuthenticationPrincipal UserDetails userDetails) {
 
@@ -34,6 +34,16 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(null, OrderResponse.ORDER_CREATED.getMessage()));
     }
+
+    // 주문 생성 (공유)
+    @PostMapping("/{chatRoomId}")
+    public ResponseEntity<ApiResponse<Void>> createSharedOrder(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long chatRoomId) {
+
+        orderService.createSharedOrder(Long.valueOf(userDetails.getUsername()), chatRoomId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.of(null, OrderResponse.ORDER_CREATED.getMessage()));
+    }
+
 
     // 주문 목록 페이징 조회
     @GetMapping
