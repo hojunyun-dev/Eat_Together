@@ -17,10 +17,12 @@ public class ChatProducerService {
     private static final String TOPIC = "chats";
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final ChatUtil chatUtil;
 
     public void send(Long roomId, ChatMessageRequestDto message) {
         try{
             ChatMessageResponseDto chatMessageResponseDto = ChatMessageResponseDto.of(message.getUserId(), roomId, message.getMessage());
+            chatUtil.saveMessage(message, message.getUserId(), roomId);
             String jsonMessage = objectMapper.writeValueAsString(chatMessageResponseDto);
             kafkaTemplate.send(TOPIC, String.valueOf(roomId), jsonMessage);
         } catch(Exception e){
