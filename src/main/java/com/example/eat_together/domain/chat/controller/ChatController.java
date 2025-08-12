@@ -1,83 +1,26 @@
 package com.example.eat_together.domain.chat.controller;
 
-import com.example.eat_together.domain.chat.chatEnum.ChatResponse;
-import com.example.eat_together.domain.chat.chatEnum.FoodType;
-import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
-import com.example.eat_together.domain.chat.dto.ChatGroupUpdateRequestDto;
-import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
-import com.example.eat_together.domain.chat.dto.ChatRoomDto;
-import com.example.eat_together.domain.chat.service.ChatService;
-import com.example.eat_together.global.dto.ApiResponse;
+import com.example.eat_together.domain.chat.dto.ChatMessageRequestDto;
+import com.example.eat_together.domain.chat.service.ChatProducerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
 
-import java.util.List;
-
+@Slf4j
+@Controller
 @RequiredArgsConstructor
-@RestController
-@RequestMapping("/chats")
 public class ChatController {
-    private final ChatService chatService;
+    private final ChatProducerService chatProducerService;
 
-    //채팅방 생성
-    @PostMapping()
-    public ResponseEntity<ApiResponse<Void>> createChatGroup(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ChatGroupCreateRequestDto chatGroupCreateRequestDto) {
-        chatService.createChatGroup(Long.valueOf(userDetails.getUsername()), chatGroupCreateRequestDto);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.CREATE_CHAT_ROOM.getMessage()));
+    @MessageMapping("/roomId/{roomId}")
+    public void send(ChatMessageRequestDto chatMessageRequestDto, @DestinationVariable Long roomId) {
+        chatProducerService.send(roomId, chatMessageRequestDto);
     }
 
-    //채팅방 참여 및 입장
-    @PostMapping("/{roomId}/enter")
-    public ResponseEntity<ApiResponse<Void>> enterChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
-        boolean result = chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
-        if(result)
-            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.ENTER_CHAT_ROOM.getMessage()));
-        else
-            return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.PARTICIPATE_CHAT_ROOM.getMessage()));
-    }
-
-    //채팅방 조회
-    @GetMapping()
-    public ResponseEntity<ApiResponse<List<ChatRoomDto>>> getChatRoomList(@RequestParam(required = false) FoodType foodType, @RequestParam(required = false) String keyWord) {
-        List<ChatRoomDto> chatRoomDtoList = chatService.getChatRoomList(foodType, keyWord);
-
-        return ResponseEntity.ok(ApiResponse.of(chatRoomDtoList, ChatResponse.READ_CHAT_ROOM_LIST.getMessage()));
-    }
-
-    //채팅방 수정
-    @PatchMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<Void>> updateChatGroup(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId, @RequestBody ChatGroupUpdateRequestDto chatGroupUpdateRequestDto) {
-        chatService.updateChatGroup(Long.valueOf(userDetails.getUsername()), roomId, chatGroupUpdateRequestDto);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.UPDATE_CHAT_ROOM.getMessage()));
-    }
-
-    //채팅방 퇴장
-    @DeleteMapping("/{roomId}/quit")
-    public ResponseEntity<ApiResponse<Void>> quitChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
-        chatService.quitChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.QUIT_CHAT_ROOM.getMessage()));
-    }
-
-    //채팅방 삭제
-    @DeleteMapping("/{roomId}/remove")
-    public ResponseEntity<ApiResponse<Void>> deleteChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
-        chatService.deleteChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
-
-        return ResponseEntity.ok(ApiResponse.of(null, ChatResponse.DELETE_CHAT_ROOM.getMessage()));
-    }
-
-    //기존 채팅 내역 조회
-    @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
-        List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
-
-        return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
-    }
 }

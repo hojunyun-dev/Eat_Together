@@ -1,27 +1,43 @@
 package com.example.eat_together.global.config;
 
 import com.example.eat_together.global.util.JwtUtil;
-import com.example.eat_together.global.websocket.ChatMessageHandler;
-import com.example.eat_together.global.websocket.WebSocketHandShakeHandler;
+//import com.example.eat_together.global.websocket.ChatMessageHandler;
+import com.example.eat_together.global.websocket.WebSocketAuthCheckInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final ChatMessageHandler chatMessageHandler;
     private final JwtUtil jwtUtil;
+    private final WebSocketAuthCheckInterceptor webSocketAuthCheckInterceptor;
 
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
         //WebSocketHandler 등록
-        registry.addHandler(chatMessageHandler, "/chats/send/**")
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
+/*
+        registry.addEndpoint("/chats/send")
                 .setAllowedOrigins("*")
-                .setHandshakeHandler(new WebSocketHandShakeHandler(jwtUtil));//토큰 가져오기 위해 HadnShakeHandler 등록
+                .withSockJS();
+
+ */
+    }
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/sub");
+        registry.setApplicationDestinationPrefixes("/pub");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(webSocketAuthCheckInterceptor);
     }
 }

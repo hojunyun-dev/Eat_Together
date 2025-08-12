@@ -35,6 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/users/reissue",
             "/users/redis",
             "/favicon.ico",
+            "/ws/**",
+            "/favicon.ico",
             "/actuator/prometheus",
             "/chats/**"
     );

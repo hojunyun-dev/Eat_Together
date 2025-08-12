@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/users/reissue",
                                 "/users/redis",
                                 "/favicon.ico",
+                                "/ws/**",
                                 "/actuator/prometheus",
                                 "/chats/**")
                         .permitAll()
