@@ -2,6 +2,8 @@ package com.example.eat_together.global.redis.service;
 
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
 import com.example.eat_together.domain.order.repository.OrderRepository;
+import com.example.eat_together.domain.payment.paymentEnum.PaymentStatus;
+import com.example.eat_together.domain.payment.repository.PaymentRepository;
 import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.exception.CustomException;
@@ -20,10 +22,12 @@ public class LockService {
 
     private final RedissonClient redissonClient;
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
-    public LockService(RedissonClient redissonClient, OrderRepository orderRepository) {
+    public LockService(RedissonClient redissonClient, OrderRepository orderRepository, PaymentRepository paymentRepository) {
         this.redissonClient = redissonClient;
         this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     // 개별 주문 락
@@ -51,6 +55,19 @@ public class LockService {
                 if (exists) {
                     throw new CustomException(ErrorCode.DUPLICATE_ORDER);
                 }
+            }
+            task.run();
+        });
+    }
+
+    // 결제
+    public void executeWithLockForPayment(Long paymentId, Runnable task) {
+        String lockKey = "payment_lock:" + paymentId;
+        executeWithLock(lockKey, 5, 10, () -> {
+            // 락 내부에서 중복 결제 체크
+            boolean exists = paymentRepository.existsByIdAndStatus(paymentId, PaymentStatus.SUCCESS);
+            if (exists) {
+                throw new CustomException(ErrorCode.ALREADY_PAID);
             }
             task.run();
         });
