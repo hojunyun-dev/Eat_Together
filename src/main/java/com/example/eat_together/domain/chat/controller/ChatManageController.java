@@ -6,6 +6,7 @@ import com.example.eat_together.domain.chat.dto.ChatGroupCreateRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatGroupUpdateRequestDto;
 import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
 import com.example.eat_together.domain.chat.dto.ChatRoomDto;
+import com.example.eat_together.domain.chat.service.ChatMessageRedisService;
 import com.example.eat_together.domain.chat.service.ChatService;
 import com.example.eat_together.global.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequestMapping("/chats")
 public class ChatManageController {
     private final ChatService chatService;
+    private final ChatMessageRedisService chatMessageRedisService;
 
     //채팅방 생성
     @PostMapping()
@@ -74,8 +76,15 @@ public class ChatManageController {
     }
 
     //기존 채팅 내역 조회
-    @GetMapping("/{roomId}")
+    @GetMapping("/{roomId}/v2")
     public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
+        List<ChatMessageResponseDto> chatMessageList = chatMessageRedisService.getMessageList(roomId);
+
+        return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
+    }
+
+    @GetMapping("/{roomId}/v1")
+    public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageListV1(@PathVariable Long roomId) {
         List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
 
         return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
