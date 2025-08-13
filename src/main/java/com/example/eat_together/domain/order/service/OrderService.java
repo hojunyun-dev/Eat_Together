@@ -25,6 +25,7 @@ import com.example.eat_together.domain.users.common.enums.UserRole;
 import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
+import com.example.eat_together.global.redis.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,42 +47,38 @@ public class OrderService {
     private final OrderCacheRepository orderCacheRepository;
     private final PaymentRepository paymentRepository;
     private final SharedCartRepository sharedCartRepository;
+    private final LockService lockService;
 
     // 주문 생성 (개인 장바구니)
     @Transactional
     public void createOrder(Long userId) {
-
         Cart cart = cartRepository.findByUserUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
-
-        User user = cart.getUser();
 
         if (cart.getCartItems().isEmpty()) {
             throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        Store store = cart.getCartItems().get(0).getMenu().getStore();
+        Long storeId = cart.getCartItems().get(0).getMenu().getStore().getStoreId();
 
-        // 주문완료상태인 주문이 같은 가게에 있으면 중복 주문으로 간주 (JPA 비관적락 적용)
-        List<Order> orderWithOrdered =
-                orderRepository.findByUserIdAndStoreIdAndStatus(userId, store.getStoreId(), OrderStatus.ORDERED);
-        if (!orderWithOrdered.isEmpty()) {
-            throw new CustomException(ErrorCode.DUPLICATE_ORDER);
-        }
+        lockService.executeWithLockForOrder(userId, storeId, () -> {
+            User user = cart.getUser();
+            Store store = cart.getCartItems().get(0).getMenu().getStore();
 
-        Order order = Order.of(user, store);
+            Order order = Order.of(user, store);
 
-        for (CartItem cartItem : cart.getCartItems()) {
-            OrderItem orderItem = OrderItem.of(order, cartItem.getMenu(), cartItem.getQuantity());
-            order.addOrderItem(orderItem);
-        }
+            for (CartItem cartItem : cart.getCartItems()) {
+                OrderItem orderItem = OrderItem.of(order, cartItem.getMenu(), cartItem.getQuantity());
+                order.addOrderItem(orderItem);
+            }
 
-        order.calculateTotalPrice();
+            order.calculateTotalPrice();
 
-        orderRepository.save(order);
+            orderRepository.save(order);
 
-        Payment payment = Payment.of(order);
-        paymentRepository.save(payment);
+            Payment payment = Payment.of(order);
+            paymentRepository.save(payment);
+        });
     }
 
     // 주문 생성 (공유 장바구니)
@@ -127,41 +124,39 @@ public class OrderService {
                 .distinct()
                 .toList();
 
-        // 배송비 계산 및 설정
-        double deliveryFeePerUser = store.getDeliveryFee() / participants.size();
+        // 락과 함께 중복 체크 및 주문 생성
+        lockService.executeWithLockForSharedOrder(chatRoomId, store, participants, () -> {
 
-        // 참여자별 주문 생성
-        for (User participant : participants) {
-            // 중복 주문 체크
-            List<Order> orderWithOrdered = orderRepository.findByUserIdAndStoreIdAndStatus(participant.getUserId(), store.getStoreId(), OrderStatus.ORDERED);
-            if (!orderWithOrdered.isEmpty()) {
-                throw new CustomException(ErrorCode.DUPLICATE_ORDER);
-            }
+            // 배송비 계산 및 설정
+            double deliveryFeePerUser = store.getDeliveryFee() / participants.size();
 
-            Order order = Order.of(participant, store);
+            // 참여자별 주문 생성
+            for (User participant : participants) {
+                Order order = Order.of(participant, store);
 
-            boolean firstItem = true;
-            for (SharedCartItem item : sharedCart.getItems()) {
-                if (item.getUser().equals(participant)) {
-                    OrderItem orderItem = OrderItem.of(order, item.getMenu(), item.getQuantity());
-                    order.addOrderItem(orderItem);
+                boolean firstItem = true;
+                for (SharedCartItem item : sharedCart.getItems()) {
+                    if (item.getUser().equals(participant)) {
+                        OrderItem orderItem = OrderItem.of(order, item.getMenu(), item.getQuantity());
+                        order.addOrderItem(orderItem);
 
-                    // 배송비는 첫 아이템에만 할당
-                    if (firstItem) {
-                        item.setDeliveryFeePerUser(deliveryFeePerUser);
-                        firstItem = false;
-                    } else {
-                        item.setDeliveryFeePerUser(0.0);
+                        // 배송비는 첫 아이템에만 할당
+                        if (firstItem) {
+                            item.setDeliveryFeePerUser(deliveryFeePerUser);
+                            firstItem = false;
+                        } else {
+                            item.setDeliveryFeePerUser(0.0);
+                        }
                     }
                 }
+                
+                order.calculateSharedTotalPrice(deliveryFeePerUser);
+                orderRepository.save(order);
+
+                Payment payment = Payment.of(order);
+                paymentRepository.save(payment);
             }
-
-            order.calculateSharedTotalPrice(deliveryFeePerUser);
-            orderRepository.save(order);
-
-            Payment payment = Payment.of(order);
-            paymentRepository.save(payment);
-        }
+        });
     }
 
     // 주문 목록 조회

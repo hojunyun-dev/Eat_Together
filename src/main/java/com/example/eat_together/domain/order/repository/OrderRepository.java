@@ -12,4 +12,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
 
     //라이더와 상태 기반 주문 조회
     List<Order> findByRider_IdAndStatus(Long riderId, OrderStatus status);
+
+    boolean existsByUserUserIdAndStoreStoreIdAndStatus(Long userId, Long storeId, OrderStatus status);
 }
