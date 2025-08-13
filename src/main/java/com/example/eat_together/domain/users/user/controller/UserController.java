@@ -64,13 +64,39 @@ public class UserController {
      * 닉네임 or 이름 검색 기능을 가짐
      *
      */
-    @PostMapping("/find/user")
-    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfo(@Valid @RequestBody UserSearchRequestDto request){
 
-        List<UserInfoResponseDto> userInfo = userService.findByUserInfo(request);
+    // 이 버전을 사용
+    @PostMapping("/find/user/v4")
+    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV4(@Valid @RequestBody UserSearchRequestDto request){
+
+        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV4(request);
 
         return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
     }
+
+//    @PostMapping("/find/user")
+//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfo(@Valid @RequestBody UserSearchRequestDto request){
+//
+//        List<UserInfoResponseDto> userInfo = userService.findByUserInfo(request);
+//
+//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
+//    }
+//
+//    @PostMapping("/find/user/v2")
+//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV2(@Valid @RequestBody UserSearchRequestDto request){
+//
+//        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV2(request);
+//
+//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
+//    }
+//
+//    @PostMapping("/find/user/v3")
+//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV3(@Valid @RequestBody UserSearchRequestDto request){
+//
+//        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV3(request);
+//
+//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
+//    }
 
     // 유저 전체 조회 ( ADMIN 전용 )
     @GetMapping("/find/all")
