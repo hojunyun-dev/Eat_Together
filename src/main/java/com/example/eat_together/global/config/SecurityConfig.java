@@ -41,9 +41,15 @@ public class SecurityConfig {
                                 "/users/reissue",
                                 "/users/redis",
                                 "/favicon.ico",
+                                "/ws/**",
                                 "/actuator/prometheus",
                                 "/chats/**")
                         .permitAll()
+
+                        // 게스트 카트: merge는 인증 필요, 나머지 게스트 카트는 무인증
+                        .requestMatchers("/guest-carts/merge").authenticated()
+                        .requestMatchers("/stores/**/guest-carts/**", "/guest-carts/**").permitAll()
+
                         // 그 외의 요청은 @PreAuthorize를 사용하여 확인
                         .anyRequest().authenticated()
                 )

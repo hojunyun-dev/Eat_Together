@@ -17,6 +17,12 @@ public class CartItemResponseDto {
     private final double price;
     private final double totalPrice;
 
+    /**
+     * {@link CartItem} 엔티티를 기반으로 {@code CartItemResponseDto} 생성
+     *
+     * @param cartItem 장바구니 항목 엔티티
+     * @return 변환된 DTO 객체
+     */
     public static CartItemResponseDto from(CartItem cartItem) {
         return CartItemResponseDto.builder()
                 .itemId(cartItem.getId())

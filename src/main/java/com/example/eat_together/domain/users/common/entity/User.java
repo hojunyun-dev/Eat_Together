@@ -11,12 +11,10 @@ import com.example.eat_together.global.entity.BaseTimeEntity;
 import com.example.eat_together.global.exception.CustomException;
 import com.example.eat_together.global.exception.ErrorCode;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +22,10 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_name", columnList = "name"),
+        @Index(name = "idx_user_nickname",columnList = "nickname")
+})
 public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

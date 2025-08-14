@@ -54,8 +54,14 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.17.4'
+
     // WebSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    //kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 
     // Querydsl JPA
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
@@ -63,11 +69,11 @@ dependencies {
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
-    //MapStruct
+    // MapStruct
     implementation 'org.mapstruct:mapstruct:1.6.2'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
 
-    //Model Mapper
+    // Model Mapper
     implementation 'org.modelmapper:modelmapper:2.4.2'
 
     // ElasticSearch

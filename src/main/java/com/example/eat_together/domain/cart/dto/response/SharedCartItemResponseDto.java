@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * 공유 장바구니 항목 응답 정보를 담는 DTO
+ */
 @Getter
 @JsonPropertyOrder({
         "userName",
@@ -40,6 +43,13 @@ public class SharedCartItemResponseDto {
         this.totalPrice = totalPrice;
     }
 
+    /**
+     * {@link SharedCartItem} 엔티티를 기반으로 {@code SharedCartItemResponseDto} 생성
+     *
+     * @param item               공유 장바구니 항목 엔티티
+     * @param deliveryFeePerUser 해당 항목에 부과되는 개인 배달비
+     * @return 변환된 DTO 객체
+     */
     public static SharedCartItemResponseDto from(SharedCartItem item, double deliveryFeePerUser) {
         double total = item.getMenu().getPrice() * item.getQuantity() + deliveryFeePerUser;
         return SharedCartItemResponseDto.builder()

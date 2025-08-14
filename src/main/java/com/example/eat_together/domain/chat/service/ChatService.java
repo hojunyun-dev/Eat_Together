@@ -143,8 +143,7 @@ public class ChatService {
                 .map(chatMessage -> ChatMessageResponseDto
                         .of(chatMessage.getUser().getUserId(),
                                 chatMessage.getChatRoom().getId(),
-                                chatMessage.getMessage(),
-                                chatMessage.getUpdatedAt()
+                                chatMessage.getMessage()
                         )).toList();
 
         return chatMessageResponseDtoList;

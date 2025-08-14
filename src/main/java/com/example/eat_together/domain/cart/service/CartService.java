@@ -5,12 +5,10 @@ import com.example.eat_together.domain.cart.dto.response.CartItemResponseDto;
 import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.entity.Cart;
 import com.example.eat_together.domain.cart.entity.CartItem;
-import com.example.eat_together.domain.cart.entity.SharedCartItem;
 import com.example.eat_together.domain.cart.repository.CartItemRepository;
 import com.example.eat_together.domain.cart.repository.CartRepository;
 import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.repository.MenuRepository;
-import com.example.eat_together.domain.store.entity.Store;
 import com.example.eat_together.domain.store.repository.StoreRepository;
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.domain.users.user.repository.UserRepository;
@@ -24,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 장바구니 도메인의 비즈니스 로직을 담당하는 서비스 클래스
+ * 장바구니 도메인의 비즈니스 로직을 처리하는 서비스
  */
 @Service
 @RequiredArgsConstructor
@@ -51,7 +49,7 @@ public class CartService {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
-        Store store = storeRepository.findById(storeId)
+        storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         Cart cart = cartRepository.findByUserUserId(userId)
@@ -117,13 +115,11 @@ public class CartService {
                 .build();
     }
 
-
-
     /**
      * 장바구니 항목 수량 수정
      *
      * @param itemId     항목 ID
-     * @param requestDto 수정할 수량 정보
+     * @param requestDto 변경할 수량 정보
      */
     @Transactional
     public void updateQuantity(Long itemId, CartItemRequestDto requestDto) {
@@ -136,7 +132,6 @@ public class CartService {
 
         cartItem.updateQuantity(requestDto.getQuantity());
     }
-
 
     /**
      * 장바구니 항목 삭제

@@ -1,5 +1,6 @@
 package com.example.eat_together.global.config;
 
+import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.MenuResponseDto;
 import com.example.eat_together.domain.menu.dto.respones.PagingMenuResponseDto;
 import com.example.eat_together.domain.order.dto.response.OrderDetailResponseDto;
@@ -8,6 +9,7 @@ import com.example.eat_together.domain.store.dto.response.StoreResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -15,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+@EnableCaching
 @Configuration
 public class CacheConfig {
 
@@ -26,83 +29,58 @@ public class CacheConfig {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // TimeStamp를 문자열로 저장
     }
 
-    // 메뉴 단건 조회 Redis 설정
-    @Bean
-    public RedisTemplate<String, MenuResponseDto> menuRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, MenuResponseDto> template = new RedisTemplate<>();
+    private <T>RedisTemplate<String, T> genericRedisTemplate(RedisConnectionFactory connectionFactory, Class<T> clazz) {
+        RedisTemplate<String, T> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<MenuResponseDto> serializer =
-                new Jackson2JsonRedisSerializer<>(MenuResponseDto.class);
+        Jackson2JsonRedisSerializer<T> serializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper(), clazz);
 
-        serializer.setObjectMapper(objectMapper());
         template.setValueSerializer(serializer);
         template.afterPropertiesSet();
         return template;
+    }
+
+    // 메뉴 단건 조회 Redis 설정
+    @Bean
+    public RedisTemplate<String, MenuResponseDto> menuRedisTemplate(RedisConnectionFactory connectionFactory) {
+
+        return genericRedisTemplate(connectionFactory, MenuResponseDto.class);
     }
 
     // 매장 메뉴 목록 조회 Redis 설정
     @Bean
     public RedisTemplate<String, PagingMenuResponseDto> pagingMenuRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, PagingMenuResponseDto> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<PagingMenuResponseDto> serializer =
-                new Jackson2JsonRedisSerializer<>(PagingMenuResponseDto.class);
-
-        serializer.setObjectMapper(objectMapper());
-        template.setValueSerializer(serializer);
-        template.afterPropertiesSet();
-        return template;
+        return genericRedisTemplate(connectionFactory, PagingMenuResponseDto.class);
     }
 
     // 매장 단건 조회 Redis 설정
     @Bean
     public RedisTemplate<String, StoreResponseDto> storeRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, StoreResponseDto> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<StoreResponseDto> serializer =
-                new Jackson2JsonRedisSerializer<>(StoreResponseDto.class);
-
-        serializer.setObjectMapper(objectMapper());
-        template.setValueSerializer(serializer);
-        template.afterPropertiesSet();
-        return template;
+        return genericRedisTemplate(connectionFactory, StoreResponseDto.class);
     }
 
     // 매장 목록 조회 Redis 설정
     @Bean
     public RedisTemplate<String, PagingStoreResponseDto> pagingStoreRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, PagingStoreResponseDto> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<PagingStoreResponseDto> serializer =
-                new Jackson2JsonRedisSerializer<>(PagingStoreResponseDto.class);
-
-        serializer.setObjectMapper(objectMapper());
-        template.setValueSerializer(serializer);
-        template.afterPropertiesSet();
-        return template;
+        return genericRedisTemplate(connectionFactory, PagingStoreResponseDto.class);
     }
 
     // 주문 단건 조회 Redis 설정
     @Bean
     public RedisTemplate<String, OrderDetailResponseDto> orderDetailResponseDtoRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, OrderDetailResponseDto> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<OrderDetailResponseDto> serializer =
-                new Jackson2JsonRedisSerializer<>(OrderDetailResponseDto.class);
+        return genericRedisTemplate(connectionFactory, OrderDetailResponseDto.class);
+    }
 
-        serializer.setObjectMapper(objectMapper());
-        template.setValueSerializer(serializer);
-        template.afterPropertiesSet();
-        return template;
+    // 채팅 조회 Redis 설정
+    @Bean
+    public RedisTemplate<String, ChatMessageResponseDto> chatMessageResponseDtoRedisTemplate(RedisConnectionFactory connectionFactory) {
+
+        return genericRedisTemplate(connectionFactory, ChatMessageResponseDto.class);
     }
 }

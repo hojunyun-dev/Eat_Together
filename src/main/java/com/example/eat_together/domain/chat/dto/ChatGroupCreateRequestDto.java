@@ -3,6 +3,7 @@ package com.example.eat_together.domain.chat.dto;
 import com.example.eat_together.domain.chat.chatEnum.ChatGroupStatus;
 import com.example.eat_together.domain.chat.chatEnum.FoodType;
 import com.example.eat_together.domain.chat.entity.ChatGroup;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ChatGroupCreateRequestDto {
-    @NotNull(message = "제목은 필수입니다.")
+    @NotBlank(message = "제목은 필수입니다.")
     private String title;
 
     private String description;

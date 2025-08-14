@@ -27,6 +27,8 @@ public enum ErrorCode {
     SOCIAL_NOCHANGE_PASSWORD(HttpStatus.BAD_REQUEST, "소셜 로그인 인원은 비밀번호 변경이 불가능 합니다."),
     ALREADY_PAID(HttpStatus.BAD_REQUEST, "이미 결제를 하였습니다."),
     NO_CHATROOM_LEADER(HttpStatus.BAD_REQUEST, "채팅방 방장이 존재하지 않습니다"),
+    CANT_PRODUCE_MESSAGE(HttpStatus.BAD_REQUEST, "메세지를 송신에 실패했습니다."),
+    CANT_CONSUME_MESSAGE(HttpStatus.BAD_REQUEST, "메세지 수신에 실패했습니다."),
 
     // 403 FORBIDDEN
     ADMIN_ACCOUNT_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "관리자 계정은 삭제할 수 없습니다."),

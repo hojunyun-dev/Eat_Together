@@ -29,7 +29,7 @@ public class ChatUtil {
     private final ChatMessageRepository chatMessageRepository;
 
     //사용자
-    protected User getUser(Long userId) {
+    public User getUser(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty())
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
@@ -39,7 +39,7 @@ public class ChatUtil {
     }
 
     //채팅방
-    protected ChatRoom getChatRoom(Long roomId) {
+    public ChatRoom getChatRoom(Long roomId) {
         Optional<ChatRoom> optionalChatRoom = chatRoomRepository.findById(roomId);
         if (optionalChatRoom.isEmpty())
             throw new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM);

@@ -5,6 +5,9 @@ import lombok.Getter;
 
 import java.util.List;
 
+/**
+ * 공유 장바구니 응답 정보를 담는 DTO
+ */
 @Getter
 @Builder
 public class SharedCartResponseDto {
