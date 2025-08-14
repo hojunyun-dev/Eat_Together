@@ -14,20 +14,12 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final JwtUtil jwtUtil;
     private final WebSocketAuthCheckInterceptor webSocketAuthCheckInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        //WebSocketHandler 등록
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*");
-/*
-        registry.addEndpoint("/chats/send")
-                .setAllowedOrigins("*")
-                .withSockJS();
-
- */
     }
 
     @Override

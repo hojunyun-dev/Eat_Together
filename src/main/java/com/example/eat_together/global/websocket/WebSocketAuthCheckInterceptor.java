@@ -42,9 +42,6 @@ public class WebSocketAuthCheckInterceptor implements ChannelInterceptor {
             Principal principal = getPrincipal(accessor);
             accessor.setUser(principal);
         }
-        if(accessor.getCommand() == StompCommand.SUBSCRIBE) {
-            //구독 권한 체크: 구독 ROOMiD와 동일한가?
-        }
         return message;
     }
 

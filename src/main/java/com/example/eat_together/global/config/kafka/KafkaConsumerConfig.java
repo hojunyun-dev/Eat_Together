@@ -16,7 +16,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    //kafka에 메세지 수신 위한 producer 객체
+    //kafka에 메세지 수신 위한 consumer 객체
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> map = new HashMap<>();
