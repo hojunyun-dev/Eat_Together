@@ -23,8 +23,6 @@ public class KafkaProducerConfig {
         //key, value 직렬화 시 사용할 serializer
         map.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         map.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        //batch size
-        map.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
 
         return new DefaultKafkaProducerFactory<>(map);
     }
