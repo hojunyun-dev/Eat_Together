@@ -25,6 +25,9 @@ services:
       - spring.elasticsearch.uris=http://elasticsearch:9200
     env_file:
       - .env
+    labels:
+      co.elastic.logs/enabled: "true"
+
 
   # MySQL 데이터베이스
   mysql:
@@ -68,6 +71,8 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes: # volumes 미설정 시 프로그램 시작 시 마다 ES Index가 날아가 검색 불가
+      - esdata:/usr/share/elasticsearch/data
     healthcheck:
       test: [ "CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
@@ -127,19 +132,6 @@ services:
         }'
       "
 
-  # kibana 추가
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.18.1   # ES와 동일 버전 사용
-    container_name: kibana
-    environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    ports:
-      - "5601:5601"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - monitoring
 
   # 모니터링 스택
   mysqld_exporter:
@@ -192,6 +184,41 @@ services:
     networks:
       - monitoring
 
+  # kibana 추가
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.18.1   # ES와 동일 버전 사용
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      # 알림/모니터링·리포팅·보안 세션용 암호화 키 (각 32자 이상) 아래 키가 없으면 모니터링 불가
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTED_SAVED_OBJECTS_KEY}
+      XPACK_REPORTING_ENCRYPTIONKEY: ${KIBANA_REPORTING_KEY}
+      XPACK_SECURITY_ENCRYPTIONKEY: ${KIBANA_SECURITY_KEY}
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+  # Filebeat (로그 수집기) 추가
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.18.1
+    container_name: filebeat
+    user: root
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - monitoring
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro   # Filebeat 설정(읽기전용)
+      - filebeat-data:/usr/share/filebeat/data                         # 레지스트리(오프셋) 영속화
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro       # 도커 컨테이너 로그 경로
+      - /var/run/docker.sock:/var/run/docker.sock                      # 도커 오토디스커버용 소켓
+    command: [ "-e", "--strict.perms=false" ]        # -e: stdout 로깅, 권한 체크 완화
+
 networks:
   monitoring:
     driver: bridge
@@ -199,3 +226,5 @@ networks:
 volumes:
   grafana_data:
   mysql_data:
+  filebeat-data:
+  esdata:
