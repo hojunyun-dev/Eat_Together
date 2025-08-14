@@ -14,7 +14,7 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final JwtUtil jwtUtil;
+    //JwtUtil 주입 제거: 인터셉터에서 JWT 처리하므로 여기선 불필요
     private final WebSocketAuthCheckInterceptor webSocketAuthCheckInterceptor;
 
     @Override
