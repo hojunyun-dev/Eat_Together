@@ -9,6 +9,7 @@ import com.example.eat_together.domain.cart.repository.SharedCartItemRepository;
 import com.example.eat_together.domain.cart.repository.SharedCartRepository;
 import com.example.eat_together.domain.chat.entity.ChatRoom;
 import com.example.eat_together.domain.chat.repository.ChatRoomRepository;
+import com.example.eat_together.domain.chat.repository.ChatRoomUserRepository;
 import com.example.eat_together.domain.menu.entity.Menu;
 import com.example.eat_together.domain.menu.repository.MenuRepository;
 import com.example.eat_together.domain.users.common.entity.User;
@@ -21,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 공유 장바구니 도메인의 비즈니스 로직을 처리하는 서비스
+ */
 @Service
 @RequiredArgsConstructor
 public class SharedCartService {
@@ -30,12 +34,35 @@ public class SharedCartService {
     private final ChatRoomRepository chatRoomRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
+    private final ChatRoomUserRepository chatRoomUserRepository;
 
     /**
-     * 공유 장바구니 담기/수량증가
+     * 사용자가 채팅방의 멤버인지 검증
+     *
+     * @param userId 사용자 ID
+     * @param roomId 채팅방 ID
+     */
+    private void assertMember(Long userId, Long roomId) {
+        if (!chatRoomRepository.existsById(roomId)) {
+            throw new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM);
+        }
+        if (!chatRoomUserRepository.existsByUserUserIdAndChatRoomId(userId, roomId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    /**
+     * 공유 장바구니에 항목 추가
+     *
+     * @param userId     사용자 ID
+     * @param roomId     채팅방 ID
+     * @param storeId    매장 ID
+     * @param requestDto 메뉴 및 수량 정보
      */
     @Transactional
     public void addItem(Long userId, Long roomId, Long storeId, SharedCartItemRequestDto requestDto) {
+        assertMember(userId, roomId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -48,7 +75,6 @@ public class SharedCartService {
         SharedCart sharedCart = sharedCartRepository.findByChatRoomId(roomId)
                 .orElseGet(() -> sharedCartRepository.save(SharedCart.of(chatRoom)));
 
-        // 같은 방 내 다른 매장 메뉴를 섞어서 담지 못하게 제약
         if (!sharedCart.getItems().isEmpty()) {
             Long existingStoreId = sharedCart.getItems().get(0).getMenu().getStore().getStoreId();
             if (!existingStoreId.equals(storeId)) {
@@ -63,11 +89,15 @@ public class SharedCartService {
                 .ifPresentOrElse(
                         item -> {
                             int newQuantity = item.getQuantity() + requestDto.getQuantity();
-                            if (newQuantity > 99) throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            if (newQuantity > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
                             item.updateQuantity(newQuantity);
                         },
                         () -> {
-                            if (requestDto.getQuantity() > 99) throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            if (requestDto.getQuantity() > 99) {
+                                throw new CustomException(ErrorCode.CART_EXCEEDS_MAX_QUANTITY);
+                            }
                             SharedCartItem newItem = SharedCartItem.of(menu, user, requestDto.getQuantity());
                             sharedCart.addItem(newItem);
                         }
@@ -75,13 +105,20 @@ public class SharedCartService {
     }
 
     /**
-     * 공유 장바구니 조회
-     * - 현재 "아이템을 담은 유저 수" 기준으로 배달팁 1/n 계산 → 응답 DTO에만 반영(표시용)
+     * 공유 장바구니 항목 전체 조회
+     *
+     * @param userId 사용자 ID
+     * @param roomId 채팅방 ID
+     * @return 공유 장바구니 응답 DTO
      */
     @Transactional(readOnly = true)
-    public SharedCartResponseDto getSharedCartItems(Long roomId) {
+    public SharedCartResponseDto getSharedCartItems(Long userId, Long roomId) {
+        assertMember(userId, roomId);
+
         List<SharedCartItem> items = sharedCartItemRepository.findBySharedCart_ChatRoom_Id(roomId);
-        if (items.isEmpty()) throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
+        if (items.isEmpty()) {
+            throw new CustomException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
 
         Long storeId = items.get(0).getMenu().getStore().getStoreId();
         double deliveryFee = items.get(0).getMenu().getStore().getDeliveryFee();
@@ -105,10 +142,17 @@ public class SharedCartService {
     }
 
     /**
-     * 공유 장바구니 수량 변경
+     * 공유 장바구니 항목 수량 수정
+     *
+     * @param userId     사용자 ID
+     * @param roomId     채팅방 ID
+     * @param itemId     항목 ID
+     * @param requestDto 변경할 수량 정보
      */
     @Transactional
     public void updateQuantity(Long userId, Long roomId, Long itemId, SharedCartItemRequestDto requestDto) {
+        assertMember(userId, roomId);
+
         SharedCartItem item = sharedCartItemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
@@ -127,9 +171,15 @@ public class SharedCartService {
 
     /**
      * 공유 장바구니 항목 삭제
+     *
+     * @param userId 사용자 ID
+     * @param roomId 채팅방 ID
+     * @param itemId 항목 ID
      */
     @Transactional
     public void deleteItem(Long userId, Long roomId, Long itemId) {
+        assertMember(userId, roomId);
+
         SharedCartItem item = sharedCartItemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
@@ -140,6 +190,4 @@ public class SharedCartService {
 
         sharedCartItemRepository.delete(item);
     }
-
-
 }

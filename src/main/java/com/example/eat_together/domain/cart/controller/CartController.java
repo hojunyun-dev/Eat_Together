@@ -13,11 +13,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 장바구니 관련 요청 처리하는 컨트롤러
+ * {@code CartController}
+ * 로그인 사용자의 장바구니 기능을 처리하는 컨트롤러
+ * <p>
+ * 장바구니 항목 추가, 조회, 수량 수정, 삭제 기능 제공
+ * </p>
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
 public class CartController {
 
     private final CartService cartService;
@@ -28,7 +31,7 @@ public class CartController {
      * @param userDetails 로그인 사용자 정보
      * @param storeId     매장 ID
      * @param requestDto  메뉴 및 수량 정보
-     * @return 생성 완료 응답
+     * @return HTTP 201(Created) 상태 코드와 추가 완료 응답
      */
     @PostMapping("/stores/{storeId}/carts/items")
     public ResponseEntity<ApiResponse<Void>> addItem(
@@ -42,10 +45,10 @@ public class CartController {
     }
 
     /**
-     * 장바구니 조회
+     * 로그인 사용자의 장바구니 조회
      *
      * @param userDetails 로그인 사용자 정보
-     * @return 장바구니 응답 데이터
+     * @return 장바구니 데이터와 조회 완료 응답
      */
     @GetMapping("/carts/me")
     public ResponseEntity<ApiResponse<CartResponseDto>> getCart(
@@ -59,7 +62,7 @@ public class CartController {
      * 장바구니 항목 수량 수정
      *
      * @param itemId     수정할 항목 ID
-     * @param requestDto 수정할 수량 정보
+     * @param requestDto 변경할 수량 정보
      * @return 수정 완료 응답
      */
     @PatchMapping("/carts/items/{itemId}")
