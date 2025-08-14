@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 사용자 장바구니를 나타내는 엔티티
+ * 사용자 장바구니 엔티티
  */
 @Entity
 @Getter
@@ -29,16 +29,11 @@ public class Cart extends BaseTimeEntity {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 
-    /**
-     * 배달팁 (기본값 0)
-     * - 개인 주문 시 전체 배달팁
-     * - 공유 복사 시 사용자 분담 배달팁
-     */
     @Column(nullable = false)
     private double deliveryFee = 0.0;
 
     /**
-     * Cart 생성 정적 팩토리 메서드
+     * Cart 인스턴스 생성
      *
      * @param user 사용자 엔티티
      * @return 생성된 Cart 인스턴스
@@ -50,9 +45,9 @@ public class Cart extends BaseTimeEntity {
     }
 
     /**
-     * 장바구니 항목 추가
+     * 장바구니에 항목 추가
      *
-     * @param cartItem 추가할 항목
+     * @param cartItem 추가할 장바구니 항목
      */
     public void addCartItem(CartItem cartItem) {
         cartItems.add(cartItem);
@@ -60,14 +55,16 @@ public class Cart extends BaseTimeEntity {
     }
 
     /**
-     * 장바구니 항목 전체 비우기
+     * 장바구니 항목 전체 삭제
      */
     public void clearItems() {
         cartItems.clear();
     }
 
     /**
-     * 배달팁 설정
+     * 배달팁 변경
+     *
+     * @param deliveryFee 배달팁 금액
      */
     public void setDeliveryFee(double deliveryFee) {
         this.deliveryFee = deliveryFee;

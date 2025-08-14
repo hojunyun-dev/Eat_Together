@@ -1,22 +1,30 @@
 package com.example.eat_together.domain.cart.dto.response;
 
 import com.example.eat_together.domain.cart.entity.Cart;
-import com.example.eat_together.domain.cart.entity.CartItem;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 
+/**
+ * 장바구니 응답 정보를 담는 DTO
+ */
 @Getter
 @Builder
 public class CartResponseDto {
 
     private Long storeId;
     private List<CartItemResponseDto> content;
-    private double subPrice;         // 메뉴 총합
-    private double deliveryFee;      // 배달팁 (개인 주문이면 전체, 공유에서 복사 시 개인분담)
-    private double storeTotalPrice;  // 전체 금액 = 메뉴 합계 + 배달팁
+    private double subPrice;
+    private double deliveryFee;
+    private double storeTotalPrice;
 
+    /**
+     * {@link Cart} 엔티티를 기반으로 {@code CartResponseDto} 생성
+     *
+     * @param cart 장바구니 엔티티
+     * @return 변환된 DTO 객체
+     */
     public static CartResponseDto of(Cart cart) {
         List<CartItemResponseDto> items = cart.getCartItems().stream()
                 .map(CartItemResponseDto::from)

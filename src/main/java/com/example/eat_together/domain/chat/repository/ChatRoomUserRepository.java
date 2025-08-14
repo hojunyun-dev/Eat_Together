@@ -16,4 +16,5 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Long
                 WHERE cru.user.userId = :userid AND cru.chatRoom.id = :roomid
             """)
     void deleteByUserIdAndRoomId(@Param("userid") Long userId, @Param("roomid") Long roomId);
+    boolean existsByUserUserIdAndChatRoomId(Long userId, Long roomId);
 }
