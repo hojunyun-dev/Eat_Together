@@ -4,6 +4,7 @@ import com.example.eat_together.domain.order.dto.response.OrderResponseDto;
 import com.example.eat_together.domain.order.dto.response.QOrderResponseDto;
 import com.example.eat_together.domain.order.entity.Order;
 import com.example.eat_together.domain.order.orderEnum.OrderStatus;
+import com.example.eat_together.domain.payment.paymentEnum.PaymentStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 import static com.example.eat_together.domain.order.entity.QOrder.order;
 import static com.example.eat_together.domain.order.entity.QOrderItem.orderItem;
+import static com.example.eat_together.domain.payment.entity.QPayment.payment;
 
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -58,7 +60,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .and(menuNameCheck(menuName))
                 .and(storeNameCheck(storeName))
                 .and(dateCheck(startDate, endDate))
-                .and(statusCheck(status));
+                .and(statusCheck(status))
+                .and(payment.status.eq(PaymentStatus.SUCCESS));
     }
 
     @Override
@@ -68,6 +71,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         List<Long> idList = queryFactory
                 .select(order.id)
                 .from(order)
+                .join(payment).on(payment.order.eq(order))
                 .where(searchOrder(userId, menuName, storeName, startDate, endDate, status))
                 .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -83,12 +87,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         List<OrderResponseDto> content = queryFactory.select(new QOrderResponseDto(order))
                 .from(order)
                 .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
+                .join(payment).on(payment.order.eq(order))
                 .where(order.id.in(idList))
                 .orderBy(order.createdAt.desc())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory.select(order.count())
                 .from(order)
+                .join(payment).on(payment.order.eq(order))
                 .where(searchOrder(userId, menuName, storeName, startDate, endDate, status));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
@@ -101,7 +107,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .join(order.store).fetchJoin() // 주문과 가게 정보를 한 번에 조회
                 .leftJoin(order.orderItems, orderItem).fetchJoin() // 주문과 주문아이템을 한 번에 조회
                 .leftJoin(orderItem.menu).fetchJoin() // 주문아이템과 메뉴를 한 번에 조회
-                .where(order.isDeleted.eq(false),
+                .join(payment).on(payment.order.eq(order))
+                .where(payment.status.eq(PaymentStatus.SUCCESS),
+                        order.isDeleted.eq(false),
                         order.user.userId.eq(userId),
                         order.id.eq(orderId))
                 .fetchOne());
