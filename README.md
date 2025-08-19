@@ -11,10 +11,13 @@ Image of a food delivery app interface with a chat bubble icon
 - 실시간 그룹 채팅 기능을 제공합니다.
 - 함께 주문 할 배달파티 모집 기능을 제공합니다.
 
-## 🏗️ 프로젝트 구조
-🏗📦 project-root/  
-┣ 📂 data/  
-┣ 📂 gradle/   
+### 🏗️ 프로젝트 구조
+<details>
+<summary>클릭하여 프로젝트 파일 구조를 확인하세요.</summary>
+
+📦 project-root/   
+┣ 📂 data/   
+┣ 📂 gradle/  
 ┣ 📂 grafana/  
 ┣ 📂 grafana_data/  
 ┣ 📂 logs/  
@@ -28,16 +31,16 @@ Image of a food delivery app interface with a chat bubble icon
 ┃ ┃ ┃ ┃ ┃ ┗ 📂 eat_together/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 domain/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 cart/  
-┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 controller/   
-┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 dto/   
-┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 entity/   
-┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 repository/   
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 controller/  
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 dto/  
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 entity/  
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 repository/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┗ 📂 service/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 chat/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 menu/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 notification/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 order/  
-┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 payment/   
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 payment/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 rider/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂 social/  
 ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┗ 📂 store/  
@@ -68,6 +71,8 @@ Image of a food delivery app interface with a chat bubble icon
 ┣ 📜 README.md  
 ┣ 📜 settings.gradle  
 ┗ 📂 외부 라이브러리  
+
+</details> 
 
 ## 💻 기술 스택
 - Backend: Java, Spring Boot, Spring Security, JWT, Query DSL, WebSocket
