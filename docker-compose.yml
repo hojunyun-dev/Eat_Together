@@ -14,7 +14,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      elasticsearch:
+      es01:
         condition: service_healthy
     environment:
       - spring.data.redis.host=redis
@@ -22,9 +22,12 @@ services:
       - spring.datasource.url=jdbc:mysql://mysql:${MYSQL_PORT}/${MYSQL_DBNAME}
       - spring.datasource.username=${MYSQL_USERNAME}
       - spring.datasource.password=${MYSQL_PASSWORD}
-      - spring.elasticsearch.uris=http://elasticsearch:9200
+      - spring.elasticsearch.uris=http://es01:9200,http://es02:9200,http://es03:9200
     env_file:
       - .env
+    labels:
+      co.elastic.logs/enabled: "true"
+
 
   # MySQL 데이터베이스
   mysql:
@@ -55,45 +58,89 @@ services:
     ports:
       - "6379:6379"
 
-  # Elasticsearch 검색 엔진 (Nori 플러그인 포함)
-  elasticsearch:
+  # --------------------
+  # Elasticsearch 클러스터 (3노드)
+  # --------------------
+  es01:
     build:
       context: .
       dockerfile: Dockerfile.elasticsearch
-    container_name: elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
+    container_name: es01
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - node.name=es01
+      - cluster.name=es-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - xpack.security.enabled=false        # 운영 전환 시 true + 인증/SSL 구성 권장
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m      # 로컬 리소스에 맞게 조정
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes: # volumes 미설정 시 프로그램 시작 시 마다 ES Index가 날아가 검색 불가
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"   # 호스트 공개는 es01만
     healthcheck:
-      test: ["CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health || exit 1"]
+      test: [ "CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 30s
-    networks:
-      - monitoring
+    networks: [ monitoring ]
 
-  # Elasticsearch 인덱스 초기화
+  es02:
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    volumes: # volumes 미설정 시 프로그램 시작 시 마다 ES Index가 날아가 검색 불가
+      - esdata02:/usr/share/elasticsearch/data
+    networks: [ monitoring ]
+
+  es03:
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    volumes: # volumes 미설정 시 프로그램 시작 시 마다 ES Index가 날아가 검색 불가
+      - esdata03:/usr/share/elasticsearch/data
+    networks: [ monitoring ]
+
+  # Elasticsearch 초기 인덱스 생성(클러스터 올라온 뒤 실행)
   init-elasticsearch:
     image: curlimages/curl:7.83.1
     container_name: init_elasticsearch
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - monitoring
+      es01: { condition: service_healthy }
+      es02: { condition: service_healthy }
+      es03: { condition: service_healthy }
+    networks: [ monitoring ]
     command: >
       sh -c "
-        until curl --silent --fail http://elasticsearch:9200/_cluster/health > /dev/null; do
-          echo 'Waiting for Elasticsearch to be fully ready...';
+        echo 'waiting for ES cluster to be at least yellow...';
+        until curl --silent --fail 'http://es01:9200/_cluster/health?wait_for_status=yellow&timeout=120s' > /dev/null; do
           sleep 5;
         done;
-      
-        curl -X PUT 'http://elasticsearch:9200/store' -H 'Content-Type: application/json' -d '{
+        curl -X PUT 'http://es01:9200/store' -H 'Content-Type: application/json' -d '{
           \"settings\": {
             \"analysis\": {
               \"tokenizer\": {
@@ -106,22 +153,15 @@ services:
                 \"nori\": {
                   \"type\": \"custom\",
                   \"tokenizer\": \"nori_tokenizer\",
-                  \"filter\": [
-                    \"lowercase\"
-                  ]
+                  \"filter\": [\"lowercase\"]
                 }
               }
             }
           },
           \"mappings\": {
             \"properties\": {
-              \"id\": {
-                \"type\": \"keyword\"
-              },
-              \"normalizationName\": {
-                \"type\": \"text\",
-                \"analyzer\": \"nori\"
-              }
+              \"id\": { \"type\": \"keyword\" },
+              \"normalizationName\": { \"type\": \"text\", \"analyzer\": \"nori\" }
             }
           }
         }'
@@ -177,6 +217,51 @@ services:
       - ./grafana_data:/var/lib/grafana
     networks:
       - monitoring
+
+  # kibana 추가
+  kibana1:
+    image: docker.elastic.co/kibana/kibana:8.18.1
+    container_name: kibana1
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTED_SAVED_OBJECTS_KEY}
+      XPACK_REPORTING_ENCRYPTIONKEY: ${KIBANA_REPORTING_KEY}
+      XPACK_SECURITY_ENCRYPTIONKEY: ${KIBANA_SECURITY_KEY}
+    ports:
+      - "5601:5601"
+    depends_on:
+      es01: { condition: service_healthy }
+    networks: [ monitoring ]
+
+  kibana2:
+    image: docker.elastic.co/kibana/kibana:8.18.1
+    container_name: kibana2
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTED_SAVED_OBJECTS_KEY}
+      XPACK_REPORTING_ENCRYPTIONKEY: ${KIBANA_REPORTING_KEY}
+      XPACK_SECURITY_ENCRYPTIONKEY: ${KIBANA_SECURITY_KEY}
+    # 로컬 테스트면 포트를 다르게, 운영은 LB 뒤에 둡니다.
+    ports:
+      - "5602:5601"
+    depends_on:
+      es01: { condition: service_healthy }
+    networks: [ monitoring ]
+
+  # Filebeat (로그 수집기) 추가
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.18.1
+    container_name: filebeat
+    user: root
+    depends_on:
+      es01: { condition: service_healthy }
+    networks: [ monitoring ]
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro   # Filebeat 설정(읽기전용)
+      - filebeat-data:/usr/share/filebeat/data                         # 레지스트리(오프셋) 영속화
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro       # 도커 컨테이너 로그 경로
+      - /var/run/docker.sock:/var/run/docker.sock                      # 도커 오토디스커버용 소켓
+    command: [ "-e", "--strict.perms=false" ]        # -e: stdout 로깅, 권한 체크 완화
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.3
@@ -257,3 +342,7 @@ networks:
 volumes:
   grafana_data:
   mysql_data:
+  filebeat-data:
+  esdata01:
+  esdata02:
+  esdata03:
