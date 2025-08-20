@@ -1,6 +1,7 @@
 package com.example.eat_together.domain.cart.controller;
 
 import com.example.eat_together.domain.cart.dto.request.CartItemRequestDto;
+import com.example.eat_together.domain.cart.dto.response.CartItemResponseDto;
 import com.example.eat_together.domain.cart.dto.response.CartResponseDto;
 import com.example.eat_together.domain.cart.service.CartService;
 import com.example.eat_together.global.exception.CustomException;
@@ -17,6 +18,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.lang.reflect.Constructor;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -116,10 +119,12 @@ class CartControllerTest {
         @WithMockUser(username = "1")
         void getCart_success() throws Exception {
             // given
-            CartResponseDto dummyResponse = new CartResponseDto(
+            CartResponseDto dummyResponse = newCartResponse(
                     10L,
-                    List.of(),
-                    3000.0
+                    Collections.<CartItemResponseDto>emptyList(), // 타입 안전한 빈 리스트
+                    0.0,     // subtotal
+                    3000.0,  // deliveryFee
+                    3000.0   // total
             );
 
             given(cartService.getCart(1L)).willReturn(dummyResponse);
@@ -129,6 +134,19 @@ class CartControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("장바구니를 조회했습니다."));
+        }
+
+        private CartResponseDto newCartResponse(
+                Long cartId,
+                java.util.List<CartItemResponseDto> items,
+                double subtotal,
+                double deliveryFee,
+                double total
+        ) throws Exception {
+            Constructor<CartResponseDto> ctor =
+                    CartResponseDto.class.getDeclaredConstructor(Long.class, java.util.List.class, double.class, double.class, double.class);
+            ctor.setAccessible(true);
+            return ctor.newInstance(cartId, items, subtotal, deliveryFee, total);
         }
     }
 

@@ -6,6 +6,7 @@ import com.example.eat_together.domain.users.common.dto.response.UserResponseDto
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.util.JwtUtil;
@@ -217,8 +218,7 @@ public class UserService {
     public List<UserInfoResponseDto> findByUserInfoV2(UserSearchRequestDto request) {
 
         // 이름과 닉네임이 모두 비어있는 경우 예외 처리
-        if ((request.getName() == null || request.getName().isEmpty()) &&
-                (request.getNickname() == null || request.getNickname().isEmpty())) {
+        if (isEmpty(request.getName()) && isEmpty(request.getNickname())) {
             throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
         }
 
@@ -263,8 +263,7 @@ public class UserService {
     public List<UserInfoResponseDto> findByUserInfoV4(UserSearchRequestDto request) {
 
         // 이름과 닉네임이 모두 비어있는 경우 예외 처리
-        if ((request.getName() == null || request.getName().isEmpty()) &&
-                (request.getNickname() == null || request.getNickname().isEmpty())) {
+        if (isEmpty(request.getName()) && isEmpty(request.getNickname())) {
             throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
         }
 

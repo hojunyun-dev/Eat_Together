@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 장바구니에 담긴 단일 메뉴 항목을 나타내는 엔티티
+ * 장바구니에 담긴 단일 메뉴 항목 엔티티
  */
 @Entity
 @Getter
@@ -30,9 +30,9 @@ public class CartItem extends BaseTimeEntity {
     private int quantity;
 
     /**
-     * CartItem 생성 정적 팩토리 메서드
+     * CartItem 인스턴스 생성
      *
-     * @param menu     메뉴 정보
+     * @param menu     메뉴 엔티티
      * @param quantity 수량
      * @return 생성된 CartItem 인스턴스
      */
@@ -44,7 +44,7 @@ public class CartItem extends BaseTimeEntity {
     }
 
     /**
-     * 장바구니 연관 관계 설정
+     * 장바구니 연관관계 설정
      *
      * @param cart 장바구니 엔티티
      */
@@ -64,7 +64,7 @@ public class CartItem extends BaseTimeEntity {
     /**
      * 총 가격 계산
      *
-     * @return 메뉴 가격 * 수량 결과
+     * @return 메뉴 가격 × 수량
      */
     public double getTotalPrice() {
         return menu.getPrice() * quantity;

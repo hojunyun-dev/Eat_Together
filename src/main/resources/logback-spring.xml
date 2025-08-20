@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true"> <!-- 파일 변경 감지하여 런타임 재적용 -->
+
+    <!-- 표준출력(stdout)으로 JSON 라인 로그 출력 -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- logstash-logback-encoder: 로그를 JSON 구조로 인코딩 -->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers> <!-- 어떤 필드를 JSON에 넣을지 정의 -->
+                <timestamp/>               <!-- @timestamp: 이벤트 발생 시각 -->
+                <version/>                 <!-- @version: 포맷 버전(보통 "1") -->
+                <level/>                   <!-- level: INFO/ERROR 등 로그 레벨 -->
+                <loggerName/>              <!-- logger_name: 로거 클래스/이름 -->
+                <threadName/>              <!-- thread_name: 쓰레드명 -->
+                <message/>                 <!-- message: 로그 본문 -->
+                <stackTrace/>              <!-- stack_trace: 예외 스택 -->
+                <mdc/>                     <!-- mdc: MDC 컨텍스트(요청ID 등) -->
+                <globalCustomFields>{"app":"eat-together","env":"dev"}</globalCustomFields>
+                <!-- 모든 이벤트에 공통으로 붙일 커스텀 필드 -->
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- 루트 로거: INFO 이상만 출력, 위 JSON 콘솔로 내보냄 -->
+    <root level="INFO">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+</configuration>
