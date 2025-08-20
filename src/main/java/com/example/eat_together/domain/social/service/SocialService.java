@@ -34,11 +34,11 @@ public class SocialService {
             String redirectUrl = googleOauth.getOauthRedirectURL();
             log.info("SocialService에서 Google Redirect URL 반환: {}", redirectUrl);
             return redirectUrl;
-        } else if (socialLoginType == SocialLoginType.KAKAO) { // KAKAO 로그인 요청 처리
+        } else if (socialLoginType == SocialLoginType.KAKAO) {
             String redirectUrl = kakaoOauth.getOauthRedirectURL();
             log.info("SocialService에서 Kakao Redirect URL 반환: {}", redirectUrl);
             return redirectUrl;
-        } else if (socialLoginType == SocialLoginType.NAVER) { // NAVER 로그인 요청 처리
+        } else if (socialLoginType == SocialLoginType.NAVER) {
             String redirectUrl = naverOauth.getOauthRedirectURL();
             log.info("SocialService에서 Naver Redirect URL 반환: {}", redirectUrl);
             return redirectUrl;
@@ -48,14 +48,14 @@ public class SocialService {
         throw new IllegalArgumentException("지원하지 않는 소셜 로그인 타입입니다: " + socialLoginType);
     }
 
-    @Transactional // 사용자 저장/업데이트 시 트랜잭션 필요
+    @Transactional
     public TokenResponse requestAccessToken(SocialLoginType socialLoginType, String code) {
         Map<String, Object> userInfo;
         if (socialLoginType == SocialLoginType.GOOGLE) {
             userInfo = googleOauth.requestAccessTokenAndGetUserInfo(code);
-        } else if (socialLoginType == SocialLoginType.KAKAO) { // KAKAO Access Token 및 사용자 정보 가져오기
+        } else if (socialLoginType == SocialLoginType.KAKAO) {
             userInfo = kakaoOauth.requestAccessTokenAndGetUserInfo(code);
-        } else if (socialLoginType == SocialLoginType.NAVER) { // NAVER Access Token 및 사용자 정보 가져오기
+        } else if (socialLoginType == SocialLoginType.NAVER) {
             userInfo = naverOauth.requestAccessTokenAndGetUserInfo(code);
         } else {
             log.error("지원하지 않는 소셜 로그인 타입입니다 ::: {}", socialLoginType);
@@ -65,15 +65,15 @@ public class SocialService {
         log.info("{}로부터 받은 사용자 정보: {}", socialLoginType, userInfo);
 
         String email = (String) userInfo.get("email");
-        // Google은 'name' 필드, Kakao는 'nickname' 또는 'name' (profile.nickname)
+
         String name = (String) userInfo.get("name");
-        String nickname = (String) userInfo.get("nickname"); // 카카오에서 닉네임은 'profile.nickname'
+        String nickname = (String) userInfo.get("nickname");
 
         // 카카오의 경우 'name' 필드가 없을 수 있으므로 닉네임을 기본으로 사용
         if (name == null && nickname != null) {
             name = nickname;
         } else if (name == null && email != null) {
-            name = email.split("@")[0]; // 이름도 닉네임도 없으면 이메일 앞부분 사용
+            name = email.split("@")[0];
         } else if (name == null) {
             name = "소셜사용자"; // 최소한의 이름
         }
@@ -96,12 +96,12 @@ public class SocialService {
                         .email(email)
                         .nickname(nickname)
                         .name(name)
-                        .socialLoginType(socialLoginType) // 현재 소셜 로그인 타입으로 설정
+                        .socialLoginType(socialLoginType)
                         .build();
 
                 userRepository.save(user);
                 log.info("새로운 {} 사용자 가입: 이메일={}, 닉네임={}, 이름={}, 저장된 소셜타입={}",
-                        socialLoginType, email, nickname, name, user.getSocialLoginType()); // 저장 후 확인
+                        socialLoginType, email, nickname, name, user.getSocialLoginType());
             } else {
                 // 기존 사용자 처리
                 user = optionalUser.get();

@@ -99,17 +99,15 @@ public class GoogleOauth implements SocialOauth {
                 JsonNode rootNode = objectMapper.readTree(responseBody);
                 String idToken = rootNode.get("id_token").asText();
 
-                // ID Token은 JWT 형식이므로 Base64 디코딩하여 페이로드 추출
                 String[] chunks = idToken.split("\\.");
                 if (chunks.length < 2) {
                     throw new IllegalArgumentException("Invalid ID Token format: " + idToken);
                 }
-                Base64.Decoder decoder = Base64.getUrlDecoder(); // URL-safe Base64 디코더 사용
+                Base64.Decoder decoder = Base64.getUrlDecoder();
 
-                String payload = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8); // 페이로드 부분 디코딩
+                String payload = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
                 log.info("ID Token 페이로드: {}", payload);
 
-                // 페이로드를 JSON으로 파싱하여 사용자 정보 추출
                 return objectMapper.readValue(payload, Map.class);
 
             } catch (IOException e) {
@@ -121,7 +119,6 @@ public class GoogleOauth implements SocialOauth {
         throw new RuntimeException("구글 로그인 토큰 요청 처리 실패");
     }
 
-    // SocialService에서 이 메서드를 직접 호출하지 않으므로, 이 인터페이스 메서드는.
     @Override
     public String requestAccessToken(String code) {
         throw new UnsupportedOperationException("requestAccessToken(String code) is deprecated. Use requestAccessTokenAndGetUserInfo(String code) instead.");
