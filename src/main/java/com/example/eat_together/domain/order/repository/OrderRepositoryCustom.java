@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,6 +15,4 @@ public interface OrderRepositoryCustom {
     Page<OrderResponseDto> findOrdersByUserId(Long userId, Pageable pageable, String menuName, String storeName, LocalDate startDate, LocalDate endDate, OrderStatus status);
 
     Optional<Order> findByIdAndUserId(Long orderId, Long userId);
-
-    List<Order> findByUserIdAndStoreIdAndStatus(Long userId, Long storeId, OrderStatus status);
 }
