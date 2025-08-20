@@ -41,9 +41,7 @@ public class NaverOauth implements SocialOauth {
     private String NAVER_SNS_USER_INFO_URL;
 
     // 네이버는 CSRF 방지를 위해 state 값을 필수로 요구합니다.
-    // 이 값은 로그인 요청 시 생성하여 콜백 시에도 동일한 값을 받아야 합니다.
-    // 여기서는 간단히 UUID를 사용하지만, 실제 서비스에서는 세션 등에 저장하여 검증해야 합니다.
-    @Value("${sns.naver.state}") // application.yml에서 기본값 설정
+    @Value("${sns.naver.state}")
     private String NAVER_SNS_STATE;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -58,10 +56,9 @@ public class NaverOauth implements SocialOauth {
         params.put("response_type", "code");
         params.put("client_id", NAVER_SNS_CLIENT_ID);
         params.put("redirect_uri", NAVER_SNS_CALLBACK_URL);
+
         // 네이버는 CSRF 방지를 위해 state 값을 필수로 요구합니다.
-        // 여기서는 application.yml의 값을 사용하거나, 동적으로 생성하여 세션에 저장하는 것이 좋습니다.
-        // 현재는 application.yml에 정의된 값을 사용합니다.
-        params.put("state", NAVER_SNS_STATE); // UUID.randomUUID().toString() 등으로 동적 생성 가능
+        params.put("state", NAVER_SNS_STATE);
 
         String parameterString = params.entrySet().stream()
                 .map(entry -> {
@@ -81,7 +78,6 @@ public class NaverOauth implements SocialOauth {
 
     @Override
     public String requestAccessToken(String code) {
-        // 이 메서드는 SocialService에서 직접 호출하지 않으므로 사용하지 않거나 제거할 수 있습니다.
         throw new UnsupportedOperationException("requestAccessToken(String code) is deprecated. Use requestAccessTokenAndGetUserInfo(String code) instead.");
     }
 
@@ -98,7 +94,7 @@ public class NaverOauth implements SocialOauth {
         params.add("client_id", NAVER_SNS_CLIENT_ID);
         params.add("client_secret", NAVER_SNS_CLIENT_SECRET);
         params.add("code", code);
-        params.add("state", NAVER_SNS_STATE); // 콜백 시 받은 state 값과 동일해야 합니다.
+        params.add("state", NAVER_SNS_STATE);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
@@ -127,7 +123,7 @@ public class NaverOauth implements SocialOauth {
         // 2. 사용자 정보 요청 (Access Token 사용)
         HttpHeaders userInfoHeaders = new HttpHeaders();
         userInfoHeaders.add("Authorization", "Bearer " + accessToken);
-        userInfoHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8"); // 네이버 사용자 정보 API 요구 헤더
+        userInfoHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         HttpEntity<MultiValueMap<String, String>> userInfoRequest = new HttpEntity<>(userInfoHeaders);
 
@@ -146,7 +142,7 @@ public class NaverOauth implements SocialOauth {
         Map<String, Object> userInfoMap = new HashMap<>();
         try {
             JsonNode rootNode = objectMapper.readTree(userInfoResponse);
-            JsonNode responseNode = rootNode.get("response"); // 네이버는 사용자 정보가 "response" 필드 안에 있습니다.
+            JsonNode responseNode = rootNode.get("response");
 
             if (responseNode != null) {
                 // 네이버 고유 ID

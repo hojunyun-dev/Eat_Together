@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
-@CrossOrigin // CORS 설정을 위해 필요
+@CrossOrigin
 @RequiredArgsConstructor
-@RequestMapping("/social") // 이 컨트롤러의 기본 경로
+@RequestMapping("/social")
 @Slf4j
 public class SocialController {
 
