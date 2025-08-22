@@ -28,10 +28,10 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> stringRedisTemplate;
     private final RedisService redisService;
+
     // 회원가입
     public UserResponseDto signup(SignupRequestDto request) {
 
-        // 중복된 아이디 검증
         if (userRepository.existsByLoginId(request.getLoginId())) {
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }

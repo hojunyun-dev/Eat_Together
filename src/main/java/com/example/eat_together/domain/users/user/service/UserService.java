@@ -6,6 +6,7 @@ import com.example.eat_together.domain.users.common.dto.response.UserResponseDto
 import com.example.eat_together.domain.users.common.entity.User;
 import com.example.eat_together.global.dto.TokenResponse;
 import com.example.eat_together.global.exception.CustomException;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import com.example.eat_together.global.exception.ErrorCode;
 import com.example.eat_together.domain.users.user.repository.UserRepository;
 import com.example.eat_together.global.util.JwtUtil;
@@ -185,86 +186,12 @@ public class UserService {
     }
 
     // 유저 닉네임 or 이름 검색기능
+    // 인덱스와 Redis 캐싱을 동시에 활용한 통합 검색 기능
+    @Cacheable(value = "users_search", key = "#request.name + '_' + #request.nickname", unless = "#result.isEmpty()")
     public List<UserInfoResponseDto> findByUserInfo(UserSearchRequestDto request) {
 
-        List<User> foundUsers;
-
-        // 1. 이름으로 검색 (이름이 제공된 경우)
-        if (request.getName() != null && !request.getName().isEmpty()) {
-            foundUsers = userRepository.findByName(request.getName());
-        }
-
-        // 2. 닉네임으로 검색 (이름이 없고 닉네임이 제공된 경우)
-        else if (request.getNickname() != null && !request.getNickname().isEmpty()) {
-            foundUsers = userRepository.findByNickname(request.getNickname());
-        }
-
-        // 3. 아무런 검색 조건도 없는 경우
-        else {
-            throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
-        }
-
-        // 검색 결과가 없는 경우
-        if (foundUsers.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        // 조회한 User 리스트를 UserInfoResponseDto 리스트로 변환하여 리턴
-        return UserInfoResponseDto.todo(foundUsers);
-    }
-
-    // index를 활용한 검색 방법
-    public List<UserInfoResponseDto> findByUserInfoV2(UserSearchRequestDto request) {
-
         // 이름과 닉네임이 모두 비어있는 경우 예외 처리
-        if ((request.getName() == null || request.getName().isEmpty()) &&
-                (request.getNickname() == null || request.getNickname().isEmpty())) {
-            throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
-        }
-
-        // 통합된 메서드를 사용하여 데이터베이스에 한 번만 접근
-        List<User> foundUsers = userRepository.findByNameOrNickname(request.getName(), request.getNickname());
-
-        if (foundUsers.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        return UserInfoResponseDto.todo(foundUsers);
-    }
-
-
-    // Redis를 이용한 캐싱 (기존 쿼리 로직)
-    @Cacheable(value = "users_search", key = "#request.name + '_' + #request.nickname", unless = "#result.isEmpty()")
-    public List<UserInfoResponseDto> findByUserInfoV3(UserSearchRequestDto request) {
-
-        List<User> foundUsers;
-
-        // 이름으로 검색 (이름이 제공된 경우)
-        if (request.getName() != null && !request.getName().isEmpty()) {
-            foundUsers = userRepository.findByName(request.getName());
-        }
-        // 닉네임으로 검색 (이름이 없고 닉네임이 제공된 경우)
-        else if (request.getNickname() != null && !request.getNickname().isEmpty()) {
-            foundUsers = userRepository.findByNickname(request.getNickname());
-        }
-        // 아무런 검색 조건도 없는 경우
-        else {
-            throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
-        }
-
-        if (foundUsers.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
-        return UserInfoResponseDto.todo(foundUsers);
-    }
-
-    // 인덱스와 Redis 캐싱을 동시에 활용한 통합 검색 기능 <- 이 버전을 선택함
-    @Cacheable(value = "users_search", key = "#request.name + '_' + #request.nickname", unless = "#result.isEmpty()")
-    public List<UserInfoResponseDto> findByUserInfoV4(UserSearchRequestDto request) {
-
-        // 이름과 닉네임이 모두 비어있는 경우 예외 처리
-        if ((request.getName() == null || request.getName().isEmpty()) &&
-                (request.getNickname() == null || request.getNickname().isEmpty())) {
+        if (isEmpty(request.getName()) && isEmpty(request.getNickname())) {
             throw new CustomException(ErrorCode.INVALID_SEARCH_CRITERIA);
         }
 

@@ -65,46 +65,19 @@ public class UserController {
      *
      */
 
-    // 이 버전을 사용
-    @PostMapping("/find/user/v4")
+    @PostMapping("/find/user")
     public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV4(@Valid @RequestBody UserSearchRequestDto request){
 
-        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV4(request);
+        List<UserInfoResponseDto> userInfo = userService.findByUserInfo(request);
 
         return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
     }
-
-//    @PostMapping("/find/user")
-//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfo(@Valid @RequestBody UserSearchRequestDto request){
-//
-//        List<UserInfoResponseDto> userInfo = userService.findByUserInfo(request);
-//
-//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
-//    }
-//
-//    @PostMapping("/find/user/v2")
-//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV2(@Valid @RequestBody UserSearchRequestDto request){
-//
-//        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV2(request);
-//
-//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
-//    }
-//
-//    @PostMapping("/find/user/v3")
-//    public ResponseEntity<ApiResponse<List<UserInfoResponseDto>>> findByUserInfoV3(@Valid @RequestBody UserSearchRequestDto request){
-//
-//        List<UserInfoResponseDto> userInfo = userService.findByUserInfoV3(request);
-//
-//        return ResponseEntity.ok(ApiResponse.of(userInfo,MessageEnum.SEARCH_INFO.getMessage()));
-//    }
 
     // 유저 전체 조회 ( ADMIN 전용 )
     @GetMapping("/find/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponseDto>>> findAllUsers(Pageable pageable) {
 
-        // Pageable 적용 ( page, size 값 입력해야함 )
-        // ex) page = 0, size = 3 첫번째 페이지에 3명 출력
         Page<UserResponseDto> usersPage = userService.findAllUsers(pageable);
 
         List<UserResponseDto> allUsers = usersPage.getContent();

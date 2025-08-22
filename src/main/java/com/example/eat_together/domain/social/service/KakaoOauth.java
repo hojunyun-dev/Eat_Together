@@ -32,7 +32,7 @@ public class KakaoOauth implements SocialOauth {
     private String KAKAO_SNS_CALLBACK_URL;
 
     @Value("${sns.kakao.client.secret}")
-    private String KAKAO_SNS_CLIENT_SECRET; // 카카오 클라이언트 시크릿 (활성화한 경우)
+    private String KAKAO_SNS_CLIENT_SECRET;
 
     @Value("${sns.kakao.token.url}")
     private String KAKAO_SNS_TOKEN_BASE_URL;
@@ -40,7 +40,7 @@ public class KakaoOauth implements SocialOauth {
     @Value("${sns.kakao.user-info-url}")
     private String KAKAO_SNS_USER_INFO_URL;
 
-    @Value("${sns.kakao.scope}") // application.yml의 sns.kakao.scope를 주입받음
+    @Value("${sns.kakao.scope}")
     private String KAKAO_SNS_SCOPE;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -56,7 +56,7 @@ public class KakaoOauth implements SocialOauth {
         params.put("response_type", "code");
         params.put("client_id", KAKAO_SNS_CLIENT_ID);
         params.put("redirect_uri", KAKAO_SNS_CALLBACK_URL);
-        params.put("scope", KAKAO_SNS_SCOPE); // application.yml에서 주입받은 scope 사용
+        params.put("scope", KAKAO_SNS_SCOPE);
 
         String parameterString = params.entrySet().stream()
                 .map(entry -> {
@@ -76,12 +76,12 @@ public class KakaoOauth implements SocialOauth {
 
     @Override
     public String requestAccessToken(String code) {
-        // 이 메서드는 SocialService에서 직접 호출하지 않으므로 사용하지 않거나 제거할 수 있습니다.
         throw new UnsupportedOperationException("requestAccessToken(String code) is deprecated. Use requestAccessTokenAndGetUserInfo(String code) instead.");
     }
 
     @Override
     public Map<String, Object> requestAccessTokenAndGetUserInfo(String code) {
+
         // 1. Access Token 요청
         RestTemplate restTemplate = new RestTemplate();
 
@@ -93,7 +93,7 @@ public class KakaoOauth implements SocialOauth {
         params.add("client_id", KAKAO_SNS_CLIENT_ID);
         params.add("redirect_uri", KAKAO_SNS_CALLBACK_URL);
         params.add("code", code);
-        // 클라이언트 시크릿을 활성화했다면 추가
+
         if (KAKAO_SNS_CLIENT_SECRET != null && !KAKAO_SNS_CLIENT_SECRET.isEmpty()) {
             params.add("client_secret", KAKAO_SNS_CLIENT_SECRET);
         }
@@ -147,25 +147,22 @@ public class KakaoOauth implements SocialOauth {
 
             // 카카오 고유 ID (long 타입으로 제공됨)
             Long id = rootNode.get("id").asLong();
-            userInfoMap.put("id", id.toString()); // String으로 변환하여 Map에 저장 (필요시)
+            userInfoMap.put("id", id.toString());
 
             JsonNode kakaoAccount = rootNode.get("kakao_account");
             if (kakaoAccount != null) {
-                // 이메일
-                // 카카오는 email_needs_agreement가 true이면 동의가 필요한 상태, false이면 동의 완료 상태
                 if (kakaoAccount.has("email") && !kakaoAccount.get("email_needs_agreement").asBoolean()) {
                     userInfoMap.put("email", kakaoAccount.get("email").asText());
                 } else {
                     log.warn("카카오 이메일 동의 항목이 없거나 동의하지 않았습니다. 임시 이메일을 생성합니다.");
-                    userInfoMap.put("email", "kakao_" + id + "@kakao.com"); // 임시 이메일 생성
+                    userInfoMap.put("email", "kakao_" + id + "@kakao.com");
                 }
 
                 JsonNode profile = kakaoAccount.get("profile");
                 if (profile != null) {
-                    // 닉네임
+
                     if (profile.has("nickname")) {
                         userInfoMap.put("nickname", profile.get("nickname").asText());
-                        // Google의 'name' 필드와 일관성을 위해 'name'에도 닉네임 설정
                         userInfoMap.put("name", profile.get("nickname").asText());
                     }
                 }
