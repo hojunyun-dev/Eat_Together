@@ -32,6 +32,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+//알림 연동: 트랜잭션 커밋 후 호출 훅
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+//알림 서비스 주입
+import com.example.eat_together.domain.notification.service.NotificationService;
+//알림 타입 enum
+import com.example.eat_together.domain.notification.enums.NotificationType;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,6 +56,7 @@ public class OrderService {
     private final PaymentRepository paymentRepository;
     private final SharedCartRepository sharedCartRepository;
     private final LockService lockService;
+    private final NotificationService notificationService; //직접 호출
 
     // 주문 생성 (개인 장바구니)
     @Transactional
@@ -78,6 +87,19 @@ public class OrderService {
 
             Payment payment = Payment.of(order);
             paymentRepository.save(payment);
+
+            //트랜잭션 커밋 후 알림 전송 (알림 실패가 본 트랜잭션에 영향을 주지 않도록)
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    notificationService.createAndPublish(
+                            user.getUserId(),                    //수신자: 주문자
+                            NotificationType.ORDER,              //알림 타입(enum)
+                            "주문 생성",                          // 제목
+                            "주문 #" + order.getId() + "이(가) 생성되었습니다.", // 내용
+                            "" //현재는 미사용
+                    );
+                }
+            });
         });
     }
 
