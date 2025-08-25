@@ -1,6 +1,5 @@
 package com.example.eat_together.global.config.kafka;
 
-import com.example.eat_together.domain.chat.dto.ChatMessageResponseDto;
 import com.example.eat_together.domain.notification.messaging.NotificationEnvelope;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -13,7 +12,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-
 
 @EnableKafka
 @Configuration
