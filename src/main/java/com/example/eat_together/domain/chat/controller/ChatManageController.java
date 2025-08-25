@@ -34,7 +34,7 @@ public class ChatManageController {
     }
 
     //채팅방 참여 및 입장
-    @PostMapping("/{roomId}/enter")
+    @PostMapping("/roomId/{roomId}/enter")
     public ResponseEntity<ApiResponse<Void>> enterChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
         boolean result = chatService.enterChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
         if(result)
@@ -52,7 +52,7 @@ public class ChatManageController {
     }
 
     //채팅방 수정
-    @PatchMapping("/{roomId}")
+    @PatchMapping("/roomId/{roomId}")
     public ResponseEntity<ApiResponse<Void>> updateChatGroup(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId, @RequestBody ChatGroupUpdateRequestDto chatGroupUpdateRequestDto) {
         chatService.updateChatGroup(Long.valueOf(userDetails.getUsername()), roomId, chatGroupUpdateRequestDto);
 
@@ -60,7 +60,7 @@ public class ChatManageController {
     }
 
     //채팅방 퇴장
-    @DeleteMapping("/{roomId}/quit")
+    @DeleteMapping("/roomId/{roomId}/quit")
     public ResponseEntity<ApiResponse<Void>> quitChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
         chatService.quitChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
 
@@ -68,7 +68,7 @@ public class ChatManageController {
     }
 
     //채팅방 삭제
-    @DeleteMapping("/{roomId}/remove")
+    @DeleteMapping("/roomId/{roomId}/remove")
     public ResponseEntity<ApiResponse<Void>> deleteChatRoom(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long roomId) {
         chatService.deleteChatRoom(Long.valueOf(userDetails.getUsername()), roomId);
 
@@ -76,14 +76,14 @@ public class ChatManageController {
     }
 
     //기존 채팅 내역 조회
-    @GetMapping("/{roomId}/v2")
+    @GetMapping("/roomId/{roomId}/v2")
     public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageList(@PathVariable Long roomId) {
         List<ChatMessageResponseDto> chatMessageList = chatMessageRedisService.getMessageList(roomId);
 
         return ResponseEntity.ok(ApiResponse.of(chatMessageList, ChatResponse.READ_CHAT_MESSAGE_LIST.getMessage()));
     }
 
-    @GetMapping("/{roomId}/v1")
+    @GetMapping("/roomId/{roomId}/v1")
     public ResponseEntity<ApiResponse<List<ChatMessageResponseDto>>> getChatMessageListV1(@PathVariable Long roomId) {
         List<ChatMessageResponseDto> chatMessageList = chatService.getChatMessageList(roomId);
 
